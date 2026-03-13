@@ -14,7 +14,7 @@ from interactions_lavalink.events import TrackException, TrackStart
 
 from utilities.config import get_config
 from utilities.emojis import emojis
-from utilities.localization.localization import Localization
+from utilities.localization.localization import Localization, lformat
 from utilities.message_decorations import *
 from utilities.music.music_loaders import CustomSearch
 
@@ -184,13 +184,13 @@ class MusicCommands(Extension):
 	@music.subcommand(sub_cmd_description="Play a song!")
 	@slash_option(
 		name="song",
-		description="Input a search term, or paste a link.",
+		description="Input a search term, or paste a link",
 		opt_type=OptionType.STRING,
 		required=True,
 		autocomplete=True,
 	)
 	async def play(self, ctx: SlashContext, song: str):
-		loc = Localization(ctx)
+		loc = Localization(ctx, prefix="commands.music.commands.play")
 		# Getting user's voice state
 		voice_state = ctx.member.voice
 		if not voice_state or not voice_state.channel:
@@ -219,7 +219,7 @@ class MusicCommands(Extension):
 				self.assign_node()
 				tries += 1
 
-		message = await fancy_message(ctx, await lformat(loc, loc.l("music.loading.search")))
+		message = await fancy_message(ctx, await lformat(loc, loc.l("loading.search")))
 
 		result = await self.lavalink.client.get_tracks(song, check_local=True)
 		tracks = result.tracks
@@ -246,7 +246,7 @@ class MusicCommands(Extension):
 		add_to_queue_embed = Embed(
 			title=track.title,
 			url=track.uri,
-			description=f"From **{track.author}** was added to the queue.",
+			description=f"From **{track.author}** was added to the queue",
 			color=Colors.GREEN,
 		)
 
@@ -254,7 +254,7 @@ class MusicCommands(Extension):
 
 		add_to_queue_embed.set_thumbnail(self.get_cover_image(track.identifier))
 		add_to_queue_embed.set_footer(
-			text="Was this a mistake? You can use [ /music remove position:-1 mine:True ] to remove your last song."
+			text="Was this a mistake? You can use[ /music remove position:-1 mine:True ] to remove your last song."
 		)
 
 		return add_to_queue_embed
@@ -262,12 +262,12 @@ class MusicCommands(Extension):
 	@music.subcommand(sub_cmd_description="Play a file!")
 	@slash_option(
 		name="file",
-		description="Input a file to play.",
+		description="Input a file to play",
 		opt_type=OptionType.ATTACHMENT,
 		required=True,
 	)
 	async def file(self, ctx: SlashContext, file: Attachment):
-		loc = Localization(ctx)
+		loc = Localization(ctx, prefix="commands.music.commands.file")
 		# Getting user's voice state
 		voice_state = ctx.member.voice
 
@@ -279,7 +279,7 @@ class MusicCommands(Extension):
 				ephemeral=True,
 			)
 
-		message = await fancy_message(ctx, await lformat(loc, loc.l("music.loading.file")))
+		message = await fancy_message(ctx, await lformat(loc, loc.l("loading.file")))
 
 		player = await self.lavalink.connect(voice_state.guild.id, voice_state.channel.id)
 
@@ -382,12 +382,12 @@ class MusicCommands(Extension):
 	@music.subcommand(sub_cmd_description="Remove a song from the queue.")
 	@slash_option(
 		name="position",
-		description="The position of the song you want to remove.",
+		description="The position of the song you want to remove",
 		opt_type=OptionType.INTEGER,
 	)
 	@slash_option(
 		name="mine",
-		description="Whether you want to browse only your songs.",
+		description="Whether you want to browse only your songs",
 		opt_type=OptionType.BOOLEAN,
 		argument_name="own",
 	)
@@ -538,7 +538,7 @@ class MusicCommands(Extension):
 		if search_ == "error":
 			return [
 				{
-					"Text": "An error occurred within the search.",
+					"Text": "An error occurred within the search",
 					"URL": "ef9hur39fh3ehgurifjehiie",
 				}
 			]
@@ -606,8 +606,8 @@ class MusicCommands(Extension):
 		player.store("Error", True)
 
 		embed = Embed(
-			title="An error occurred when playing this track.",
-			description=f"Please try again later.",
+			title="An error occurred when playing this track",
+			description=f"Please try again later",
 			color=Colors.RED,
 		)
 
@@ -812,8 +812,8 @@ class MusicCommands(Extension):
 
 		if stopped_track is None:
 			embed = Embed(
-				title="An error occurred when playing this track.",
-				description=f"Please try again later.",
+				title="An error occurred when playing this track",
+				description=f"Please try again later",
 				color=Colors.RED,
 			)
 
