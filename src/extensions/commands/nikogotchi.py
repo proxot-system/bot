@@ -1,3 +1,4 @@
+import asyncio
 import math
 import random
 import re
@@ -264,7 +265,7 @@ class NikogotchiCommands(Extension):
 		pass
 
 	@nikogotchi.subcommand(sub_cmd_description="Check out your Nikogotchi!")
-	async def check(self, ctx: SlashContext):
+	async def check(self, ctx: SlashContext | ComponentContext):
 		uid = ctx.author.id
 		loc = Localization(ctx)
 
@@ -272,7 +273,8 @@ class NikogotchiCommands(Extension):
 
 		metadata = await fetch_nikogotchi_metadata(nikogotchi.nid)
 		if nikogotchi.status > -1 and metadata:
-			msg = await fancy_message(ctx, await lformat(loc, loc.l("generic.loading.nikogotchi")))
+			asyncio.create_task(ctx.defer())
+			await fancy_message(ctx, await lformat(loc, loc.l("generic.loading.nikogotchi")), edit=True)
 		else:
 			if not metadata and nikogotchi.nid != "?":
 				buttons: list[BaseComponent | dict] = [
@@ -351,6 +353,7 @@ class NikogotchiCommands(Extension):
 				started_finding_treasure_at=datetime.now(),
 				available=False,
 				status=2,
+				pronouns="it/its",
 			)
 
 			hatched_embed = Embed(
@@ -378,14 +381,13 @@ class NikogotchiCommands(Extension):
 				embed=hatched_embed,
 				components=buttons,
 				ephemeral=True,
-				edit_origin=True,
 			)
 			try:
 				button: Component = await ctx.client.wait_for_component(components=buttons, timeout=15.0)
 				if button.ctx.custom_id == f"rename {ctx.id}":
 					await self.init_rename_flow(button.ctx, nikogotchi.name, True)
 			except TimeoutError:
-				return await self.check(ctx)
+				return await self.check(ctx, edit=True)
 		await self.nikogotchi_interaction(ctx)
 
 	async def calculate_treasure_seek(self, uid: str, time_taken: timedelta) -> TreasureSeekResults | None:

@@ -9,7 +9,6 @@ import aiohttp
 from aioconsole import aexec
 from interactions import (
 	Embed,
-	EmbedAttachment,
 	Extension,
 	OptionType,
 	SlashContext,
@@ -21,8 +20,7 @@ from interactions import (
 
 from utilities.config import get_config
 from utilities.dev_commands import redir_prints
-from utilities.emojis import emojis, make_emoji_cdn_url
-from utilities.localization.formatting import amperjoin, fnum
+from utilities.localization.formatting import fnum
 from utilities.localization.localization import Localization, lformat
 from utilities.message_decorations import Colors, fancy_message
 from utilities.misc import fetch
@@ -55,7 +53,7 @@ class MiscellaneousCommands(Extension):
 			ctx,
 			await lformat(
 				loc,
-				loc.l("misc.wikipedia"),
+				loc.l("commands.misc.commands.random_wikipedia.wikipedia"),
 				link=response["content_urls"]["desktop"]["page"],
 				title=response["title"],
 			),
@@ -90,50 +88,6 @@ class MiscellaneousCommands(Extension):
 			ephemeral=not public,
 		)
 
-	@slash_command(description="Roll an imaginary dice")
-	@slash_option(
-		description="What sided dice to roll",
-		min_value=1,
-		max_value=9999,
-		name="sides",
-		opt_type=OptionType.INTEGER,
-		required=True,
-	)
-	@slash_option(
-		description="How many times to roll it",
-		min_value=1,
-		max_value=10,
-		name="amount",
-		opt_type=OptionType.INTEGER,
-	)
-	@slash_option(
-		description="Whether you want the response to be visible for others in the channel",
-		name="public",
-		opt_type=OptionType.BOOLEAN,
-	)
-	@integration_types(guild=True, user=True)
-	@contexts(bot_dm=True)
-	async def roll(self, ctx: SlashContext, sides: int, amount: int = 1, public: bool = False):
-		loc = Localization(ctx)
-
-		rolls = [random.randint(1, sides) for _ in range(amount)]
-
-		result = amperjoin([str(roll) for roll in rolls])
-		description = await lformat(loc, loc.l("misc.roll.desc"), result=result)
-
-		if len(rolls) > 1:
-			description += "\n\n" + await lformat(loc, loc.l("misc.roll.multi"), total=sum(rolls))
-
-		await ctx.send(
-			embeds=Embed(
-				color=Colors.DEFAULT,
-				thumbnail=EmbedAttachment(url=make_emoji_cdn_url(emojis["treasures"]["die"])),
-				title=await lformat(loc, loc.l("misc.roll.title"), amount=amount if amount > 1 else "", sides=sides),
-				description=description,
-			),
-			ephemeral=not public,
-		)
-
 	@slash_command(description="Show a picture of a kitty or a cat or a Catto")
 	@slash_option(
 		description="Whether you want the response to be visible for others in the channel",
@@ -143,15 +97,15 @@ class MiscellaneousCommands(Extension):
 	@integration_types(guild=True, user=True)
 	@contexts(bot_dm=True)
 	async def cat(self, ctx: SlashContext, public: bool = False):
-		loc = Localization(ctx)
-		embed = Embed(title=await lformat(loc, loc.l("misc.miaou.title")), color=Colors.DEFAULT)
+		loc = Localization(ctx, prefix="commands.misc.commands.cat")
+		embed = Embed(title=await lformat(loc, loc.l("miaou.title")), color=Colors.DEFAULT)
 
 		if random.randint(0, 100) == 30 + 6 + 14:
-			embed.description = await lformat(loc, loc.l("misc.miaou.finding.noik"))
+			embed.description = await lformat(loc, loc.l("miaou.finding.noik"))
 			embed.set_image(
 				"https://cdn.discordapp.com/attachments/1028022857877422120/1075445796113219694/ezgif.com-gif-maker_1.gif"
 			)
-			embed.set_footer(await lformat(loc, loc.l("misc.miaou.finding.footer")))
+			embed.set_footer(await lformat(loc, loc.l("miaou.finding.footer", return_None_on_not_found=True) or ""))
 			return await ctx.send(embed=embed)
 
 		async with aiohttp.ClientSession() as session:
@@ -160,7 +114,7 @@ class MiscellaneousCommands(Extension):
 
 		image = data[0]["url"]
 
-		embed.description = await lformat(loc, loc.l("misc.miaou.finding.cat"))
+		embed.description = await lformat(loc, loc.l("miaou.finding.cat"))
 		embed.set_image(image)
 		return await ctx.send(embed=embed, ephemeral=not public)
 
@@ -236,7 +190,6 @@ class MiscellaneousCommands(Extension):
 			if not res_str.strip() and method != "eval":
 				desc += "\n-# Nothing was printed"
 			else:
-				# Discord limit is 4096; we truncate to ~3900 to be safe with formatting
 				if len(res_str) > 3900:
 					res_str = res_str[:3850] + "\n... (truncated)"
 				desc += f"\n```py\n{res_str.replace('```', '` ``')}```"
@@ -246,8 +199,7 @@ class MiscellaneousCommands(Extension):
 				description=desc,
 			)
 
-		# 4. Send
 		try:
 			return await ctx.edit(embeds=build_embed(result))
-		except Exception as e:  # Final fallback for unexpected Discord API errors (e.g. still too long)
+		except Exception as e:
 			return await ctx.edit(embeds=build_embed("Output too complex to display", note=f"\n⚠️ Send Error: {e}"))
