@@ -2,7 +2,7 @@
     <img src="https://avatars.githubusercontent.com/u/160534184?s=280&v=4" width="128" height="128">
 </div>
 
-# <div align="center"> The World Machine </div>
+# <div align="center"> Proxot System bot (The World Machine) </div>
 
 <div align="center">
 
@@ -18,7 +18,7 @@ For more information on what you can do with this bot, check out our [website](h
 
 ### Localization
 
-Localization is done on the [TWM translation](https://translate.theworldmachine.xyz/translate/proxot-system/bot) website (we are using [Weblate](https://translate.theworldmachine.xyz/about/)). You are required to register using a Google account for the time being, after that you may suggest any changes to the text in any language, for the Lead Translators of that language to review. Contact @meqativ on the community server if you wish to become a Lead Translator for any language.
+Localization is done on [the translation website](https://translate.theworldmachine.xyz/) (we are using [Weblate](https://translate.theworldmachine.xyz/about/)). You are required to register using a Google account for the time being, after that you may suggest any changes to the text in any language, for the Lead Translators of that language to review. Contact @meqativ on the community server if you wish to become a Lead Translator for any language.
 
 > [!NOTE]
 > Some basic rules for translating
