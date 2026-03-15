@@ -3,18 +3,10 @@ developers:
     country: 🇺🇦
     discord_id: "744276454946242723"
     roles:
-      - maintainer
+      - owner
     links:
       - "patreon: https://www.patreon.com/c/meqativ"
       - "other: https://kutt.it/meqa"
-  - name: Axiinyaa
-    country: 🇮🇪
-    discord_id: "302883948424462346"
-    roles:
-      - owner
-    links:
-      - "bluesky: https://bsky.app/profile/axii.the-gay.cat"
-      - "github: https://github.com/Axiinyaa"
   - name: fily
     country: ~
     discord_id: "831530536781873163"
@@ -22,6 +14,14 @@ developers:
       - funder
     links:
       - "website: https://fily-is.dev/"
+  - name: Axiinyaa
+    country: 🇮🇪
+    discord_id: "302883948424462346"
+    roles:
+      - founder
+    links:
+      - "bluesky: https://bsky.app/profile/axii.the-gay.cat"
+      - "github: https://github.com/Axiinyaa"
 translators:
   - name: meqativ
     country: 🇺🇦
