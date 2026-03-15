@@ -41,20 +41,6 @@
 		"./src",
 		"${workspaceFolder}/.venv/lib/python3.13/site-packages"
 	],
-	"ruff.lint.ignore": [
-		"ERA001"
-	],
 	"ruff.nativeServer": true,
 	"ruff.configurationPreference": "filesystemFirst",
-	/*
-	line-length = 120
-indent-width = 4
-
-[format]
-indent-style = "tab"
-
-quote-style = "double"
-skip-magic-trailing-comma = false
-
-*/
 }
