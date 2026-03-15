@@ -10,7 +10,7 @@ You can use special commmands mid-sentence to do various stuff (like changing th
 >
 > This accepts three arguments separated by a colon (`:`)
 >
-> 1. the path for the facepic. you can find all of these [in this file](https://github.com/the-world-machine/bot/blob/main/src/data/facepics.yml) (they are listed in '`name`: `discord emoji id` # `credits`' layout), or by using the facepic selector in the textbox dialogue builder using the bot. When writing the paths manually, make sure to not put "characters" or "faces" in the paths.
+> 1. the path for the facepic. you can find all of these [in this file](https://github.com/proxot-system/bot/blob/main/src/data/facepics.yml) (they are listed in '`name`: `discord emoji id` # `credits`' layout), or by using the facepic selector in the textbox dialogue builder using the bot. When writing the paths manually, make sure to not put "characters" or "faces" in the paths.
 >
 > - optional string
 >

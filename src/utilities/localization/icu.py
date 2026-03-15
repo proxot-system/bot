@@ -209,6 +209,10 @@ async def util_user(
 		"the world machine",
 		"theworldmachine",
 		"the-world-machine",
+		"proxot",
+		"proxot-bot",
+		"proxot bot",
+		"bot",
 	):
 		user_id = bot_id
 	try:

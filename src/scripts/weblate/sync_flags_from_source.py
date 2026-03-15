@@ -10,7 +10,7 @@ from utilities.config import get_config
 
 WEBLATE_API_TOKEN = os.environ.get("WEBLATE_TOKEN", get_config("localization.weblate-token"))
 WEBLATE_URL = os.environ.get("WEBLATE_URL", "https://translate.theworldmachine.xyz")
-PROJECT_SLUG = os.environ.get("PROJECT_SLUG", "the-world-machine")
+PROJECT_SLUG = os.environ.get("PROJECT_SLUG", "discord-bot")
 LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "en_GB")
 
 LOCALES_ROOT = Path(get_config("paths.localization.root"))

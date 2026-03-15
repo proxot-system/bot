@@ -69,7 +69,7 @@ class State:
 			comment=await lformat(
 				loc,
 				loc.l("textbox.ttb.comment"),
-				link=f"https://github.com/the-world-machine/bot/blob/main/md/en/textbox/index.md#raw-file-editing-tbb",  # /md/{loc.locale}/textbox
+				link=f"https://github.com/proxot-system/bot/blob/main/md/en/textbox/index.md#raw-file-editing-tbb",  # /md/{loc.locale}/textbox
 			),
 			filetype=self.options.filetype,
 			send_to=self.options.send_to,

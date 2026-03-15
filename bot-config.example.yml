@@ -82,7 +82,7 @@ database:
 localization:
   weblate-token:
     "..."
-    # ↑ https://translate.theworldmachine.xyz/access/the-world-machine/#api
+    # ↑ https://translate.theworldmachine.xyz/access/discord-bot/#api
     #   go to Personal API key and copypaste it here
   source-locale: en-GB # string, make sure the locale is 100% complete
   debug: ~ # boolean, defaults to false on prod, shows detailed error messages for not found paths if true
