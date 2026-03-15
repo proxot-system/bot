@@ -29,7 +29,7 @@ Localization is done on [the translation website](https://translate.theworldmach
 > - If you are found sending spam/incorrect translations - you will be removed from the project without a possibility of returning
 
 > [!NOTE]
-> `/transmission`, `/sun give` & any slash command names or descriptions - **do not** have localizations yet
+> `/transmission`, `/sun give` - **do not** have localizations yet
 
 ### Pull Requests
 
