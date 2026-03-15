@@ -1,7 +1,4 @@
 {
-	"python.analysis.extraPaths": [
-		"./src"
-	],
 	"editor.tabSize": 2,
 	"editor.insertSpaces": false,
 	"editor.formatOnSave": true,
@@ -25,17 +22,39 @@
 		}
 	},
 	"python-envs.defaultEnvManager": "ms-python.python:system",
-	"python-envs.pythonProjects": [
-		{
-			"path": "",
-			"envManager": "ms-python.python:system",
-			"packageManager": "ms-python.python:pip"
-		}
-	],
-	"ruff.lint.select": [
-		"ERA001"
-	],
 	"ruff.importStrategy": "fromEnvironment",
 	"autoflake-extension.expand-star-imports": true,
-	"autoflake-extension.remove-all-unused-imports": true
+	"autoflake-extension.remove-all-unused-imports": true,
+	"python.analysis.autoFormatStrings": true,
+	"python.analysis.diagnosticMode": "workspace",
+	"python.analysis.enablePytestSupport": false,
+	"python.analysis.languageServerMode": "full",
+	"python.analysis.typeCheckingMode": "basic",
+	"python.analysis.aiHoverSummaries": false,
+	"python.analysis.referencesCodeLens": true,
+	"python.analysis.enableParallelIndexing": true,
+	"python.defaultInterpreterPath": "./.venv/bin/python",
+	"python.venvPath": ".",
+	"python.venv": ".venv",
+	"python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+	"python.analysis.extraPaths": [
+		"./src",
+		"${workspaceFolder}/.venv/lib/python3.13/site-packages"
+	],
+	"ruff.lint.ignore": [
+		"ERA001"
+	],
+	"ruff.nativeServer": true,
+	"ruff.configurationPreference": "filesystemFirst",
+	/*
+	line-length = 120
+indent-width = 4
+
+[format]
+indent-style = "tab"
+
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+*/
 }

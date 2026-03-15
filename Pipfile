@@ -26,6 +26,8 @@ aiohttp = "*"
 aiohttp-devtools = "*"
 jurigged = "*"
 pyicumessageformat = "*"
+pyvips = {ref = "master", git = "https://github.com/libvips/pyvips.git"}
+pytz = "*"
 
 [dev-packages]
 ruff = "*"
