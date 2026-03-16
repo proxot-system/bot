@@ -104,9 +104,6 @@ class Collection:
 		return await self.update(**{key: value + by})
 
 
-# In main.py
-
-
 class DBDict(MutableMapping):
 	_parent: Collection | None
 	_parent_field: str | None
@@ -123,6 +120,10 @@ class DBDict(MutableMapping):
 
 		initial_data = dict(*args, **kwargs)
 		for key, value in initial_data.items():
+			if isinstance(value, dict):
+				value = DBDict(value, _parent=self._parent, _parent_field=f"{self._parent_field}.{key}")
+			elif isinstance(value, list):
+				value = DBList(value, _parent=self._parent, _parent_field=f"{self._parent_field}.{key}")
 			setattr(self, key, value)
 
 	def __setitem__(self, key, value):
@@ -208,7 +209,7 @@ class DBList(list, Generic[TItem]):
 	def __repr__(self):
 		return f"DB{super().__repr__()}"
 
-	async def append(self, item: TItem) -> None:
+	async def append(self, item: TItem):
 		"""Append object to the end of the list, and update self in the database"""
 		if self._parent is None or self._parent_field is None:
 			raise Exception("Parent not set for nested update.")
@@ -216,7 +217,7 @@ class DBList(list, Generic[TItem]):
 		await self._parent.update_array(self._parent_field, "$push", item)
 		super().append(item)
 
-	async def remove(self, item: TItem) -> None:
+	async def remove(self, item: TItem):
 		"""Remove first occurrence of value, and update self in the database"""
 		if self._parent is None or self._parent_field is None:
 			raise Exception("Parent not set for nested update.")
@@ -343,7 +344,7 @@ async def connect_to_db():
 async def get_database():
 	if connection is None:
 		await connect_to_db()
-	assert connection != None
+	assert connection is not None
 
 	return connection.get_database("TheWorldMachine")
 
