@@ -250,7 +250,10 @@ class Localization:
 		prefix = self.prefix
 		if prefix_override:
 			prefix = prefix_override
-		path = f"{prefix}.{path}" if len(prefix) > 0 else path
+		if len(prefix) > 0:
+			path = f"{prefix}.{path}"
+		elif path.startswith("["):
+			path = f"{prefix}{path}"
 		return self.sl(path=path, locale=self.locale, typecheck=typecheck, **variables)
 
 	@staticmethod
