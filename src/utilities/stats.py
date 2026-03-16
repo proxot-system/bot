@@ -22,8 +22,10 @@ async def system_monitor_task():
 	process = psutil.Process(os.getpid())
 
 	while True:
-		stats = Stats(process.cpu_percent(interval=5), process.memory_percent(), datetime.now())
-		await asyncio.sleep(1)
+		cpu_usage = await asyncio.to_thread(process.cpu_percent, interval=5)
+		ram_usage = process.memory_percent()
+
+		stats = Stats(cpu_usage, ram_usage, datetime.now())
 
 
 def get_stats():
