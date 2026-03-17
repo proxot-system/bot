@@ -19,13 +19,13 @@ from interactions import (
 	slash_option,
 )
 
-import utilities.profile.badge_manager as bm
 from utilities.config import debugging, get_config
 from utilities.database.schemas import UserData
 from utilities.localization.formatting import fnum
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors, emojis, fancy_message
 from utilities.misc import fetch
+from utilities.profile.badge_manager import increment_value
 from utilities.profile.main import draw_profile
 from utilities.textbox.mediagen import Frame, render_textbox_frames
 
@@ -79,8 +79,8 @@ class ProfileCommands(Extension):
 		_ = ctx.author
 		if isinstance(_, Member):
 			_ = _.user
-		await bm.increment_value(ctx, "suns", target=_)
-		await bm.increment_value(ctx, "suns", target=who)
+		await increment_value(ctx, "suns", target=_)
+		await increment_value(ctx, "suns", target=who)
 
 		await ctx.send(f"[ {ctx.author.mention} gave {who.mention} a sun! {emojis['icons']['sun']} ]")
 
@@ -97,14 +97,14 @@ class ProfileCommands(Extension):
 		if user is None:
 			user = ctx.user
 		if user.bot and ctx.client.user != user:
-			return await ctx.send(await lformat(loc, loc.l("profile.view.bots")), ephemeral=True)
+			return await ctx.send(await locale_format(loc, loc.get_string("profile.view.bots")), ephemeral=True)
 
-		await fancy_message(ctx, await lformat(loc, loc.l("profile.view.loading"), target_id=user.id))
+		await fancy_message(ctx, await locale_format(loc, loc.get_string("profile.view.loading"), target_id=user.id))
 
 		start_time = time.perf_counter()
 		image = await draw_profile(
 			user,
-			filename=await lformat(loc, loc.l("profile.view.image.name"), target_id=user.id),
+			filename=await locale_format(loc, loc.get_string("profile.view.image.name"), target_id=user.id),
 			loc=loc,
 		)
 		runtime = (time.perf_counter() - start_time) * 1000
@@ -114,10 +114,10 @@ class ProfileCommands(Extension):
 				Button(
 					style=ButtonStyle.URL,
 					url=url,
-					label=await lformat(loc, loc.l("profile.view.button")),
+					label=await locale_format(loc, loc.get_string("profile.view.button")),
 				)
 			)
-		content = await lformat(loc, loc.l("profile.view.message"), target_id=user.id)
+		content = await locale_format(loc, loc.get_string("profile.view.message"), target_id=user.id)
 		await ctx.edit(
 			content=f"-# Took {fnum(runtime, locale=loc.locale)}ms. {content}" if debugging() else f"-# {content}",
 			files=image,
@@ -132,35 +132,35 @@ class ProfileCommands(Extension):
 		components = [
 			Button(
 				style=ButtonStyle.URL,
-				label=await lformat(loc, loc.l("generic.buttons.open_site")),
+				label=await locale_format(loc, loc.get_string("generic.buttons.open_site")),
 				url=get_config("bot.links.website-root") + "/profile",
 			)
 		]
 		asyncio.create_task(
 			fancy_message(
 				ctx,
-				message=await lformat(loc, loc.l("profile.edit.text")),
+				message=await locale_format(loc, loc.get_string("profile.edit.text")),
 				ephemeral=True,
 				components=components,
 			)
 		)
 		try:
 			await fetch("https://theworldmachine.xyz/profile")
-		except ClientResponseError as e:
+		except ClientResponseError:
 			components.append(
 				Button(
 					style=ButtonStyle.URL,
-					label=await lformat(loc, loc.l('about.buttons["community server"]')),
+					label=await locale_format(loc, loc.get_string('about.buttons["community server"]')),
 					url=get_config("bot.links.discord-invite"),
 				)
 			)
 			buffer = await render_textbox_frames(
-				[Frame(str(await lformat(loc, loc.l("profile.edit.down"))))], loops=1, loc=loc
+				[Frame(str(await locale_format(loc, loc.get_string("profile.edit.down"))))], loops=1, loc=loc
 			)
 			filename = (
-				await lformat(
+				await locale_format(
 					loc,
-					loc.l(f"textbox.alt.single_frame.filename"),
+					loc.get_string("textbox.alt.single_frame.filename"),
 					timestamp=str(round(datetime.now().timestamp())),
 				)
 				+ ".webp"

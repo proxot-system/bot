@@ -1,4 +1,3 @@
-
 from interactions import (
 	Extension,
 	SlashContext,
@@ -17,11 +16,9 @@ class InventoryCommands(Extension):
 	)
 	@integration_types(guild=True, user=True)
 	@contexts(bot_dm=True)
-	async def inventory(self, ctx: SlashContext):
-		...
+	async def inventory(self, ctx: SlashContext): ...
 
-		
 	treasures = inventory.subcommand(
 		sub_cmd_name="treasures",
-		sub_cmd_description="View the treasures you have in your inventory (or see someone else's!)"
+		sub_cmd_description="View the treasures you have in your inventory (or see someone else's!)",
 	)(treasures_cmd)

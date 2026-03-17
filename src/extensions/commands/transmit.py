@@ -26,7 +26,6 @@ from interactions.api.events import Component, MessageCreate
 from utilities.database.schemas import ServerData
 from utilities.emojis import emojis
 from utilities.localization.formatting import ftime
-from utilities.localization.localization import Localization, lformat
 from utilities.message_decorations import Colors, fancy_message
 from utilities.profile.badge_manager import increment_value
 from utilities.transmission_connection_manager import (
@@ -252,7 +251,7 @@ class TransmissionCommands(Extension):
 		server_id = ctx.guild_id
 		if not server_id:
 			return
-		loc = Localization(ctx)
+		# loc = Localization(ctx)
 		trans: Transmission | None = get_transmission(server_id)
 		if not trans:
 			return
@@ -272,16 +271,16 @@ class TransmissionCommands(Extension):
 		server_data: ServerData = await ServerData(_id=server_id).fetch()
 		await server_data.transmissions.known_servers.append(str(other_server.id))
 
-		guilds = [
-			await ctx.client.fetch_guild(id) or id
-			for id in list(set(server_data.transmissions.known_servers + server_data.transmissions.blocked_servers))
-		]
-		known_servers = {
-			guild.id if isinstance(guild, Guild) else guild: guild.name
-			if isinstance(guild, Guild)
-			else (await lformat(loc, loc.l("transmit.autocomplete.unknown_server"), server_id=guild), True)
-			for guild in guilds
-		}
+		# guilds = [
+		# 	await ctx.client.fetch_guild(id) or id
+		# 	for id in list(set(server_data.transmissions.known_servers + server_data.transmissions.blocked_servers))
+		# ]
+		# known_servers = {
+		# 	guild.id if isinstance(guild, Guild) else guild: guild.name
+		# 	if isinstance(guild, Guild)
+		# 	else (await lformat(loc, loc.l("transmit.autocomplete.unknown_server"), server_id=guild), True)
+		# 	for guild in guilds
+		# }
 
 		btn_id = uuid.uuid4()
 

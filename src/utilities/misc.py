@@ -282,11 +282,11 @@ def shell(command: str) -> str:
 
 
 async def set_status(client: Client, text: str | list | None):
-	from utilities.localization.localization import lformat, source_loc
+	from utilities.localization.localization import locale_format, source_loc
 
 	if text is not None:
 		status = str(
-			await lformat(
+			await locale_format(
 				source_loc,
 				input=text,
 				shard_count=len(client.shards) if hasattr(client, "shards") else 1,  # type: ignore

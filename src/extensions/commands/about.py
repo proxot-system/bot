@@ -30,7 +30,7 @@ from interactions import (
 from yaml import full_load
 
 from utilities.localization.formatting import amperjoin, fnum, ftime
-from utilities.localization.localization import Localization, lformat, source_loc
+from utilities.localization.localization import Localization, locale_format, source_loc
 from utilities.message_decorations import Colors, fancy_message
 from utilities.source_watcher import FileModifiedEvent, all_of, filter_file_suffix, filter_path, subscribe
 from utilities.stats import get_stats, get_version
@@ -69,11 +69,11 @@ class Contributor:
 		self, loc: Localization, simple: bool = False
 	) -> Union[str, SectionComponent, TextDisplayComponent]:
 		ploc = Localization(loc, prefix="commands.info.about.contributors")
-		roles = amperjoin([await lformat(ploc, ploc.l(f"roles['{role}']")) for role in self.roles])
+		roles = amperjoin([await locale_format(ploc, ploc.get_string(f"roles['{role}']")) for role in self.roles])
 		links = " · ".join(item for item in [await format_link(ploc, link) for link in self.links] if item is not None)
-		text: str | TextDisplayComponent = await lformat(
+		text: str | TextDisplayComponent = await locale_format(
 			ploc,
-			ploc.l(f"contrib.layout['{'simple' if simple else 'full'}']"),
+			ploc.get_string(f"contrib.layout['{'simple' if simple else 'full'}']"),
 			name=self.name,
 			roles=roles,
 			country_flags=self.country,
@@ -89,7 +89,7 @@ class Contributor:
 			components=text,
 			accessory=ThumbnailComponent(
 				media=UnfurledMediaItem(url=user.display_avatar.as_url(size=4096)),
-				description=await lformat(ploc, ploc.l("contrib.pfp_alt_text")),
+				description=await locale_format(ploc, ploc.get_string("contrib.pfp_alt_text")),
 			),
 		)
 
@@ -102,7 +102,7 @@ async def format_link(loc, link):
 	service = split[0]
 	url = split[1]
 
-	service = await lformat(lloc, lloc.l(f"buttons['{service}']"))
+	service = await locale_format(lloc, lloc.get_string(f"buttons['{service}']"))
 
 	return f"[`{service}`]({url})"
 
@@ -155,10 +155,9 @@ class AboutCommand(Extension):
 	@integration_types(guild=True, user=True)
 	@contexts(bot_dm=True)
 	async def about(self, ctx: SlashContext, public: bool = False):
-
 		loc = Localization(ctx)
 		stats_loc = Localization(ctx, prefix="commands.info.about")
-		_content = await lformat(stats_loc, stats_loc.l("loading"))
+		_content = await locale_format(stats_loc, stats_loc.get_string("loading"))
 
 		start_time = datetime.now(timezone.utc)
 		loading_message = await fancy_message(ctx, _content, ephemeral=not public)
@@ -168,7 +167,11 @@ class AboutCommand(Extension):
 		reply_latency = datetime.fromtimestamp(loading_message.created_at.timestamp(), tz=timezone.utc) - start_time
 
 		buttons: list[Button] = [
-			Button(custom_id="about_contributors", label=stats_loc.l("buttons.contributors"), style=ButtonStyle.BLURPLE)
+			Button(
+				custom_id="about_contributors",
+				label=stats_loc.get_string("buttons.contributors"),
+				style=ButtonStyle.BLURPLE,
+			)
 		]
 		strbuttons: list[str] = []
 		processed_lines: list[str] = []
@@ -180,7 +183,7 @@ class AboutCommand(Extension):
 						name, url = line.split(":", 1)
 						name = name.strip()
 
-						loc_name = await lformat(stats_loc, stats_loc.l(f"buttons['{name.lower()}']"))
+						loc_name = await locale_format(stats_loc, stats_loc.get_string(f"buttons['{name.lower()}']"))
 						if not loc_name.startswith("`"):
 							name = loc_name
 
@@ -192,18 +195,19 @@ class AboutCommand(Extension):
 						if not _first_processed:
 							_first_processed = True
 							original_lines = list(
-								await lformat(
-									source_loc, Localization(prefix=stats_loc.prefix).l("mes", typecheck=tuple)
+								await locale_format(
+									source_loc, Localization(prefix=stats_loc.prefix).get_string("mes", typecheck=tuple)
 								)
 							)
-							translated_lines = list(await lformat(stats_loc, stats_loc.l("mes", typecheck=tuple)))
+							translated_lines = list(
+								await locale_format(stats_loc, stats_loc.get_string("mes", typecheck=tuple))
+							)
 							index = original_lines.index(line)
 							line = translated_lines[index]
 						processed_lines.append(line)
 				except ValueError:
 					processed_lines.append(line)
 
-		team = ctx.client.app.team
 		processed_description = "\n".join(processed_lines)
 
 		if len(strbuttons) != 0:
@@ -213,42 +217,42 @@ class AboutCommand(Extension):
 		embed = Embed(description=processed_description, color=Colors.DEFAULT)  # fixme: no way to see owners now
 		embed.add_fields(
 			EmbedField(
-				name=await lformat(stats_loc, stats_loc.l("fields.avg_ping.name")),
-				value=await lformat(
-					stats_loc, stats_loc.l("generic_values.time"), sec=fnum(ctx.client.latency, ctx.locale)
+				name=await locale_format(stats_loc, stats_loc.get_string("fields.avg_ping.name")),
+				value=await locale_format(
+					stats_loc, stats_loc.get_string("generic_values.time"), sec=fnum(ctx.client.latency, ctx.locale)
 				),
 				inline=True,
 			),
 			EmbedField(
-				name=await lformat(stats_loc, stats_loc.l("fields.latency.name")),
-				value=f"{await lformat(stats_loc, stats_loc.l('generic_values.time'), sec=fnum(reception_latency.microseconds / 1e6, ctx.locale))} / {await lformat(stats_loc, stats_loc.l('generic_values.time'), sec=fnum(reply_latency.microseconds / 1e6, ctx.locale))}",
+				name=await locale_format(stats_loc, stats_loc.get_string("fields.latency.name")),
+				value=f"{await locale_format(stats_loc, stats_loc.get_string('generic_values.time'), sec=fnum(reception_latency.microseconds / 1e6, ctx.locale))} / {await locale_format(stats_loc, stats_loc.get_string('generic_values.time'), sec=fnum(reply_latency.microseconds / 1e6, ctx.locale))}",
 				inline=True,
 			),
 			EmbedField(
-				await lformat(stats_loc, stats_loc.l("fields.uptime.name")),
+				await locale_format(stats_loc, stats_loc.get_string("fields.uptime.name")),
 				ftime(datetime.now() - ctx.client.start_time, ctx.locale),
 				inline=True,
 			),
 			EmbedField(
-				name=await lformat(stats_loc, stats_loc.l("fields.server_count.name")),
+				name=await locale_format(stats_loc, stats_loc.get_string("fields.server_count.name")),
 				value=str(ctx.client.guild_count),
 				inline=True,
 			),
 			EmbedField(
-				name=await lformat(stats_loc, stats_loc.l("fields.load.name")),
-				value=await lformat(
+				name=await locale_format(stats_loc, stats_loc.get_string("fields.load.name")),
+				value=await locale_format(
 					loc,
-					stats_loc.l("fields.load.value"),
+					stats_loc.get_string("fields.load.value"),
 					cpu_load=sys_stats.cpu / 100,
 					mem_load=sys_stats.ram / 100,
 				),
 				inline=True,
 			),
 			EmbedField(
-				name=await lformat(stats_loc, stats_loc.l("fields.version.name")),
-				value=await lformat(
+				name=await locale_format(stats_loc, stats_loc.get_string("fields.version.name")),
+				value=await locale_format(
 					loc,
-					stats_loc.l("fields.version.value"),
+					stats_loc.get_string("fields.version.value"),
 					version_type="tag" if version.tag else "commit",
 					tag=version.tag,
 					commit_hash=version.commit,
@@ -257,7 +261,7 @@ class AboutCommand(Extension):
 				inline=True,
 			),
 			EmbedField(
-				await lformat(stats_loc, stats_loc.l("fields.host.name")),
+				await locale_format(stats_loc, stats_loc.get_string("fields.host.name")),
 				f"{platform.system()} {platform.release()} ({platform.architecture()[0]})",
 				inline=True,
 			),
@@ -271,16 +275,15 @@ class AboutCommand(Extension):
 	@component_callback("about_contributors")
 	async def handle_contributors_button(self, ctx: ComponentContext):
 		asyncio.create_task(ctx.defer(ephemeral=True))
-		global_loc = Localization(ctx)
 		loc = Localization(ctx, prefix="commands.info.about.contributors")
 
 		components = []
-		components.append(TextDisplayComponent(content=loc.l(f"categories.developers")))
+		components.append(TextDisplayComponent(content=loc.get_string("categories.developers")))
 		components.extend([await contributor.render(loc) for contributor in contributors["developers"]])
 		components.append(
 			TextDisplayComponent(
 				# TODO sort by country flag
-				await lformat(loc, loc.l("categories.translators"))
+				await locale_format(loc, loc.get_string("categories.translators"))
 				+ f":\n{'\n'.join([await contributor.render(loc, simple=True) for contributor in contributors['translators']])}"
 			)
 		)

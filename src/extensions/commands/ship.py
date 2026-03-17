@@ -11,7 +11,7 @@ from interactions import (
 	slash_option,
 )
 
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors, fancy_message
 from utilities.textbox.facepics import get_facepic
 
@@ -45,7 +45,7 @@ class ShippingCommands(Extension):
 			if parsed_id.count("@") > 1:
 				return await fancy_message(
 					ctx,
-					await lformat(loc, loc.l("errors.idk")),
+					await locale_format(loc, loc.get_string("errors.idk")),
 					color=Colors.BAD,
 					ephemeral=True,
 				)
@@ -53,7 +53,7 @@ class ShippingCommands(Extension):
 			if not parsed_id.isdigit():
 				return await fancy_message(
 					ctx,
-					await lformat(loc, loc.l("errors.failed_mention")),
+					await locale_format(loc, loc.get_string("errors.failed_mention")),
 					color=Colors.BAD,
 					ephemeral=True,
 				)
@@ -61,7 +61,7 @@ class ShippingCommands(Extension):
 			if not user:
 				return await fancy_message(
 					ctx,
-					await lformat(loc, loc.l("errors.cant_find_one")),
+					await locale_format(loc, loc.get_string("errors.cant_find_one")),
 					color=Colors.BAD,
 					ephemeral=True,
 				)
@@ -71,7 +71,7 @@ class ShippingCommands(Extension):
 			if parsed_id.count("@") > 1:
 				return await fancy_message(
 					ctx,
-					await lformat(loc, loc.l("errors.idk")),
+					await locale_format(loc, loc.get_string("errors.idk")),
 					color=Colors.BAD,
 					ephemeral=True,
 					facepic=await get_facepic("OneShot/The World Machine/Upset left"),
@@ -80,7 +80,7 @@ class ShippingCommands(Extension):
 			if not parsed_id.isdigit():
 				return await fancy_message(
 					ctx,
-					await lformat(loc, loc.l("errors.failed_mention")),
+					await locale_format(loc, loc.get_string("errors.failed_mention")),
 					color=Colors.BAD,
 					ephemeral=True,
 					facepic=await get_facepic("OneShot/The World Machine/Looking Left"),
@@ -89,7 +89,7 @@ class ShippingCommands(Extension):
 			if not user:
 				return await fancy_message(
 					ctx,
-					await lformat(loc, loc.l("errors.cant_find_two")),
+					await locale_format(loc, loc.get_string("errors.cant_find_two")),
 					color=Colors.BAD,
 					ephemeral=True,
 					facepic=await get_facepic("OneShot/The World Machine/Upset left"),
@@ -98,7 +98,7 @@ class ShippingCommands(Extension):
 		if who == ctx.author.display_name and who == whomst:
 			return await fancy_message(
 				ctx,
-				await lformat(loc, loc.l("errors.hugs_you")),
+				await locale_format(loc, loc.get_string("errors.hugs_you")),
 				color=Colors.BAD,
 				ephemeral=True,
 				facepic=await get_facepic("OneShot/The World Machine/Looking Left"),
@@ -118,24 +118,24 @@ class ShippingCommands(Extension):
 		color = Colors.PASTEL_RED
 		if love_percentage == 100:
 			emoji = "💛"
-			footer = await lformat(loc, loc.l("compatibility.footer.perfect"))
+			footer = await locale_format(loc, loc.get_string("compatibility.footer.perfect"))
 			color = Colors.PURE_YELLOW
 		if love_percentage < 100:
 			emoji = "💖"
-			footer = await lformat(loc, loc.l("compatibility.footer.love"))
+			footer = await locale_format(loc, loc.get_string("compatibility.footer.love"))
 			color = Colors.PINK
 		if love_percentage < 70:
 			emoji = "❤"
-			footer = await lformat(loc, loc.l("compatibility.footer.interest"))
+			footer = await locale_format(loc, loc.get_string("compatibility.footer.interest"))
 		if love_percentage <= 50:
 			emoji = "❓"
-			footer = await lformat(loc, loc.l("compatibility.footer.potential"))
+			footer = await locale_format(loc, loc.get_string("compatibility.footer.potential"))
 		if love_percentage < 30:
 			emoji = "❌"
-			footer = await lformat(loc, loc.l("compatibility.footer.disinterest"))
+			footer = await locale_format(loc, loc.get_string("compatibility.footer.disinterest"))
 		if love_percentage < 10:
 			emoji = "💔"
-			footer = await lformat(loc, loc.l("compatibility.footer.nope"))
+			footer = await locale_format(loc, loc.get_string("compatibility.footer.nope"))
 			color = Colors.LIGHTER_BLACK
 
 		hearts_line = list("🤍🤍🤍🤍🤍🤍🤍🤍🤍🤍")
@@ -150,7 +150,7 @@ class ShippingCommands(Extension):
 
 		embed = Embed(
 			title=name,
-			description=f"{await lformat(loc, loc.l('compatibility.description'), who=who, whomst=whomst, emoji=emoji, percentage=love_percentage)}\n{''.join(hearts_line)}\n-# {footer}",
+			description=f"{await locale_format(loc, loc.get_string('compatibility.description'), who=who, whomst=whomst, emoji=emoji, percentage=love_percentage)}\n{''.join(hearts_line)}\n-# {footer}",
 			color=color,
 		)
 

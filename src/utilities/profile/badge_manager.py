@@ -1,7 +1,7 @@
 from interactions import Embed, SlashContext, User
 
 from utilities.database.schemas import UserData
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors
 from utilities.shop.fetch_items import fetch_badge
 
@@ -23,19 +23,19 @@ async def earn_badge(
 	if user_data.badge_notifications and send_message:
 		return await ctx.send(
 			embeds=Embed(
-				title=await lformat(
+				title=await locale_format(
 					loc,
-					loc.l("profile.notifications.badge.title"),
+					loc.get_string("profile.notifications.badge.title"),
 					emoji=f"<:i:{badge_data['emoji']}>",
 					badge_name=badge_name,
 				),
-				description=await lformat(
+				description=await locale_format(
 					loc,
-					loc.l("profile.notifications.badge.description"),
+					loc.get_string("profile.notifications.badge.description"),
 					target_id=target.id,
-					badge_message=await lformat(
+					badge_message=await locale_format(
 						loc,
-						loc.l(f'profile.notifications.badge.types["{badge_data["type"]}"]'),
+						loc.get_string(f'profile.notifications.badge.types["{badge_data["type"]}"]'),
 						amount=badge_data["requirement"],
 					),
 				),
@@ -44,7 +44,7 @@ async def earn_badge(
 				# await lformat(loc, loc.l("profile.notifications.badge.settings_note"))# noqa: ERA001
 				# await put_mini(loc, "profile.notifications.badge.settings_note", user_id=ctx.user.id)# noqa: ERA001
 			),
-			content=await lformat(loc, loc.l("profile.notifications.badge.content")),
+			content=await locale_format(loc, loc.get_string("profile.notifications.badge.content")),
 		)
 
 

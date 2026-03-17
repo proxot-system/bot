@@ -14,7 +14,7 @@ from interactions_lavalink.events import TrackException, TrackStart
 
 from utilities.config import get_config
 from utilities.emojis import emojis
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import *
 from utilities.music.music_loaders import CustomSearch
 
@@ -219,7 +219,7 @@ class MusicCommands(Extension):
 				self.assign_node()
 				tries += 1
 
-		message = await fancy_message(ctx, await lformat(loc, loc.l("loading.search")))
+		message = await fancy_message(ctx, await locale_format(loc, loc.get_string("loading.search")))
 
 		result = await self.lavalink.client.get_tracks(song, check_local=True)
 		tracks = result.tracks
@@ -279,7 +279,7 @@ class MusicCommands(Extension):
 				ephemeral=True,
 			)
 
-		message = await fancy_message(ctx, await lformat(loc, loc.l("loading.file")))
+		message = await fancy_message(ctx, await locale_format(loc, loc.get_string("loading.file")))
 
 		player = await self.lavalink.connect(voice_state.guild.id, voice_state.channel.id)
 

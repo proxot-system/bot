@@ -7,13 +7,13 @@ from pathlib import Path
 
 from pyvips import Image
 
+
 async def get_image(source: str):
 	from utilities.misc import fetch
 
 	if source.startswith(("http://", "https://")):
 		image_bytes = await fetch(source, output="read")
-		import io
-		return Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+		return Image.new_from_buffer(image_bytes, "")
 	elif Path(source).exists():
 		return Image.new_from_file(str(Path(source)))
 	else:
@@ -37,18 +37,20 @@ def create_blur_kernel(length, angle_rad):
 	return kernel / total_sum
 
 
-def render_chunk_to_canvas(chunk_id, chunk, tile, canvas_w, canvas_h, max_dist, blur_intensity, batch_size, darkening_intensity):
+def render_chunk_to_canvas(
+	chunk_id, chunk, tile, canvas_w, canvas_h, max_dist, blur_intensity, batch_size, darkening_intensity
+):
 	layer = Image.black(canvas_w, canvas_h, bands=4).copy(interpretation="srgb")
 
 	images, xs, ys, modes = [], [], [], []
 	kernel_cache = {}
 
 	total = len(chunk)
-	total_list [chunk_id] = total
+	total_list[chunk_id] = total
 
 	for idx, (fx, fy, dist, angle) in enumerate(chunk):
 		if idx % 5 == 0:
-			progress_list [chunk_id] = idx
+			progress_list[chunk_id] = idx
 
 		brightness = max(0.2, 1.0 - (dist / (max_dist * darkening_intensity)))
 		flower = tile.linear([brightness, brightness, brightness, 1.0], [0, 0, 0, 0])
@@ -64,8 +66,8 @@ def render_chunk_to_canvas(chunk_id, chunk, tile, canvas_w, canvas_h, max_dist, 
 				final_fy -= blur_len
 				cache_key = (blur_len, q_angle)
 				if cache_key not in kernel_cache:
-					kernel_cache [cache_key] = create_blur_kernel(blur_len, q_angle)
-				kernel = kernel_cache [cache_key]
+					kernel_cache[cache_key] = create_blur_kernel(blur_len, q_angle)
+				kernel = kernel_cache[cache_key]
 				if kernel:
 					flower = flower.conv(kernel)
 		baked_flower = flower.copy_memory()
@@ -80,7 +82,7 @@ def render_chunk_to_canvas(chunk_id, chunk, tile, canvas_w, canvas_h, max_dist, 
 
 	if images:
 		layer = layer.composite(images, modes, x=xs, y=ys).copy_memory()
-	progress_list [chunk_id] = total
+	progress_list[chunk_id] = total
 	return layer
 
 
@@ -90,7 +92,7 @@ async def report_progress(num_threads):
 	while True:
 		sys.stdout.write(f"\033[{num_threads}A")
 		for i in range(num_threads):
-			p, t = progress_list [i], total_list [i]
+			p, t = progress_list[i], total_list[i]
 			pct = (p / t * 100) if t > 0 else 0
 			sys.stdout.write(f"Thread {i}: {p}/{t} ({pct:.1f}%)\033[K\n")
 		sys.stdout.flush()
@@ -101,6 +103,7 @@ async def report_progress(num_threads):
 
 def run():
 	import asyncio
+
 	asyncio.run(render_banner())
 
 
@@ -108,21 +111,20 @@ async def render_banner():
 	step_x_col, step_x_row = 6, 2
 	step_y_alt = 2
 	step_y_row = -7
-	
+
 	canvas_w, canvas_h = 85, 30
 	blur_intensity = 0.1
 	batch_size = 300
 	darkening_intensity = 999
-	
 
 	tile_path = Path("src/data/images/other/proxot_logo_clear.png").resolve()
 	tile = Image.new_from_file(str(tile_path))
 	tw, th = tile.width, tile.height
-	
+
 	cols_range = int((canvas_w / step_x_col) * 1.5)
 	rows_range = int((canvas_h / abs(step_y_row)) * 1.5)
-	
-	raw_flowers =[]
+
+	raw_flowers = []
 	for r in range(-rows_range, rows_range):
 		for c in range(-cols_range, cols_range):
 			x = (c * step_x_col) + (r * step_x_row)
@@ -132,10 +134,10 @@ async def render_banner():
 	target_cx = 13 - (tw / 2)
 	target_cy = canvas_h - 20 - (th / 2)
 
-	best_fit = min(raw_flowers, key=lambda f: math.sqrt((f [0] - target_cx) ** 2 + (f [1] - target_cy) ** 2))
-	shift_x, shift_y = target_cx - best_fit [0], target_cy - best_fit [1]
-	
-	flowers_to_process =[]
+	best_fit = min(raw_flowers, key=lambda f: math.sqrt((f[0] - target_cx) ** 2 + (f[1] - target_cy) ** 2))
+	shift_x, shift_y = target_cx - best_fit[0], target_cy - best_fit[1]
+
+	flowers_to_process = []
 	for fx, fy in raw_flowers:
 		nx, ny = fx + shift_x, fy + shift_y
 		if -300 <= nx <= canvas_w + 300 and -300 <= ny <= canvas_h + 300:
@@ -143,24 +145,32 @@ async def render_banner():
 			angle = math.atan2(ny - target_cy, nx - target_cx)
 			flowers_to_process.append((nx, ny, dist, angle))
 
-	flowers_to_process.sort(key=lambda f: f [2], reverse=True)
+	flowers_to_process.sort(key=lambda f: f[2], reverse=True)
 
 	max_dist = math.sqrt((canvas_w / 2) ** 2 + (canvas_h / 2) ** 2)
 	num_threads = min(os.cpu_count() or 4, 8)
 	global progress_list, total_list
 	progress_list, total_list = [0] * num_threads, [0] * num_threads
-	
+
 	chunk_size = math.ceil(len(flowers_to_process) / num_threads)
-	chunks = [flowers_to_process [i : i + chunk_size] for i in range(0, len(flowers_to_process), chunk_size)]
+	chunks = [flowers_to_process[i : i + chunk_size] for i in range(0, len(flowers_to_process), chunk_size)]
 
 	loop = asyncio.get_running_loop()
 	with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as pool:
 		reporter = asyncio.create_task(report_progress(num_threads))
 		tasks = [
 			loop.run_in_executor(
-				pool, 
-				render_chunk_to_canvas, 
-				i, chunk, tile, canvas_w, canvas_h, max_dist, blur_intensity, batch_size, darkening_intensity
+				pool,
+				render_chunk_to_canvas,
+				i,
+				chunk,
+				tile,
+				canvas_w,
+				canvas_h,
+				max_dist,
+				blur_intensity,
+				batch_size,
+				darkening_intensity,
 			)
 			for i, chunk in enumerate(chunks)
 		]

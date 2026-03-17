@@ -6,7 +6,7 @@ from pathlib import Path
 from aiohttp import web
 
 from utilities.config import get_config
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 
 from .misc import get_browser_locale, http_status_names
 
@@ -42,7 +42,7 @@ async def error_middleware(request, handler):
 			) as f:
 				error_paige = f.read()
 			return web.Response(
-				text=await lformat(
+				text=await locale_format(
 					loc,
 					error_paige,
 					status=status,

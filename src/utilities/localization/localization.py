@@ -230,23 +230,25 @@ class Localization:
 		elif isinstance(input, tuple):
 			out = []
 			for elem in input:
-				out.append(await lformat(self, elem, **variables))
+				out.append(await locale_format(self, elem, **variables))
 			return tuple(out)
 		elif isinstance(input, dict):
 			new_dict = {}
 			for key, value in input.items():
-				new_dict[key] = await lformat(self, value, **variables)
+				new_dict[key] = await locale_format(self, value, **variables)
 			return new_dict
 		else:
 			return input
 
 	@overload
-	def l(self, path: str, *, typecheck: Type[T], **variables: Any) -> T: ...
+	def get_string(self, path: str, *, typecheck: Type[T], **variables: Any) -> T: ...
 
 	@overload
-	def l(self, path: str, *, prefix_override: str | None = None, **variables: Any) -> str: ...
+	def get_string(self, path: str, *, prefix_override: str | None = None, **variables: Any) -> str: ...
 
-	def l(self, path: str, *, prefix_override: str | None = None, typecheck: Any = str, **variables: Any) -> Any:
+	def get_string(
+		self, path: str, *, prefix_override: str | None = None, typecheck: Any = str, **variables: Any
+	) -> Any:
 		prefix = self.prefix
 		if prefix_override:
 			prefix = prefix_override
@@ -254,11 +256,11 @@ class Localization:
 			path = f"{prefix}.{path}"
 		elif path.startswith("["):
 			path = f"{prefix}{path}"
-		return self.sl(path=path, locale=self.locale, typecheck=typecheck, **variables)
+		return self.static_get_string(path=path, locale=self.locale, typecheck=typecheck, **variables)
 
 	@staticmethod
 	@overload
-	def sl(
+	def static_get_string(
 		path: str,
 		locale: str | None,
 		*,
@@ -269,10 +271,10 @@ class Localization:
 
 	@staticmethod
 	@overload
-	def sl(path: str, locale: str | None) -> str: ...
+	def static_get_string(path: str, locale: str | None) -> str: ...
 
 	@staticmethod
-	def sl(
+	def static_get_string(
 		path: str,
 		locale: str | None = None,
 		*,
@@ -301,7 +303,7 @@ class Localization:
 		return result
 
 	@staticmethod
-	def sl_all(localization_path: str, raise_on_not_found: bool = False) -> dict[str, Any]:
+	def static_get_all_strings(localization_path: str, raise_on_not_found: bool = False) -> dict[str, Any]:
 		results = {}
 
 		for locale in _locales.keys():
@@ -315,29 +317,30 @@ class Localization:
 
 		return results
 
+
 source_loc = Localization()
 
 
 @overload
-async def lformat(loc: Localization, input: str, **variables: Any) -> str: ...
+async def locale_format(loc: Localization, input: str, **variables: Any) -> str: ...
 
 
 @overload
-async def lformat(loc: Localization, input: T, **variables: Any) -> T: ...
+async def locale_format(loc: Localization, input: T, **variables: Any) -> T: ...
 
 
-async def lformat(loc: Localization = source_loc, input: Any = None, **variables: Any) -> Any:
+async def locale_format(loc: Localization = source_loc, input: Any = None, **variables: Any) -> Any:
 	if isinstance(input, str):
 		return await render_icu(input, variables, loc.locale, loc.client)
 	elif isinstance(input, tuple):
 		out = []
 		for elem in input:
-			out.append(await lformat(loc, elem, **variables))
+			out.append(await locale_format(loc, elem, **variables))
 		return tuple(out)
 	elif isinstance(input, dict):
 		new_dict = {}
 		for key, value in input.items():
-			new_dict[key] = await lformat(loc, value, **variables)
+			new_dict[key] = await locale_format(loc, value, **variables)
 		return new_dict
 	else:
 		return input

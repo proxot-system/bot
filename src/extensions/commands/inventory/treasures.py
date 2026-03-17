@@ -1,4 +1,3 @@
-
 import asyncio
 
 from interactions import Embed, OptionType, SlashContext, User, contexts, integration_types, slash_option
@@ -6,7 +5,7 @@ from interactions import Embed, OptionType, SlashContext, User, contexts, integr
 from utilities.database.schemas import UserData
 from utilities.emojis import emojis
 from utilities.localization.formatting import fnum
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.localization.minis import put_mini
 from utilities.message_decorations import Colors, fancy_message
 from utilities.shop.fetch_items import fetch_treasure
@@ -31,12 +30,12 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 	if user is None:
 		user = ctx.user
 	if user.bot:
-		return await ctx.send(await lformat(loc, treasure_loc.l("empty"), user_id=user.id), ephemeral=True)
+		return await ctx.send(await locale_format(loc, treasure_loc.get_string("empty"), user_id=user.id), ephemeral=True)
 
 	message = asyncio.create_task(
 		fancy_message(
 			ctx,
-			await lformat(loc, treasure_loc.l("loading"), target_type="current" if user == ctx.user else "other"),
+			await locale_format(loc, treasure_loc.get_string("loading"), target_type="current" if user == ctx.user else "other"),
 			ephemeral=not public,
 		)
 	)
@@ -46,21 +45,21 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 	owned_treasures = user_data.owned_treasures
 	if len(list(user_data.owned_treasures.items())) == 0:
 		await message
-		return await fancy_message(ctx, await lformat(loc, treasure_loc.l("empty"), user_id=user.id), edit=True)
+		return await fancy_message(ctx, await locale_format(loc, treasure_loc.get_string("empty"), user_id=user.id), edit=True)
 
 	max_amount_length = len(fnum(max(owned_treasures.values(), default=0), locale=loc.locale))
 	treasure_string = ""
 	for treasure_nid, item in all_treasures.items():
-		treasure_metadata: dict = await lformat(loc, loc.l(f"items.treasures", typecheck=dict))
+		treasure_metadata: dict = await locale_format(loc, loc.get_string(f"items.treasures", typecheck=dict))
 
 		name = treasure_metadata[treasure_nid]["name"]
 
 		num = fnum(owned_treasures.get(treasure_nid, 0), loc.locale)
 		rjust = num.rjust(max_amount_length, " ")
 		treasure_string += (
-			await lformat(
+			await locale_format(
 				loc,
-				loc.l("items.entry_template"),
+				loc.get_string("items.entry_template"),
 				spacer=rjust.replace(num, ""),
 				amount=num,
 				icon=emojis["treasures"][treasure_nid],
@@ -71,7 +70,7 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 
 	await ctx.edit(
 		embed=Embed(
-			description=await lformat(loc, treasure_loc.l("message"), user=user.mention, treasures=treasure_string)
+			description=await locale_format(loc, treasure_loc.get_string("message"), user=user.mention, treasures=treasure_string)
 			+ (
 				await put_mini(
 					treasure_loc,

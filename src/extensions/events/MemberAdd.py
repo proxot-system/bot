@@ -11,7 +11,7 @@ from interactions import (
 from interactions.api.events import MemberAdd
 
 from utilities.database.schemas import ServerData
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.textbox.mediagen import Frame, render_frame
 
 
@@ -33,8 +33,8 @@ class MemberAddEvent(Extension):
 		if not target_channel:
 			return
 
-		message = config.message or loc.l("misc.welcome.placeholder_text", typecheck=str)
-		message = await lformat(
+		message = config.message or loc.get_string("misc.welcome.placeholder_text", typecheck=str)
+		message = await locale_format(
 			loc,
 			message,
 			user_name=event.member.display_name,

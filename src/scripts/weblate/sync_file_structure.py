@@ -13,10 +13,7 @@ def run():
 		print(f"Error: Source path {SOURCE_PATH} not found.")
 		return
 
-	target_locales = [
-		d.name for d in LOCALES_ROOT.iterdir()
-		if d.is_dir() and d.name != SOURCE_LOCALE
-	]
+	target_locales = [d.name for d in LOCALES_ROOT.iterdir() if d.is_dir() and d.name != SOURCE_LOCALE]
 
 	if not target_locales:
 		print("No target locales found to sync to.")

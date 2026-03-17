@@ -21,13 +21,13 @@ psutil = "*"
 jellyfish = "*"
 grapheme = "*"
 apng = "*"
-"interactions.py" = "*"
 aiohttp = "*"
 aiohttp-devtools = "*"
 jurigged = "*"
 pyicumessageformat = "*"
 pyvips = {ref = "master", git = "https://github.com/libvips/pyvips.git"}
 pytz = "*"
+interactions-py = "*"
 
 [dev-packages]
 ruff = "*"

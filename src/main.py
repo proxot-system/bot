@@ -69,6 +69,7 @@ intents &= ~(
 	| Intents.GUILD_MODERATION
 )
 
+
 class TWMClient(Client):
 	started_at: datetime | None
 	ready_at: datetime | None

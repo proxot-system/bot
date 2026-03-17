@@ -19,6 +19,7 @@ SOURCE_PATH = LOCALES_ROOT / SOURCE_LOCALE
 
 SEMAPHORE = asyncio.Semaphore(15)
 
+
 async def parse_flags_from_file(file_path: Path) -> Dict[str, str]:
 	path_at_indent: Dict[int, str] = {}
 	results: Dict[str, str] = {}
@@ -62,6 +63,7 @@ async def parse_flags_from_file(file_path: Path) -> Dict[str, str]:
 
 	return results
 
+
 def get_component_slug(relative_path: Path) -> str:
 	component_part = str(relative_path.with_suffix("")).replace("\\", "/")
 	if component_part in ["main", "facepics"]:
@@ -69,6 +71,7 @@ def get_component_slug(relative_path: Path) -> str:
 
 	clean_part = component_part.replace("/", "-")
 	return clean_part.lower()
+
 
 async def clear_translations_for_key(session: aiohttp.ClientSession, comp_slug: str, key: str):
 	"""
@@ -136,6 +139,7 @@ async def update_unit(session: aiohttp.ClientSession, comp_slug: str, key: str, 
 		except Exception as e:
 			print(f"  - ❌ [{comp_slug}]: Unexpected error for '{key}', {e}")
 
+
 async def run():
 	if not WEBLATE_API_TOKEN or WEBLATE_API_TOKEN == "..." or WEBLATE_API_TOKEN == "YOUR_WEBLATE_API_TOKEN":
 		print("Error: WEBLATE_TOKEN not set or invalid.")
@@ -152,7 +156,7 @@ async def run():
 		for file_path in files:
 			rel_path = file_path.relative_to(SOURCE_PATH)
 			comp_slug = get_component_slug(rel_path)
-			
+
 			string_flags = await parse_flags_from_file(file_path)
 			if not string_flags:
 				continue

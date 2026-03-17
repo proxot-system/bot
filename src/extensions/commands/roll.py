@@ -14,7 +14,7 @@ from interactions import (
 
 from utilities.emojis import emojis, make_emoji_cdn_url
 from utilities.localization.formatting import amperjoin
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors
 
 
@@ -45,19 +45,19 @@ class RollCommand(Extension):
 	async def roll(self, ctx: SlashContext, sides: int, amount: int = 1, public: bool = False):
 		loc = Localization(ctx, prefix="commands.roll")
 
-		rolls =[random.randint(1, sides) for _ in range(amount)]
+		rolls = [random.randint(1, sides) for _ in range(amount)]
 
 		result = amperjoin([str(roll) for roll in rolls])
-		description = await lformat(loc, loc.l("desc"), result=result)
+		description = await locale_format(loc, loc.get_string("desc"), result=result)
 
 		if len(rolls) > 1:
-			description += "\n\n" + await lformat(loc, loc.l("multi"), total=sum(rolls))
+			description += "\n\n" + await locale_format(loc, loc.get_string("multi"), total=sum(rolls))
 
 		await ctx.send(
 			embeds=Embed(
 				color=Colors.DEFAULT,
 				thumbnail=EmbedAttachment(url=make_emoji_cdn_url(emojis["treasures"]["die"])),
-				title=await lformat(loc, loc.l("title"), amount=amount if amount > 1 else "", sides=sides),
+				title=await locale_format(loc, loc.get_string("title"), amount=amount if amount > 1 else "", sides=sides),
 				description=description,
 			),
 			ephemeral=not public,

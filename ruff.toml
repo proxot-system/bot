@@ -8,4 +8,4 @@ quote-style = "double"
 skip-magic-trailing-comma = false
 
 [lint]
-ignore = ["ERA001"]
+ignore = ["ERA001", "E722"]

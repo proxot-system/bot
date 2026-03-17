@@ -14,7 +14,7 @@ from interactions import (
 )
 
 from utilities.emojis import make_emoji_cdn_url
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors
 from utilities.misc import replace_numbers_with_emojis
 from utilities.textbox.facepics import f_storage, get_facepic
@@ -53,18 +53,21 @@ async def render_selector_ui(
 	loc_path = ".".join(f'["{name}"]' for name in path)
 	prev_loc_path = ".".join(f'["{name}"]' for name in path[:-1])
 	name = (
-		loc_facepics.l(f"{loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
+		loc_facepics.get_string(f"{loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
 		if len(path) > 0
 		else None
 	)
-	_other = (
-		lambda: current_level
-		if isinstance(current_level, str)
-		else previous_level.get(
-			"icon",
-			previous_level.get("Normal"),
+
+	def _other():
+		return (
+			current_level
+			if isinstance(current_level, str)
+			else previous_level.get(
+				"icon",
+				previous_level.get("Normal"),
+			)
 		)
-	)
+
 	icon = (
 		current_level.get("icon", current_level.get("Normal", _other()))
 		if not isinstance(current_level, str)
@@ -72,12 +75,12 @@ async def render_selector_ui(
 	)
 	is_icon_metadata_facepic = "icon" in previous_level and previous_level.get("icon") is icon
 
-	description = loc_facepics.l(
+	description = loc_facepics.get_string(
 		f"{loc_path if not is_icon_metadata_facepic else prev_loc_path}._description",
 		typecheck=Any,
 		return_None_on_not_found=True,
 	)
-	credits = loc_facepics.l(
+	credits = loc_facepics.get_string(
 		f"{loc_path if not is_icon_metadata_facepic else prev_loc_path}._credits",
 		typecheck=Any,
 		return_None_on_not_found=True,
@@ -87,14 +90,14 @@ async def render_selector_ui(
 		if not is_icon_metadata_facepic:
 			expression = name
 		name = (
-			loc_facepics.l(f"{prev_loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
+			loc_facepics.get_string(f"{prev_loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
 			if len(path) > 0
 			else None
 		)
 	embed = Embed(
-		description=await lformat(
+		description=await locale_format(
 			loc,
-			loc.l("textbox.facepic_picker.layout"),
+			loc.get_string("textbox.facepic_picker.layout"),
 			location=location,
 			name=name,
 			expression=expression,
@@ -257,7 +260,7 @@ async def handle_facepic_selection(self, ctx: ComponentContext):
 			return
 		face_path = path_str.strip()
 		face = await get_facepic(face_path)
-		if face and face.icon == None and not face.path.startswith("https://"):
+		if face and face.icon is None and not face.path.startswith("https://"):
 			if face.path == "Other/Your Avatar":
 				face_path = ctx.user.avatar_url
 		frame_data.text = set_facepic_in_frame_text(frame_data.text, face_path)

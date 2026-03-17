@@ -17,7 +17,7 @@ from interactions import (
 
 from utilities.database.schemas import UserData
 from utilities.emojis import emojis
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors, fancy_message
 
 
@@ -80,13 +80,13 @@ class GambleCommands(Extension):
 	)
 	async def wool(self, ctx: SlashContext, bet: int):
 		loc = Localization(ctx)
-		await fancy_message(ctx, await lformat(loc, loc.l("generic.loading.generic")))
+		await fancy_message(ctx, await locale_format(loc, loc.get_string("generic.loading.generic")))
 		user_data: UserData = await UserData(_id=ctx.author.id).fetch()
 
 		if user_data.wool < bet:
 			return await fancy_message(
 				ctx,
-				await lformat(loc, loc.l("wool.gamble.errors.not_enough_wool")),
+				await locale_format(loc, loc.get_string("wool.gamble.errors.not_enough_wool")),
 				ephemeral=True,
 				color=Colors.BAD,
 			)
@@ -176,10 +176,10 @@ class GambleCommands(Extension):
 					else:
 						ticker += f"{s} ┋ "
 			return Embed(
-				description=f"## {await lformat(loc, loc.l('wool.gamble.slots.title'))}\n\n"
-				+ await lformat(
+				description=f"## {await locale_format(loc, loc.get_string('wool.gamble.slots.title'))}\n\n"
+				+ await locale_format(
 					loc,
-					loc.l(f"wool.gamble.slots.description_{'running' if not result else 'result'}"),
+					loc.get_string(f"wool.gamble.slots.description_{'running' if not result else 'result'}"),
 					bettor_id=ctx.author.id,
 					bet_amount=bet,
 					result=result[0] if result else None,
@@ -252,7 +252,7 @@ class GambleCommands(Extension):
 			value = int(abs(slot.value) * 100)
 			tasks.append(
 				loc.format(
-					loc.l("wool.gamble.slots.guide.value_entry"),
+					loc.get_string("wool.gamble.slots.guide.value_entry"),
 					icon=slot.emoji,
 					value=value,
 					value_sign="negative" if slot.value < 0 else "positive",
@@ -263,6 +263,6 @@ class GambleCommands(Extension):
 
 		await fancy_message(
 			ctx,
-			f"## {await lformat(loc, loc.l('wool.gamble.slots.title'))}\n"
-			+ await lformat(loc, loc.l("wool.gamble.slots.guide.description"), slot_values="\n".join(point_rows)),
+			f"## {await locale_format(loc, loc.get_string('wool.gamble.slots.title'))}\n"
+			+ await locale_format(loc, loc.get_string("wool.gamble.slots.guide.description"), slot_values="\n".join(point_rows)),
 		)

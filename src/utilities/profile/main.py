@@ -12,7 +12,7 @@ from utilities.config import debugging, get_config
 from utilities.database.schemas import UserData
 from utilities.emojis import emojis, make_emoji_cdn_url
 from utilities.localization.formatting import fnum
-from utilities.localization.localization import Localization, lformat, source_loc
+from utilities.localization.localization import Localization, locale_format, source_loc
 from utilities.message_decorations import Colors
 from utilities.misc import cached_get, pretty_user
 from utilities.shop.fetch_items import fetch_background, fetch_badge
@@ -110,7 +110,7 @@ async def draw_profile(
 
 	user_data: UserData = await UserData(_id=user_id).fetch()
 
-	title = await lformat(loc, loc.l("profile.view.image.title"), target_id=user.id)
+	title = await locale_format(loc, loc.get_string("profile.view.image.title"), target_id=user.id)
 
 	backgrounds = await fetch_background()
 	image = Image.open(await cached_get(backgrounds[user_data.equipped_bg]["image"]))
@@ -205,7 +205,7 @@ async def draw_profile(
 
 	base_profile.text(
 		(42, 251),
-		await lformat(loc, loc.l("profile.view.image.unlocked.stamps"), username=user.username),
+		await locale_format(loc, loc.get_string("profile.view.image.unlocked.stamps"), username=user.username),
 		font=font,
 		fill=(255, 255, 255),
 		stroke_width=2,
@@ -245,9 +245,9 @@ async def draw_profile(
 	alt = (
 		alt
 		if alt is not None
-		else await lformat(
+		else await locale_format(
 			loc,
-			loc.l("profile.view.image.alt"),
+			loc.get_string("profile.view.image.alt"),
 			username=username,
 			suns=user_data.suns,
 			wool=user_data.wool,

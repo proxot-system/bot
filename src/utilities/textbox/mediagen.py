@@ -10,7 +10,7 @@ from grapheme import graphemes
 from PIL import Image, ImageDraw, ImageFont
 
 from utilities.config import get_config
-from utilities.localization.localization import Localization, lformat, source_loc
+from utilities.localization.localization import Localization, locale_format, source_loc
 from utilities.misc import cached_get
 from utilities.textbox.facepics import get_facepic
 from utilities.textbox.parsing import (
@@ -278,7 +278,7 @@ async def render_frame(
 		elif isinstance(command, LocaleCommand):
 			out = None
 			try:
-				out = parse_textbox_text(await lformat(loc, loc.l(command.path)))
+				out = parse_textbox_text(await locale_format(loc, loc.get_string(command.path)))
 			except Exception as e:
 				out = ["[ " + str(e) + " ]"]
 			i += 1

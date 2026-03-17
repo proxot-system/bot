@@ -20,7 +20,7 @@ from interactions import (
 from utilities.database.schemas import UserData
 from utilities.emojis import emojis, make_emoji_cdn_url
 from utilities.localization.formatting import fnum
-from utilities.localization.localization import Localization, lformat
+from utilities.localization.localization import Localization, locale_format
 from utilities.localization.minis import put_mini
 from utilities.message_decorations import Colors, fancy_message
 from utilities.textbox.facepics import get_facepic
@@ -73,7 +73,7 @@ class WoolCommands(Extension):
 		user_data: UserData = await UserData(_id=of.id).fetch()
 		wool: int = user_data.wool
 		who_path = "other"
-		if public == False and of == ctx.user:
+		if not public and of == ctx.user:
 			who_path = "you"
 		if of == ctx.client.user:
 			who_path = "twm"
@@ -81,9 +81,9 @@ class WoolCommands(Extension):
 			who_path = "bot"
 		return await fancy_message(
 			ctx,
-			await lformat(
+			await locale_format(
 				loc,
-				loc.l(f"wool.balance.{who_path}.{'none' if wool == 0 else 'some'}"),
+				loc.get_string(f"wool.balance.{who_path}.{'none' if wool == 0 else 'some'}"),
 				account_holder_id=of.id,
 				balance=fnum(wool, locale=ctx.locale),
 			),
@@ -120,7 +120,7 @@ class WoolCommands(Extension):
 		if to.id == ctx.author.id:
 			return await fancy_message(
 				ctx,
-				await lformat(loc, loc.l("wool.transfer.errors.self_transfer")),
+				await locale_format(loc, loc.get_string("wool.transfer.errors.self_transfer")),
 				ephemeral=True,
 				color=Colors.BAD,
 			)
@@ -129,19 +129,19 @@ class WoolCommands(Extension):
 			buttons = [
 				Button(
 					style=ButtonStyle.RED,
-					label=await lformat(loc, loc.l("generic.buttons.yes")),
-					custom_id=f"yes",
+					label=await locale_format(loc, loc.get_string("generic.buttons.yes")),
+					custom_id="yes",
 				),
 				Button(
 					style=ButtonStyle.GRAY,
-					label=await lformat(loc, loc.l("generic.buttons.cancel")),
-					custom_id=f"cancel",
+					label=await locale_format(loc, loc.get_string("generic.buttons.cancel")),
+					custom_id="cancel",
 				),
 			]
 
 			confirmation_m = await fancy_message(
 				ctx,
-				message=await lformat(loc, loc.l("wool.transfer.to.bot.confirmation"))
+				message=await locale_format(loc, loc.get_string("wool.transfer.to.bot.confirmation"))
 				+ await put_mini(
 					loc,
 					"wool.transfer.to.bot.notefirmation",
@@ -161,26 +161,29 @@ class WoolCommands(Extension):
 					return
 			except asyncio.TimeoutError:
 				await confirmation_m.edit(
-					content=await lformat(loc, loc.l("generic.responses.timeout.yn")), components=[]
+					content=await locale_format(loc, loc.get_string("generic.responses.timeout.yn")), components=[]
 				)
 				await ctx.delete()
 				await asyncio.sleep(15)
 				return await confirmation_m.delete()
 
-		loading = await fancy_message(
-			ctx,
-			await lformat(loc, loc.l("generic.loading.hint")),
-			ephemeral=ephemeral_override if ephemeral_override is not None else False,
+		loading = asyncio.create_task(
+			fancy_message(
+				ctx,
+				await locale_format(loc, loc.get_string("generic.loading.hint")),
+				ephemeral=ephemeral_override if ephemeral_override is not None else False,
+			)
 		)
 		from_user: UserData = await UserData(_id=ctx.author.id).fetch()
 		to_user: UserData = await UserData(_id=to.id).fetch()
 
+		await loading
 		if from_user.wool < amount:
 			return await fancy_message(
 				ctx,
-				await lformat(
+				await locale_format(
 					loc,
-					loc.l("wool.transfer.errors.not_enough"),
+					loc.get_string("wool.transfer.errors.not_enough"),
 					balance=from_user.wool,
 					sender_id=from_user._id,
 					receiver_id=to_user._id,
@@ -198,9 +201,9 @@ class WoolCommands(Extension):
 		if amount < 0:
 			return await fancy_message(
 				ctx,
-				await lformat(
+				await locale_format(
 					loc,
-					loc.l("wool.transfer.steal"),
+					loc.get_string("wool.transfer.steal"),
 					sender_id=from_user._id,
 					receiver_id=to_user._id,
 				),
@@ -208,9 +211,9 @@ class WoolCommands(Extension):
 			)
 		await fancy_message(
 			ctx,
-			await lformat(
+			await locale_format(
 				loc,
-				loc.l(f"wool.transfer.to.{'bot' if to.bot else 'user'}.{'none' if amount == 0 else 'some'}"),
+				loc.get_string(f"wool.transfer.to.{'bot' if to.bot else 'user'}.{'none' if amount == 0 else 'some'}"),
 				sender_id=from_user._id,
 				receiver_id=to_user._id,
 				amount=amount,
@@ -232,9 +235,9 @@ class WoolCommands(Extension):
 		if unable_until and now < unable_until:
 			return await fancy_message(
 				ctx,
-				await lformat(
+				await locale_format(
 					loc,
-					loc.l("wool.pray.errors.timeout"),
+					loc.get_string("wool.pray.errors.timeout"),
 					unable_until=unable_until,
 				),
 				ephemeral=True,
@@ -256,11 +259,11 @@ class WoolCommands(Extension):
 		await ctx.send(
 			embed=Embed(
 				thumbnail=EmbedAttachment(make_emoji_cdn_url(emojis["treasures"]["die"])),
-				title=await lformat(loc, loc.l("wool.pray.title")),
-				description=f"{await lformat(loc, loc.l(f'wool.pray.finds.{finding[0]}'))}\n-# "
-				+ await lformat(
+				title=await locale_format(loc, loc.get_string("wool.pray.title")),
+				description=f"{await locale_format(loc, loc.get_string(f'wool.pray.finds.{finding[0]}'))}\n-# "
+				+ await locale_format(
 					loc,
-					loc.l(f"wool.pray.Change.{'gain' if amount > 0 else 'loss'}"),
+					loc.get_string(f"wool.pray.Change.{'gain' if amount > 0 else 'loss'}"),
 					amount=abs(amount),
 				),
 				color=Colors.GREEN if amount > 0 else Colors.BAD,

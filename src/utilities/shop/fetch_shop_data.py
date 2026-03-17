@@ -65,7 +65,7 @@ async def get_shop_data():
 	all_bgs = items["backgrounds"]
 	backgrounds = {bg: val for bg, val in all_bgs.items() if val["purchasable"]}
 	treasures = items["treasures"]
-	motds = source_loc.l("shop.motds", typecheck=tuple)
+	motds = source_loc.get_string("shop.motds", typecheck=tuple)
 
 	data.background_stock = random.sample(list(backgrounds.keys()), 3)
 	data.treasure_stock = random.sample(list(treasures.keys()), 3)
