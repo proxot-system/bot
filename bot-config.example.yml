@@ -4,13 +4,13 @@ config-check-level: 4
 # 2 = stops the bot on missing
 # 3 = doesn't log missing
 bot:
-  token: "..."
+  token: "MTAyODA1ODA5NzM4MzY0MTExOA.4R9ncw.LWxLZQXHygROBuEr5xeuXocO-Kb" # replace with yours
   logging-level: DEBUG
   prod:
-    token: ~ # if ~ always uses token above
+    token: "MTAxNTYyOTYwNDUzNjQ2MzQyMQ.a__Fep.Ki-TLCbGHrKcIPS2JjUMKTsyapl" # replace with yours, or a tilde (no quotes) so it always uses token above
     override: ~ # boolean
     branch: "origin"
-    command-marker: ~ # see dev.command-marker
+    command-marker: "[.]" # see dev.command-marker
     logging-level: WARN
   debug: ~ # boolean, defaults to false on prod
 
@@ -33,7 +33,7 @@ bot:
 
   main:
     guild-id: "1017531963000754247" # server id, in "", the main community server for the bot
-    invite: ""
+    invite: "https://discord.gg/R7r27dzN5W"
     roles:
       contributor-id: "1054832328729427988"
       translator-id: "1337522400367218758"
@@ -57,17 +57,17 @@ modules:
   devcommands: true
 
 dev:
-  guild-id: ~ # string, server id
+  guild-id: "1017479547664482444" # string, server id
   channels:
-    logs: ~ # string, channel id
-    more: ~ # string, channel id
-  send-startup-message: false
+    logs: "1017479547664482444" # string, channel id
+    more: "1381622140125577276" # string, channel id
+  send-startup-message: true
 
   command-marker: "[.]" # dev commands command indicator, e.g. [bot shell git pull] value examples: <.> (.) [.] {.} ^.^
   whitelist:
-    - ~
+    - "744276454946242723"
     - ~ #  strings, user ids
-    - ~
+    - "831530536781873163"
 
 watcher:
   ignore-4913:
@@ -77,8 +77,8 @@ watcher:
 
 database:
   connection: # mongodb+srv://{username}:{password}@{host}
-    username: "admin" # meqativ
-    password: ~ # password in quotes
+    username: "meqativ" # replace with yours
+    password: "password"
     host: "localhost" # domain name / ip / localhost
     port: 27017
 
@@ -86,11 +86,11 @@ database:
 
 localization:
   weblate-token:
-    "..."
-    # ↑ https://translate.theworldmachine.xyz/access/discord-bot/#api
+    "wlu_XnaUbp8Hq62163Xau5i6AT37K9kYzn3423wz"
+    # ↑ replace with yours, get at https://translate.theworldmachine.xyz/access/discord-bot/#api
     #   go to Personal API key and copypaste it here
   source-locale: en-GB # string, make sure the locale is 100% complete
-  debug: ~ # boolean, defaults to false on prod, shows detailed error messages for not found paths if true
+  debug: true # boolean, defaults to false on prod, shows detailed error messages for not found paths if true
   whitelist:
     en:
       - ~
