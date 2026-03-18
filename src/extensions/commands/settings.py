@@ -344,7 +344,7 @@ class SettingsCommands(Extension):
 					)
 					or 1423,
 					required=False,
-					value=server_data.welcome.message or loc.get_string("misc.welcome.placeholder_text"),
+					value=server_data.welcome.message or loc.get_string("settings.welcome.editor.templates.default"),
 				),
 				title=await locale_format(loc, loc.get_string("settings.welcome.editor.title")),
 				custom_id="welcome_message_editor",
@@ -360,10 +360,10 @@ class SettingsCommands(Extension):
 		config = server_data.welcome
 		old_text = config.message
 		new_text = text
-		if new_text == loc.get_string("misc.welcome.placeholder_text") or new_text == "":
+		if new_text == loc.get_string("settings.welcome.editor.templates.default") or new_text == "":
 			new_text = None
 		if old_text is None or old_text == "":
-			old_text = loc.get_string("misc.welcome.placeholder_text")
+			old_text = loc.get_string("settings.welcome.editor.templates.default")
 
 		await config.update(message=new_text)
 		Changed = "\n" + await locale_format(
