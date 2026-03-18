@@ -32,14 +32,15 @@ class MemberAddEvent(Extension):
 
 		if not target_channel:
 			return
-
-		message = config.message or loc.get_string("misc.welcome.placeholder_text", typecheck=str)
+		message = config.message or loc.get_string("settings.welcome.editor.templates.default", typecheck=str)
 		message = await locale_format(
 			loc,
 			message,
+			bot_count=len(event.guild.bots),
+			human_count=len(event.guild.humans),
+			user_type="bot" if event.member.bot else "user",
 			user_name=event.member.display_name,
 			server_name=guild.name,
-			member_count=guild.member_count,
 		)
 		buffer = io.BytesIO()
 		basic_facepic_command = "\\@"
@@ -53,14 +54,15 @@ class MemberAddEvent(Extension):
 		try:
 			if not event.guild.system_channel:
 				return
-			print(f"Trying to send welcome message for server {event.guild.id} in channel {event.guild.system_channel}")
-			if isinstance(target_channel, TYPE_MESSAGEABLE_CHANNEL):
-				return await target_channel.send(
-					content=f"-# {event.member.mention}",
-					files=File(file=buffer, file_name=f"welcome textbox.png"),
-					allowed_mentions=AllowedMentions.all() if server_data.welcome.ping else AllowedMentions.none(),
-				)
-			raise TypeError("tried to send message in a channel where i can't send messages :mumawomp:")
+			if not isinstance(target_channel, TYPE_MESSAGEABLE_CHANNEL):
+				raise TypeError(f"tried to send message in a channel where i can't send messages :mumawomp: (guild: {event.guild.id}, channel: {event.guild.system_channel})")
+			print(f"Trying to send welcome message (guild: {event.guild.id}, channel: {event.guild.system_channel})")
+			return await target_channel.send(
+				content=f"-# {event.member.mention}",
+				files=File(file=buffer, file_name=f"welcome textbox.png"),
+				allowed_mentions=AllowedMentions.all() if server_data.welcome.ping else AllowedMentions.none(),
+			)
+			
 		except Exception as e:
 			print(f"Failed to send welcome message. {guild.id}/{target_channel.id}")
 			print(tb.format_exc(chain=True))
