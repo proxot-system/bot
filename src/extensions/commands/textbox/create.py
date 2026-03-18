@@ -243,13 +243,13 @@ async def send_output(
 	frame_index: int,
 ):
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index)
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
 	except StateShortcutError:
 		return
 	pos = ""
 	message = await ctx.respond(
 		embed=Embed(
-			description=await locale_format(loc, loc.get_string("textbox.monologue.rendering")) + pos,
+			description=await locale_format(loc, loc.get_string("monologue.rendering")) + pos,
 			color=Colors.DARKER_WHITE,
 		),
 		ephemeral=True,
@@ -264,7 +264,7 @@ async def send_output(
 		ctx.edit(
 			message=message,
 			embed=Embed(
-				description=await locale_format(loc, loc.get_string("textbox.monologue.sending")) + pos,
+				description=await locale_format(loc, loc.get_string("monologue.sending")) + pos,
 				color=Colors.DARKER_WHITE,
 			),
 		)
@@ -286,24 +286,23 @@ async def send_output(
 			message=message,
 			embed=Embed(
 				description=await locale_format(
-					loc, loc.get_string(f"textbox.errors.failed_to_send{'_dm' if state.options.send_to == 3 else ''}")
+					loc,
+					loc.get_string(f"errors.failed_to_send{'_dm' if state.options.send_to == 3 else ''}"),
 				),
 				color=Colors.DARKER_WHITE,
 			),
 		)
-	desc = await locale_format(loc, loc.get_string("textbox.monologue.done"))
+	desc = await locale_format(loc, loc.get_string("monologue.done"))
 	if debugging():
 		desc += "\n-# " + await locale_format(
-			loc, loc.get_string("textbox.monologue.debug"), time=took.total_seconds(), sid=state_id
+			loc, loc.get_string("monologue.debug"), time=took.total_seconds(), sid=state_id
 		)
 	if (
 		state.options.filetype in ("WEBP", "GIF", "APNG")
 		and sent_message
 		and MessageFlags.EPHEMERAL in sent_message.flags
 	):
-		mini = await put_mini(
-			loc, "textbox.errors.ephemeral_warnote", user_id=ctx.user.id, show_up_amount=9, type="warn"
-		)
+		mini = await put_mini(loc, "errors.ephemeral_warnote", user_id=ctx.user.id, show_up_amount=9, type="warn")
 		if mini != "":
 			await ctx.edit(
 				message=sent_message,
@@ -318,7 +317,7 @@ async def render_to_file(
 	state: State,
 	frame_preview_index: int | None = None,
 ) -> File:
-	loc = Localization(ctx)
+	loc = Localization(ctx, prefix="commands.textbox.create")
 
 	frames = state.frames
 	filetype = state.options.filetype
@@ -328,7 +327,7 @@ async def render_to_file(
 		frames = [state.frames[int(frame_preview_index)]]
 	filename = await locale_format(
 		loc,
-		loc.get_string(f"textbox.alt.{'single' if frame_preview_index is not None else 'multi'}_frame.filename"),
+		loc.get_string(f"alt.{'single' if frame_preview_index is not None else 'multi'}_frame.filename"),
 		frames=len(frames),
 		timestamp=str(round(datetime.now().timestamp())),
 	)
@@ -342,7 +341,7 @@ async def render_to_file(
 
 async def init_change_text_flow(ctx: ComponentContext | SlashContext, state_id: str, frame_index: str):
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index)
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
 	except StateShortcutError:
 		return
 	modal = Modal(
@@ -350,15 +349,15 @@ async def init_change_text_flow(ctx: ComponentContext | SlashContext, state_id: 
 			custom_id="new_text",
 			required=False,
 			value=frame_data.text,
-			label=await locale_format(loc, loc.get_string("textbox.modal.edit_text.input.label"), index=int(frame_index) + 1),
-			placeholder=await locale_format(loc, loc.get_string("textbox.modal.edit_text.input.placeholder")),
+			label=await locale_format(loc, loc.get_string("modal.edit_text.input.label"), index=int(frame_index) + 1),
+			placeholder=await locale_format(loc, loc.get_string("modal.edit_text.input.placeholder")),
 			min_length=0,
 			max_length=get_config("textbox.limits.frame-text-length", typecheck=int),
 		),
 		custom_id=f"textbox update_text_finish {state_id} {frame_index}",
 		title=await locale_format(
 			loc,
-			loc.get_string("textbox.modal.edit_text.title"),
+			loc.get_string("modal.edit_text.title"),
 			index=int(frame_index) + 1,
 			total=len(state.frames),
 		),
@@ -376,7 +375,7 @@ async def handle_update_text_modal(self, ctx: ModalContext, new_text: str):
 		return
 	state_id, frame_index = match.group("state_id", "frame_index")
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index)
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
 	except StateShortcutError:
 		return
 	# old_text = frame_data.text
@@ -385,7 +384,7 @@ async def handle_update_text_modal(self, ctx: ModalContext, new_text: str):
 	# 	asyncio.create_task(
 	# 		fancy_message(
 	# 			ctx,
-	# 			await lformat(loc, loc.l("textbox.modal.edit_text.response"), new_text=new_text, old_text=old_text),
+	# 			await lformat(loc, loc.l("modal.edit_text.response"), new_text=new_text, old_text=old_text),
 	# 			ephemeral=True,
 	# 		)
 	# 	)
@@ -395,7 +394,7 @@ async def handle_update_text_modal(self, ctx: ModalContext, new_text: str):
 
 async def init_edit_flow(ctx: ComponentContext | SlashContext, state_id: str, frame_index: str):
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index)
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
 	except StateShortcutError:
 		return
 	frames = ""
@@ -406,15 +405,13 @@ async def init_edit_flow(ctx: ComponentContext | SlashContext, state_id: str, fr
 			custom_id="updated_frames",
 			required=False,
 			value=frames,
-			label=await locale_format(
-				loc, loc.get_string("textbox.modal.edit_frames.input.label"), index=int(frame_index) + 1
-			),
-			placeholder=await locale_format(loc, loc.get_string("textbox.modal.edit_frames.input.placeholder")),
+			label=await locale_format(loc, loc.get_string("modal.edit_frames.input.label"), index=int(frame_index) + 1),
+			placeholder=await locale_format(loc, loc.get_string("modal.edit_frames.input.placeholder")),
 		),
 		custom_id=f"textbox edit_finish {state_id} {frame_index}",
 		title=await locale_format(
 			loc,
-			loc.get_string("textbox.modal.edit_frames.title"),
+			loc.get_string("modal.edit_frames.title"),
 			index=int(frame_index) + 1,
 			total=len(state.frames),
 		),
@@ -468,7 +465,9 @@ async def respond(
 		assert state_id is not None and frame_index is not None
 
 		try:
-			loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index)
+			loc, state, frame_data = await state_shortcut(
+				ctx, state_id, frame_index, loc_prefix="commands.textbox.create"
+			)
 		except StateShortcutError:
 			return
 
@@ -476,7 +475,7 @@ async def respond(
 			warnings = []
 		pos = ""
 		if len(state.frames) > 1 or frame_index != 0:
-			pos = f"\n-# {await locale_format(loc, loc.get_string('textbox.frame_position'), current=int(frame_index) + 1, total=len(state.frames))}"
+			pos = f"\n-# {await locale_format(loc, loc.get_string('frame_position'), current=int(frame_index) + 1, total=len(state.frames))}"
 		if debugging():
 			pos += "\n-# **sid**: " + state_id
 		next_frame_exists = len(state.frames) != int(frame_index) + 1
@@ -508,18 +507,19 @@ async def respond(
 					Button(
 						style=ButtonStyle.BLURPLE,
 						label=await locale_format(
-							loc, loc.get_string(f"textbox.button.text.{'edit' if frame_data.text else 'add'}")
+							loc,
+							loc.get_string(f"button.text.{'edit' if frame_data.text else 'add'}"),
 						),
 						custom_id=f"textbox change_text {state_id} {frame_index}",
 					),
 					Button(
 						style=ButtonStyle.BLURPLE,
-						label=await locale_format(loc, loc.get_string("textbox.button.face")),
+						label=await locale_format(loc, loc.get_string("button.face")),
 						custom_id=f"textbox_fs init {state_id} {frame_index}",
 					),
 					Button(
 						style=ButtonStyle.BLURPLE,
-						label=await locale_format(loc, loc.get_string("textbox.button.edit")),
+						label=await locale_format(loc, loc.get_string("button.edit")),
 						custom_id=f"textbox edit {state_id} {frame_index}",
 					),
 				),
@@ -528,7 +528,10 @@ async def respond(
 					ActionRow(
 						Button(
 							style=ButtonStyle.GRAY,
-							label=await locale_format(loc, loc.get_string("textbox.button.frame.previous")),
+							label=await locale_format(
+								loc,
+								loc.get_string("button.frame.previous"),
+							),
 							custom_id=f"textbox refresh {state_id} {int(frame_index) - 1}",
 							disabled=int(frame_index) - 1 < 0,
 						),
@@ -537,9 +540,12 @@ async def respond(
 							label=await locale_format(
 								loc,
 								loc.get_string(
-									"textbox.button.render" + ("send" if state.options.send_to != 1 else "")
+									"button.render" + ("send" if state.options.send_to != 1 else "")
 								),
-								type=await locale_format(loc, loc.get_string(f"textbox.filetypes.{state.options.filetype}")),
+								type=await locale_format(
+									loc,
+									loc.get_string(f"filetypes.{state.options.filetype}"),
+								),
 							),
 							custom_id=f"textbox render {state_id} {frame_index}",
 						),
@@ -548,7 +554,7 @@ async def respond(
 							label=await locale_format(
 								loc,
 								loc.get_string(
-									f"textbox.button.frame.{'clear' if len(state.frames) == 1 else 'delete'}"
+									f"button.frame.{'clear' if len(state.frames) == 1 else 'delete'}"
 								),
 							),
 							custom_id=f"textbox delete_frame {state_id} {frame_index}",
@@ -556,7 +562,8 @@ async def respond(
 						Button(
 							style=ButtonStyle.GRAY,
 							label=await locale_format(
-								loc, loc.get_string(f"textbox.button.frame.{'next' if next_frame_exists else 'add'}")
+								loc,
+								loc.get_string(f"button.frame.{'next' if next_frame_exists else 'add'}"),
 							),
 							custom_id=f"textbox refresh {state_id} {int(frame_index) + 1}",
 						),

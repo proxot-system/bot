@@ -18,9 +18,17 @@ int_regex = re.compile(r"^\d+$")
 	opt_type=OptionType.STRING,
 	required=False,
 )
-async def command_(self, ctx: SlashContext, search: str = "user:me!0:5"):
+@slash_option(
+	name="public",
+	description="Whether you want the response to be visible for others in the channel (default: false)",
+	opt_type=OptionType.BOOLEAN,
+)
+async def command_(self, ctx: SlashContext, search: str = "user:me!0:5", public: bool = False):
 	loc = Localization(ctx)
-	await fancy_message(ctx, await locale_format(loc, loc.get_string("generic.loading.checking_developer_status")), ephemeral=True)
+	sloc = Localization(ctx, prefix="commands.textbox.state")
+	await fancy_message(
+		ctx, await locale_format(loc, loc.get_string("generic.loading.checking_developer_status")), ephemeral=not public
+	)
 
 	if str(ctx.author.id) not in get_config("dev.whitelist", typecheck=list):
 		await asyncio.sleep(3)
@@ -46,7 +54,11 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5"):
 				user_id = parts[1] if len(parts) == 2 and parts[1] else "me"
 
 				if not int_regex.match(user_id) and user_id != "me":
-					return await ctx.edit(embeds=Embed(color=Colors.BAD, title="Invalid user id"))
+					return await ctx.edit(
+						embeds=Embed(
+							color=Colors.BAD, title=await locale_format(sloc, sloc.get_string("errors.invalid_user_id"))
+						)
+					)
 
 				if user_id == "me":
 					user_id = str(ctx.user.id)
@@ -55,7 +67,12 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5"):
 
 			elif int_regex.match(filter_str):
 				if filter_str not in states:
-					return await ctx.edit(embeds=Embed(color=Colors.BAD, title=f"Couldn't find sid {filter_str}"))
+					return await ctx.edit(
+						embeds=Embed(
+							color=Colors.BAD,
+							title=await locale_format(sloc, sloc.get_string("errors.not_found"), sid=filter_str),
+						)
+					)
 				states2show = [(filter_str, states[filter_str])]
 
 	if len(states2show) > 0 and len(options) > 1:
@@ -68,7 +85,11 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5"):
 			page = int(page_str)
 			items_per_page = int(amount_str)
 		except ValueError:
-			return await ctx.edit(embeds=Embed(color=Colors.BAD, title="Invalid Paging syntax"))
+			return await ctx.edit(
+				embeds=Embed(
+					color=Colors.BAD, title=await locale_format(sloc, sloc.get_string("errors.invalid_paging"))
+				)
+			)
 
 		start_index = page * items_per_page
 
@@ -76,24 +97,24 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5"):
 			return await ctx.edit(
 				embeds=Embed(
 					color=Colors.BAD,
-					title=f"Page out of bounds, max items: {len(states2show)}",
+					title=await locale_format(sloc, sloc.get_string("errors.out_of_bounds"), max=len(states2show)),
 				)
 			)
 		states2show = states2show[start_index : start_index + items_per_page]
 
 	if len(states2show) == 0:
+		reason = "_empty" if len(states) == 0 else "_filter"
 		return await ctx.edit(
 			embeds=Embed(
 				color=Colors.BAD,
-				title="Nothing found"
-				+ (" (there are no states)" if len(states) == 0 else " (check your filter maybe?)"),
+				title=await locale_format(sloc, sloc.get_string(f"errors.nothing_found{reason}")),
 			)
 		)
 
 	return await ctx.edit(
 		embeds=Embed(
 			color=Colors.DEFAULT,
-			title=f"Found results: {len(states2show)}",
+			title=await locale_format(sloc, sloc.get_string("results"), count=len(states2show)),
 			description="\n".join(map(lambda a: f"-# {a[0]}:\n```{a[1]}```", states2show)),
 		)
 	)

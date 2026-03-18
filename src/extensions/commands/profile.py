@@ -160,7 +160,7 @@ class ProfileCommands(Extension):
 			filename = (
 				await locale_format(
 					loc,
-					loc.get_string("textbox.alt.single_frame.filename"),
+					loc.get_string("commands.textbox.create.alt.single_frame.filename"),
 					timestamp=str(round(datetime.now().timestamp())),
 				)
 				+ ".webp"

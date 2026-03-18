@@ -40,7 +40,7 @@ async def render_selector_ui(
 	path: list[str],
 	page: int = 0,
 ):
-	loc = Localization(ctx)
+	loc = Localization(ctx, prefix="commands.textbox.create")
 	loc_facepics = Localization(ctx, prefix="facepics")
 	current_level = f_storage.facepics
 	previous_level = {}
@@ -97,7 +97,7 @@ async def render_selector_ui(
 	embed = Embed(
 		description=await locale_format(
 			loc,
-			loc.get_string("textbox.facepic_picker.layout"),
+			loc.get_string("facepic_picker.layout"),
 			location=location,
 			name=name,
 			expression=expression,
@@ -133,7 +133,7 @@ async def render_selector_ui(
 				style=ButtonStyle.BLURPLE,
 				label=key + "/",
 				emoji=emoji,
-				custom_id=f"textbox_fs select {state_id} {frame_index} 0 {new_path_str}",
+				custom_id=f"textbox_fs select {state_id} {frame_index} 0 #{new_path_str}",
 			)
 		else:
 			button = Button(
@@ -160,7 +160,7 @@ async def render_selector_ui(
 			Button(
 				style=ButtonStyle.BLURPLE,
 				emoji="⬅️",
-				custom_id=f"textbox_fs select {state_id} {frame_index} {page - 1} {path_str}",
+				custom_id=f"textbox_fs select {state_id} {frame_index} {page - 1} #{path_str}",
 			)
 		)
 		free_slots -= 1
@@ -171,7 +171,7 @@ async def render_selector_ui(
 			Button(
 				style=ButtonStyle.BLURPLE,
 				emoji="⬆️",
-				custom_id=f"textbox_fs select {state_id} {frame_index} 0 {parent_path}",
+				custom_id=f"textbox_fs select {state_id} {frame_index} 0 #{parent_path}",
 			)
 		)
 		free_slots -= 1
@@ -204,7 +204,7 @@ async def render_selector_ui(
 			Button(
 				style=ButtonStyle.BLURPLE,
 				emoji="➡️",
-				custom_id=f"textbox_fs select {state_id} {frame_index} {page + 1} {path_str}",
+				custom_id=f"textbox_fs select {state_id} {frame_index} {page + 1} #{path_str}",
 			)
 		)
 
@@ -235,7 +235,7 @@ async def init_facepic_selector(self, ctx: ComponentContext):
 
 
 select_regex = re.compile(
-	r"textbox_fs select (?P<state_id>-?\d+) (?P<frame_index>-?\d+) (?P<page>\d+)(?: (?P<path>.*))?$"
+	r"textbox_fs select (?P<state_id>-?\d+) (?P<frame_index>-?\d+) (?P<page>\d+)(?: (?P<noupd>\#)?(?P<path>.*))?$"
 )
 
 
@@ -248,12 +248,12 @@ async def handle_facepic_selection(self, ctx: ComponentContext):
 	if not match:
 		return
 
-	state_id, frame_index_str, page_str, path_str = match.groups()
+	state_id, frame_index_str, page_str, noupd, path_str = match.groups()
 	frame_index = int(frame_index_str)
 	page = int(page_str)
 	path = path_str.strip().split("/") if path_str and path_str.strip() else []
 
-	if path_str.strip():
+	if not noupd and path_str.strip():
 		try:
 			_, state, frame_data = await state_shortcut(ctx, state_id, frame_index)
 		except StateShortcutError:
@@ -263,6 +263,7 @@ async def handle_facepic_selection(self, ctx: ComponentContext):
 		if face and face.icon is None and not face.path.startswith("https://"):
 			if face.path == "Other/Your Avatar":
 				face_path = ctx.user.avatar_url
+		
 		frame_data.text = set_facepic_in_frame_text(frame_data.text, face_path)
 
 		await update_textbox(state.memory_leak, state_id, int(frame_index) or 0, type="loading", edit=True)

@@ -50,7 +50,7 @@ def csscolor(color: str) -> RGBA:
 		output = result.stdout.strip()
 	except subprocess.CalledProcessError as e:
 		output = e.stdout.strip()
-	except FileNotFoundError as e:
+	except FileNotFoundError:
 		raise ValueError("color parsing unsupported (binary not found)")
 
 	if output.startswith("Error:"):
@@ -76,10 +76,10 @@ class ColorModifier(ReprMixin):
 
 @dataclass
 class LocaleCommand(ReprMixin):
-	path: str = "textbox.errors.nothing_passed"
+	path: str = "commands.textbox.create.errors.nothing_passed"
 
 	def parse_input(self, args: str | None):
-		args = args or "textbox.errors.nothing_passed"
+		args = args or "commands.textbox.create.errors.nothing_passed"
 		self.path = args
 
 

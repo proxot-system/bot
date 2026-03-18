@@ -3,7 +3,7 @@ import io
 import re
 from dataclasses import dataclass, field, fields
 from pathlib import Path
-from typing import Any, Callable, Literal, Sequence, get_args, get_origin
+from typing import Any, Literal, Sequence, get_args, get_origin
 
 import apng
 from grapheme import graphemes
@@ -38,8 +38,12 @@ SupportedLocations = Literal[
 	"bcenter",
 	"bright",
 ]
-sanitize: Callable[[str], str] = lambda text: text.replace("\\", "\\\\").replace("\n", "\\n")
-desanitize: Callable[[str], str] = lambda text: text.replace("\\n", "\n").replace("\\\\", "\\")
+def sanitize(text: str) -> str:
+	return text.replace("\\", "\\\\").replace("\n", "\\n")
+
+
+def desanitize(text: str) -> str:
+	return text.replace("\\n", "\n").replace("\\\\", "\\")
 
 
 class SerializableData:
@@ -48,8 +52,8 @@ class SerializableData:
 	def __str__(self) -> str:
 		"""Serializes the object to a string based on its fields."""
 		parts = []
-		for field in fields(self):  # type: ignore
-			value = getattr(self, field.name)
+		for _field in fields(self):  # type: ignore
+			value = getattr(self, _field.name)
 			parts.append(str(value))
 		return self._separator.join(parts)
 
@@ -68,8 +72,8 @@ class SerializableData:
 			)
 
 		kwargs = {}
-		for field, value_str in zip(class_fields, parts):
-			kwargs[field.name] = cls._parse_value(value_str, field)
+		for _field, value_str in zip(class_fields, parts):
+			kwargs[_field.name] = cls._parse_value(value_str, _field)
 
 		return cls(**kwargs)
 
@@ -96,7 +100,7 @@ class SerializableData:
 			actual_type = next(arg for arg in args if not issubclass(arg, type(None)))
 			return SerializableData._parse_value(value_str, actual_type)
 
-		if value_str == "" and not field.type is str:
+		if value_str == "" and field.type is not str:
 			return None
 		if field.type is bool:
 			if value_str in ("True", "true", "+", "yes"):
@@ -207,7 +211,7 @@ async def render_frame(
 	text = Image.new("RGBA", (background.width, 999999), color=(255, 255, 255, 0))
 	text_x, text_y = 23, 16
 	max_text_width = background.width - (20 * 2)
-	text_height = background.height - (17 * 2)
+	# text_height = background.height - (17 * 2)
 	images: list[Image.Image] = []
 	durations: Sequence[int] = []
 
@@ -277,8 +281,9 @@ async def render_frame(
 			frame_speed = command.speed if not (command.speed <= 0) else 0.25
 		elif isinstance(command, LocaleCommand):
 			out = None
+			mt_loc = Localization(loc, prefix="")
 			try:
-				out = parse_textbox_text(await locale_format(loc, loc.get_string(command.path)))
+				out = parse_textbox_text(await locale_format(mt_loc, mt_loc.get_string(command.path)))
 			except Exception as e:
 				out = ["[ " + str(e) + " ]"]
 			i += 1

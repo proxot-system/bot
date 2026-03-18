@@ -23,7 +23,7 @@ class StateOptions:
 		quality: int | str | None = 100,
 		loops: int | None = 1,
 	):
-		if filetype == None:
+		if filetype is None:
 			filetype = "WEBP"
 		filetype = filetype.upper()  # type:ignore
 		if filetype not in get_args(SupportedFiletypes):
@@ -63,13 +63,14 @@ class State:
 
 	async def to_string(self, loc: Localization) -> str:
 		frames = "\n".join([str(f) for f in self.frames])
+		sloc = Localization(loc, prefix="commands.textbox.create")
 		processed: str = await locale_format(
-			loc,
+			sloc,
 			state_template,
 			comment=await locale_format(
-				loc,
-				loc.get_string("textbox.ttb.comment"),
-				link=f"https://github.com/proxot-system/bot/blob/main/md/en/textbox/index.md#raw-file-editing-tbb",  # /md/{loc.locale}/textbox
+				sloc,
+				sloc.get_string("ttb.comment"),
+				link="https://github.com/proxot-system/bot/blob/main/md/en/textbox/index.md#raw-file-editing-tbb",  # /md/{sloc.locale}/textbox
 			),
 			filetype=self.options.filetype,
 			send_to=self.options.send_to,
@@ -111,7 +112,7 @@ class State:
 					raise ValueError(f"Failed to parse frame #{len(parsed_frames)} at line {i}!\n{e}") from e
 				continue
 			if current == "StateOptions":
-				if not "=" in line:
+				if "=" not in line:
 					raise ValueError(f"Couldn't find the value to set at line {i} of StateOptions")
 				key, value = line.split("=", maxsplit=1)
 				if key not in StateOptions_allowed_keys:
@@ -141,7 +142,7 @@ class State:
 								raise ValueError("must be in the range 1..=100")
 						if key == "loops":
 							try:
-								loops = int(loops)  # type:ignore
+								loops = int(value)  # type:ignore
 							except:
 								raise ValueError("must be an integer")
 							if loops < 0:
@@ -158,7 +159,7 @@ class State:
 		if frame_index:
 			try:
 				frame_index = int(frame_index)
-			except ValueError as e:
+			except ValueError:
 				raise ValueError("Could not convert frame_index to integer")
 			if not (frame_index >= 0):
 				raise ValueError("frame_index must be >= 0")
@@ -200,11 +201,11 @@ class State:
 
 	def __repr__(self):
 		return (
-			f"State(\n"
+			"State(\n"
 			+ f"  owner={self.owner},\n"
 			+ f"  frames: len()={len(self.frames)}; [\n"
 			+ f"{',\n'.join(f'      {repr(frame)}' for frame in self.frames)}\n"
-			+ f"  ]\n"
+			+ f"  ]\n"  # noqa: F541
 			+ f"  {self.options}\n"
 			f")"
 		)
@@ -231,17 +232,19 @@ class StateShortcutError(Exception):
 
 
 @overload
-async def state_shortcut(ctx, state_id: str | int, frame_index: Literal[None]) -> Tuple["Localization", "State"]: ...
+async def state_shortcut(
+	ctx, state_id: str | int, frame_index: Literal[None], loc_prefix: str = "main"
+) -> Tuple["Localization", "State"]: ...
 
 
 @overload
 async def state_shortcut(
-	ctx, state_id: str | int, frame_index: str | int
+	ctx, state_id: str | int, frame_index: str | int, loc_prefix: str = "main"
 ) -> Tuple["Localization", "State", "Frame"]: ...
 
 
 async def state_shortcut(
-	ctx, state_id: str | int, frame_index: Optional[str | int]
+	ctx, state_id: str | int, frame_index: Optional[str | int], loc_prefix: str = "main"
 ) -> Union[Tuple["Localization", "State"], Tuple["Localization", "State", "Frame"]]:
 	"""
 	            Helper function for textbox to not have to get these variables all the time
@@ -250,7 +253,8 @@ async def state_shortcut(
 	                        frame index is invalid. The user will be notified
 	                        with an ephemeral message before the exception is raised.
 	"""
-	loc = Localization(ctx)
+	loc = Localization(ctx, prefix=loc_prefix)
+	loc = Localization(ctx, prefix="commands.textbox.create")
 	try:
 		state: State = states[str(state_id)]
 	except KeyError:
@@ -270,7 +274,7 @@ async def state_shortcut(
 	except ValueError:
 		await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get_string("textbox.errors.invalid_frame_index"), index=str(frame_index)),
+			await locale_format(loc, loc.get_string("errors.invalid_frame_index"), index=str(frame_index)),
 			ephemeral=True,
 		)
 		raise StateShortcutError(f"Frame index '{frame_index}' is not a valid integer.")
@@ -283,7 +287,7 @@ async def state_shortcut(
 		else:
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("textbox.errors.unknown_frame"), id=str(frame_index)),
+				await locale_format(loc, loc.get_string("errors.unknown_frame"), id=str(frame_index)),
 				ephemeral=True,
 			)
 			raise StateShortcutError(f"Frame with index '{idx}' not found in state '{state_id}'.")
