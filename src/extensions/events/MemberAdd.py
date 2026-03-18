@@ -44,7 +44,7 @@ class MemberAddEvent(Extension):
 		)
 		buffer = io.BytesIO()
 		basic_facepic_command = "\\@"
-		if basic_facepic_command in message:
+		if not basic_facepic_command in message:
 			# default to this face unless they have some in their message already
 			message = f"\\@[OneShot/The World Machine/Pancakes]{message}"
 
