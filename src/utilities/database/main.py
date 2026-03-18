@@ -298,10 +298,10 @@ async def connect_to_db():
 		return
 
 	# Helper logic to dynamically build the URI to avoid shell parsing issues
-	username = urllib.parse.quote_plus(get_config("database.username"))
-	password = urllib.parse.quote_plus(get_config("database.password"))
-	host = get_config("database.host")
-	port = get_config("database.port")
+	username = urllib.parse.quote_plus(get_config("database.connection.username"))
+	password = urllib.parse.quote_plus(get_config("database.connection.password"))
+	host = get_config("database.connection.host")
+	port = get_config("database.connection.port")
 
 	connection_uri = f"mongodb://{username}:{password}@{host}:{port}/?authSource=admin"
 

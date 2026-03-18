@@ -18,8 +18,8 @@ bot:
     avatar: true # uses unstable.png if not on prod
     status: true # has no status at all instead
     interval: 3600 # seconds
-    statuses: # can also be just a string
-      - "[ ... ]" # Can use the variables: {shard_count} {guild_count}
+    statuses: # can be ~ or just a string
+      - "[ ... ]" # can use the variables: {guild_count,, pretty_num} {shard_count, pretty_num}
       - "[ ... ]"
       - "[ ... ]" # e.g. - - - - \/
       - "[ Monitoring over {guild_count, pretty_num} places at once. ]"
@@ -33,8 +33,7 @@ bot:
     add-twm-bot: "https://theworldmachine.xyz/add-twm"
 
   main:
-    guild-id: "1017531963000754247" # server id, in "", the main community server for the bot
-    invite: "https://discord.gg/R7r27dzN5W"
+    guild-id: "1017531963000754247" # server id, the main community server for the bot
     roles:
       contributor-id: "1054832328729427988"
       translator-id: "1337522400367218758"
