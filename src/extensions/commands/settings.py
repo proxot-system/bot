@@ -38,7 +38,7 @@ class SettingsCommands(Extension):
 		if not isinstance(channel, MessageableMixin):
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.l("settings.errors.channel_not_messageable")),
+				await locale_format(loc, loc.get_string("settings.errors.channel_not_messageable")),
 				color=Colors.BAD,
 			)
 			return False
@@ -48,7 +48,7 @@ class SettingsCommands(Extension):
 		if not has_perms:
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.l("settings.errors.channel_insufficient_perms")),
+				await locale_format(loc, loc.get_string("settings.errors.channel_insufficient_perms")),
 				color=Colors.BAD,
 			)
 		return True
@@ -60,7 +60,7 @@ class SettingsCommands(Extension):
 		if not member:
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.l("settings.errors.weird_edgecase_number_0")),
+				await locale_format(loc, loc.get_string("settings.errors.weird_edgecase_number_0")),
 				color=Colors.BAD,
 				ephemeral=True,
 			)
@@ -69,7 +69,7 @@ class SettingsCommands(Extension):
 		if not ctx.member.has_permission(Permissions.MANAGE_GUILD):
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.l("settings.errors.missing_permissions")),
+				await locale_format(loc, loc.get_string("settings.errors.missing_permissions")),
 				color=Colors.BAD,
 				ephemeral=True,
 			)

@@ -61,7 +61,7 @@ class TransmissionCommands(Extension):
 	# 	server_ids = {
 	# 		guild.id if isinstance(guild, Guild) else guild
 	# 		:
-	# 									guild.name if isinstance(guild, Guild) else (await lformat(loc, loc.l("transmit.autocomplete.unknown_server"), server_id=guild), True)
+	# 									guild.name if isinstance(guild, Guild) else (await locale_format(loc, loc.get_string("transmit.autocomplete.unknown_server"), server_id=guild), True)
 	# 		for guild in guilds
 	# 	}
 
@@ -278,7 +278,7 @@ class TransmissionCommands(Extension):
 		# known_servers = {
 		# 	guild.id if isinstance(guild, Guild) else guild: guild.name
 		# 	if isinstance(guild, Guild)
-		# 	else (await lformat(loc, loc.l("transmit.autocomplete.unknown_server"), server_id=guild), True)
+		# 	else (await locale_format(loc, loc.get_string("transmit.autocomplete.unknown_server"), server_id=guild), True)
 		# 	for guild in guilds
 		# }
 

@@ -41,7 +41,7 @@ async def earn_badge(
 				),
 				color=Colors.YELLOW,
 				# footer={"text": 'You can change this notification using "/settings badge_notifications"'} # TODO: implement user /settings page # noqa: ERA001
-				# await lformat(loc, loc.l("profile.notifications.badge.settings_note"))# noqa: ERA001
+				# await locale_format(loc, loc.get_string("profile.notifications.badge.settings_note"))# noqa: ERA001
 				# await put_mini(loc, "profile.notifications.badge.settings_note", user_id=ctx.user.id)# noqa: ERA001
 			),
 			content=await locale_format(loc, loc.get_string("profile.notifications.badge.content")),

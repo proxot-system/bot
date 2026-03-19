@@ -222,11 +222,11 @@ class GambleCommands(Extension):
 		if win_amount > 0:
 			if additional_scoring > 1:
 				result_color = Colors.PURE_YELLOW
-				result = "jackpot"  # result_embed.set_footer(text=await lformat(loc, loc.l("wool.gamble.slots.result.jackpot", username=ctx.author.username, amount=fnum(abs(win_amount)))))
+				result = "jackpot"  # result_embed.set_footer(text=await locale_format(loc, loc.get_string("wool.gamble.slots.result.jackpot", username=ctx.author.username, amount=fnum(abs(win_amount)))))
 			else:
 				if win_amount < bet:
 					result_color = Colors.PURE_ORANGE
-					result = "lost_some"  # result_embed.set_footer(text=await lformat(loc, loc.l("wool.gamble.slots.result.lost_some"), username=ctx.author.username, amount=fnum(abs(win_amount))))
+					result = "lost_some"  # result_embed.set_footer(text=await locale_format(loc, loc.get_string("wool.gamble.slots.result.lost_some"), username=ctx.author.username, amount=fnum(abs(win_amount))))
 				else:
 					result_color = Colors.PURE_GREEN
 					result = "won_some"

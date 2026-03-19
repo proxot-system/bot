@@ -594,7 +594,7 @@ class NikogotchiCommands(Extension):
 	async def make_food_select(self, loc, data: Nikogotchi, custom_id: str):
 		if all(getattr(data, attr) <= 0 for attr in ["glitched_pancakes", "golden_pancakes", "pancakes"]):
 			return await make_empty_select(
-				loc, placeholder=await locale_format(loc, loc.l("nikogotchi.components.feed.no_food"))
+				loc, placeholder=await locale_format(loc, loc.get_string("nikogotchi.components.feed.no_food"))
 			)
 
 		# name_map = {  # TODO: rm this when db fix
@@ -604,7 +604,7 @@ class NikogotchiCommands(Extension):
 		# }
 		select = StringSelectMenu(
 			custom_id=custom_id,
-			placeholder=await locale_format(loc, loc.l("nikogotchi.components.feed.placeholder"), name=data.name),
+			placeholder=await locale_format(loc, loc.get_string("nikogotchi.components.feed.placeholder"), name=data.name),
 		)
 		for pancake in ("glitched_pancakes", "golden_pancakes", "pancakes"):
 			updated_name: PancakeTypes = pancake_id_to_emoji_index_please_rename_them_in_db(pancake)
@@ -613,7 +613,7 @@ class NikogotchiCommands(Extension):
 				continue
 			select.options.append(
 				StringSelectOption(
-					label=await locale_format(loc, loc.l(f"nikogotchi.components.feed.{pancake}"), amount=amount),
+					label=await locale_format(loc, loc.get_string(f"nikogotchi.components.feed.{pancake}"), amount=amount),
 					emoji=emojis["pancakes"][updated_name],
 					value=updated_name,
 				)
@@ -850,82 +850,118 @@ class NikogotchiCommands(Extension):
 
 		await ctx.send(embeds=await self.get_main_embeds(ctx, nikogotchi, preview=True))
 
-	"""@nikogotchi.subcommand(sub_cmd_description='Trade your Nikogotchi with someone else!')
-    @slash_option('user', description='The user to trade with.', opt_type=OptionType.USER, required=True)
-    async def trade(self, ctx: SlashContext, user: User):
-        loc = Localization(ctx)
+	@nikogotchi.subcommand(sub_cmd_description="Trade your Nikogotchi with someone else!")
+	@slash_option("user", description="The user to trade with.", opt_type=OptionType.USER, required=True)
+	async def trade(self, ctx: SlashContext, user: User):
+		loc = Localization(ctx)
 
-        nikogotchi_one = await self.get_nikogotchi(ctx.author.id)
-        nikogotchi_two = await self.get_nikogotchi(user.id)
-        
-        
-        if nikogotchi_one is None:
-            return await fancy_message(ctx, await lformat(loc, loc.l('nikogotchi.other.you_invalid')), ephemeral=True, color=Colors.BAD)
-        if nikogotchi_two is None:
-            return await fancy_message(ctx, await lformat(loc, loc.l('nikogotchi.other.other_invalid')), ephemeral=True, color=Colors.BAD)
-        
-        one_data = await fetch_nikogotchi_metadata(nikogotchi_one.nid)
-        two_data = await fetch_nikogotchi_metadata(nikogotchi_two.nid)
-        
+		try:
+			nikogotchi_one = await self.get_nikogotchi(str(ctx.author.id))
+			assert nikogotchi_one is not None
+			one_data = await fetch_nikogotchi_metadata(nikogotchi_one.nid)
+			assert one_data is not None
+		except:
+			return await fancy_message(
+				ctx, await locale_format(loc, loc.get_string("nikogotchi.other.you_invalid")), ephemeral=True, color=Colors.BAD
+			)
 
-        await fancy_message(ctx, await lformat(loc, loc.l('nikogotchi.other.trade.waiting'), edit this → user_id=user.id), ephemeral=True)
+		try:
+			nikogotchi_two = await self.get_nikogotchi(str(user.id))
+			assert nikogotchi_two is not None
+			two_data = await fetch_nikogotchi_metadata(nikogotchi_two.nid)
+			assert two_data is not None
+		except:
+			return await fancy_message(
+				ctx,
+				await locale_format(loc, loc.get_string("nikogotchi.other.other_invalid")),
+				ephemeral=True,
+				color=Colors.BAD,
+			)
 
-        uid = user.id
+		await fancy_message(
+			ctx,
+			await locale_format(loc, loc.get_string("nikogotchi.other.trade.waiting"), receiver_id=user.id),
+			ephemeral=True,
+		)
 
-        buttons = [
-            Button(style=ButtonStyle.SUCCESS, label=await lformat(loc, loc.l('generic.buttons.yes')), custom_id=f'trade {ctx.author.id} {uid}'),
-            Button(style=ButtonStyle.DANGER, label=awailoc.l('generic.buttons.no'), custom_id=f'decline {ctx.author.id} {uid}')
-        ]
+		uid = user.id
 
-        await user.send(
-            embed=Embed(
-                description=awailoc.l('nikogotchi.other.trade.request', user_id=ctx.author.id, name_one=nikogotchi_one.name, name_two=nikogotchi_two.name),
-                color=Colors.WARN
-            ),
-            components=buttons
-        )
+		buttons = [
+			Button(
+				style=ButtonStyle.DANGER,
+				label=await locale_format(loc, loc.get_string("generic.buttons.accept")),
+				custom_id=f"accept {ctx.author.id} {uid}",
+			),
+			Button(
+				style=ButtonStyle.SECONDARY,
+				label=await locale_format(loc, loc.get_string("generic.buttons.decline")),
+				custom_id=f"decline {ctx.author.id} {uid}",
+			),
+		]
 
-        button = await ctx.client.wait_for_component(components=buttons)
-        button_ctx = button.ctx
+		await user.send(
+			embed=Embed(
+				description=await locale_format(
+					loc,
+					loc.get_string("nikogotchi.other.trade.request"),
+					sender_id=ctx.author.id,
+					receiver_id=user.id,
+					sender_nikogotchi_name=nikogotchi_one.name,
+					receiver_nikogotchi_name=nikogotchi_two.name,
+				),
+				color=Colors.WARN,
+			),
+			components=buttons,
+		)
 
-        await button_ctx.defer(edit_origin=True)
+		button = await ctx.client.wait_for_component(components=buttons)
+		button_ctx = button.ctx
 
-        custom_id = button_ctx.custom_id
+		await button_ctx.defer(edit_origin=True)
 
-        if custom_id == f'trade {ctx.author.id} {uid}':
-            del nikogotchi_two._id
-            del nikogotchi_one._id
-            await self.save_nikogotchi(nikogotchi_two, ctx.author.id)
-            await self.save_nikogotchi(nikogotchi_one, uid)
-            nikogotchi_two._id = str(ctx.author.id)
-            nikogotchi_one._id = str(uid)
-            embed_two = Embed(
-                description=awailoc.l('nikogotchi.other.trade.success', user_id=user.id, name=nikogotchi_two.name),
-                color=Colors.GREEN,
-            )
-            embed_two.set_image(url=two_data.image_url)
+		custom_id = button_ctx.custom_id
 
-            embed_one = Embed(
-                description=awailoc.l('nikogotchi.other.trade.success', user_id=ctx.author.id, name=nikogotchi_one.name),
-                color=Colors.GREEN,
-            )
-            embed_one.set_image(url=one_data.image_url)
+		if custom_id == f"accept {ctx.author.id} {uid}":
+			del nikogotchi_two._id
+			del nikogotchi_one._id
+			await self.save_nikogotchi(nikogotchi_two, str(ctx.author.id))
+			await self.save_nikogotchi(nikogotchi_one, str(uid))
+			nikogotchi_two._id = str(ctx.author.id)
+			nikogotchi_one._id = str(uid)
+			embed_two = Embed(
+				description=await locale_format(
+					loc,
+					loc.get_string("nikogotchi.other.trade.success"),
+					user_id=user.id,
+					received_nikogotchi_name=nikogotchi_two.name,
+				),
+				color=Colors.GREEN,
+			)
+			embed_two.set_image(url=two_data.image_url)
 
-            await button_ctx.edit_origin(embed=embed_one, components=[])
-            await ctx.edit(embed=embed_two)
-        else:
-            sender_embed = Embed(
-                description=awailoc.l('nikogotchi.other.trade.declined'),
-                color=Colors.RED,
-            )
-            receiver_embed = Embed(
-                description=awailoc.l('nikogotchi.other.trade.success_decline'),
-                color=Colors.RED,
-            )
-            await asyncio.gather(
-                ctx.edit(embed=sender_embed),
-                button_ctx.edit_origin(embed=receiver_embed, components=[])
-            )"""
+			embed_one = Embed(
+				description=await locale_format(
+					loc,
+					loc.get_string("nikogotchi.other.trade.success"),
+					user_id=ctx.author.id,
+					received_nikogotchi_name=nikogotchi_one.name,
+				),
+				color=Colors.GREEN,
+			)
+			embed_one.set_image(url=one_data.image_url)
+
+			await button_ctx.edit_origin(embed=embed_one, components=[])
+			await ctx.edit(embed=embed_two)
+		else:
+			sender_embed = Embed(
+				description=await locale_format(loc, loc.get_string("nikogotchi.other.trade.declined")),
+				color=Colors.RED,
+			)
+			receiver_embed = Embed(
+				description=await locale_format(loc, loc.get_string("nikogotchi.other.trade.success_decline")),
+				color=Colors.RED,
+			)
+			await asyncio.gather(ctx.edit(embed=sender_embed), button_ctx.edit_origin(embed=receiver_embed, components=[]))
 
 	async def init_repronoun_flow(
 		self,
