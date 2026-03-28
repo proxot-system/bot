@@ -103,7 +103,7 @@ async def refresh_discord_cdn_link(url: list[str] | str, token: str):
 		"https://discord.com/api/v10/attachments/refresh-urls",
 		method="POST",
 		output="json",
-		headers={"Content-Type": "application/json", f"Authorization": f"Bot {token}"},
+		headers={"Content-Type": "application/json", "Authorization": f"Bot {token}"},
 		json={"attachment_urls": url if isinstance(url, (list, tuple)) else [url]},
 	)
 	if isinstance(url, list):
