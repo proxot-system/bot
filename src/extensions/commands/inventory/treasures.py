@@ -50,7 +50,7 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 	max_amount_length = len(fnum(max(owned_treasures.values(), default=0), locale=loc.locale))
 	treasure_string = ""
 	for treasure_nid, item in all_treasures.items():
-		treasure_metadata: dict = await locale_format(loc, loc.get_string(f"items.treasures", typecheck=dict))
+		treasure_metadata: dict = await locale_format(loc, loc.get_string("items.treasures", typecheck=dict))
 
 		name = treasure_metadata[treasure_nid]["name"]
 
