@@ -70,11 +70,13 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 
 	await ctx.edit(
 		embed=Embed(
-			description=await locale_format(loc, treasure_loc.get_string("message"), user=user.mention, treasures=treasure_string)
+			description=await locale_format(
+				loc, treasure_loc.get_string("message"), user=user.mention, treasures=treasure_string
+			)
 			+ (
 				await put_mini(
 					treasure_loc,
-					"minis.where_to_get_treasure",
+					"minis.tips.where_to_get_treasure",
 					show_up_amount=5,
 					type="tip",
 					user_id=ctx.user.id,

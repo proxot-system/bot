@@ -298,11 +298,9 @@ async def send_output(
 			loc, loc.get_string("monologue.debug"), time=took.total_seconds(), sid=state_id
 		)
 	if (
-		state.options.filetype in ("WEBP", "GIF", "APNG")
-		and sent_message
-		and MessageFlags.EPHEMERAL in sent_message.flags
+		state.options.filetype in ("WEBP", "GIF", "APNG") and sent_message and MessageFlags.EPHEMERAL in sent_message.flags
 	):
-		mini = await put_mini(loc, "errors.ephemeral_warnote", user_id=ctx.user.id, show_up_amount=9, type="warn")
+		mini = await put_mini(loc, "minis.warnings.ephemeral", user_id=ctx.user.id, show_up_amount=9, type="warn")
 		if mini != "":
 			await ctx.edit(
 				message=sent_message,
@@ -465,9 +463,7 @@ async def respond(
 		assert state_id is not None and frame_index is not None
 
 		try:
-			loc, state, frame_data = await state_shortcut(
-				ctx, state_id, frame_index, loc_prefix="commands.textbox.create"
-			)
+			loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
 		except StateShortcutError:
 			return
 
@@ -539,9 +535,7 @@ async def respond(
 							style=ButtonStyle.GREEN,
 							label=await locale_format(
 								loc,
-								loc.get_string(
-									"button.render" + ("send" if state.options.send_to != 1 else "")
-								),
+								loc.get_string("button.render" + ("send" if state.options.send_to != 1 else "")),
 								type=await locale_format(
 									loc,
 									loc.get_string(f"filetypes.{state.options.filetype}"),
@@ -553,9 +547,7 @@ async def respond(
 							style=ButtonStyle.DANGER if frame_data.text else ButtonStyle.GRAY,
 							label=await locale_format(
 								loc,
-								loc.get_string(
-									f"button.frame.{'clear' if len(state.frames) == 1 else 'delete'}"
-								),
+								loc.get_string(f"button.frame.{'clear' if len(state.frames) == 1 else 'delete'}"),
 							),
 							custom_id=f"textbox delete_frame {state_id} {frame_index}",
 						),

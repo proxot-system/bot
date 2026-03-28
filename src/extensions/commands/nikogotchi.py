@@ -324,7 +324,7 @@ class NikogotchiCommands(Extension):
 					await locale_format(loc, loc.get_string("invalid"))
 					+ await put_mini(
 						loc,
-						"tipnvalid",
+						"minis.tips.no_nikogotchi",
 						show_up_amount=5,
 						type="tip",
 						user_id=ctx.user.id,
@@ -362,7 +362,7 @@ class NikogotchiCommands(Extension):
 				title=await locale_format(loc, loc.get_string("found.title"), name=nikogotchi.name),
 				color=Colors.GREEN,
 				description=await locale_format(loc, loc.get_string("found.description"))
-				+ await put_mini(loc, "found.renamenote", show_up_amount=5, user_id=ctx.user.id, pre="\n\n"),
+				+ await put_mini(loc, "minis.notes.rename", show_up_amount=5, user_id=ctx.user.id, pre="\n\n"),
 			)
 
 			hatched_embed.set_thumbnail(url=selected_nikogotchi.image_url)
@@ -552,7 +552,7 @@ class NikogotchiCommands(Extension):
 			if custom_id == "findtreasure":
 				dialogue = await locale_format(loc, loc.get_string("treasured.dialogues.sent")) + await put_mini(
 					loc,
-					"treasured.dialogues.senote",
+					"minis.notes.sent_treasure",
 					user_id=ctx.user.id,
 					show_up_amount=25,
 					pre="\n\n",
