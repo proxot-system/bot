@@ -4,7 +4,7 @@ import asyncio
 import random
 import re
 from traceback import print_exc
-from typing import Any
+from typing import Any, Awaitable
 
 from interactions import (
 	ActionRow,
@@ -36,7 +36,7 @@ from utilities.config import debugging
 from utilities.emojis import emojis
 from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors, fancy_message
-from utilities.misc import replace_numbers_with_emojis
+from utilities.misc import filler_task, replace_numbers_with_emojis
 
 invis_char = "󠄴"
 
@@ -190,53 +190,24 @@ class InteractCommands(Extension):
 		user_one: str | User,
 		user_two: str | User,
 	):
-		loc = Localization(ctx)
-		await ctx.respond(content=await locale_format(loc, loc.get_string("generic.loading.generic")), ephemeral=True)
-		"""if ctx.author.id == who.id:
-			return await fancy_message(
-			    ctx,
-			    await Localization(ctx).get_string('interact.twm_is_fed_up_with_you', user_id=ctx.author.id),
-			    ephemeral=True,
-			    color=0XFF0000
+		loc = Localization(ctx, prefix="commands.interact")
+		loading = asyncio.create_task(
+			ctx.respond(
+				content=await locale_format(loc, loc.get_string("generic.loading.generic", prefix_override="main")),
+				ephemeral=True,
 			)
-		if who.id == ctx.client.user.id:
-			return await fancy_message(
-			    ctx,
-			    await locale_format(loc, loc.get_string('interact.twm_not_being_very_happy'), user_id=ctx.author.id),
-			    ephemeral=True,
-			    color=0XFF0000
-			)
-		if who.bot:
-            await fancy_message(ctx, awaitloc.format(loc.get_string('interact.twm_questioning_if_youre_stupid_or_not'), bot=who.mention, user_id=ctx.author.id), ephemeral=True, color=0XFF0000)
-            return
-								await fancy_message(
-		    ctx,
-		    message=await loc.get_string(
-		        f'interact.selected{"_self" if with_self else ""}',
-		        user_one_mention=f"<@{user_one.id}>" if isinstance(user_one, User) else user_one,
-		        user_two_mention=f"<@{user_two.id}>" if isinstance(user_two, User) else user_two
-		    ),
-		    components=[
-		        Button(
-		            label="Delicate Boop",
-		            custom_id=f"interact {ctx.id} [0].phrases[2].phrases",
-		            style=ButtonStyle.GRAY,
-		        )
-		    ],
-		    edit=True
 		)
-		"""
-		return await self.respond((ctx, loc), (0, ".phrases", user_one, user_two))
+		return await self.respond((ctx, loc, loading), (0, "phrases", user_one, user_two))
 
 	handle_components_regex = re.compile(r"interact (?P<page>\d+)(?: (?P<path>.+))?$")
 
 	@component_callback(handle_components_regex)
 	async def handle_components(self, ctx: ComponentContext):
-		loc = Localization(ctx)
+		loc = Localization(ctx, prefix="commands.interact")
 		if ctx.message is None:
 			return await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("generic.errors.expired")),
+				await locale_format(loc, loc.get_string("generic.errors.expired", prefix_override="main")),
 				color=Colors.BAD,
 				ephemeral=True,
 			)
@@ -244,14 +215,16 @@ class InteractCommands(Extension):
 		content = content.replace("→ :i: →", "→ ❔ →")
 		content = content.replace(f"→ {emojis['icons']['loading']} →", "→ ❔ →")
 		stuff = content.partition("→ ❔ →")
-		await ctx.edit_origin(
-			content=stuff[0] + stuff[1].replace("❔", emojis["icons"]["loading"]) + stuff[2],
-			allowed_mentions=none_allowed,
+		loading = asyncio.create_task(
+			ctx.edit_origin(
+				content=stuff[0] + stuff[1].replace("❔", emojis["icons"]["loading"]) + stuff[2],
+				allowed_mentions=none_allowed,
+			)
 		)
 		match = self.handle_components_regex.match(ctx.custom_id)
 		if match:
 			page = match.group("page")
-			path = match.group("path") or ".phrases"
+			path = match.group("path") or "phrases"
 		assert isinstance(page, str) and isinstance(path, str)
 
 		user_one = stuff[0][2:-1]
@@ -262,7 +235,7 @@ class InteractCommands(Extension):
 			user_two = user_two[2:-2]
 		user_one, user_two = await self.parse_args(ctx, user_one, user_two)
 		try:
-			interaction_raw = await locale_format(loc, loc.get_string(f"interact{path}", typecheck=Any))  # type:ignore
+			interaction_raw = await locale_format(loc, loc.get_string(path, typecheck=Any))  # type:ignore
 			assert not isinstance(interaction_raw, str), "Assertion failed: " + interaction_raw
 			interaction = (
 				InteractionEntry(interaction_raw["name"], phrases=interaction_raw["phrases"])
@@ -273,7 +246,7 @@ class InteractCommands(Extension):
 			print_exc()
 			return await ctx.send(
 				embeds=Embed(
-					description=f"[ {await locale_format(loc, loc.get_string('interact.errors.no_path'))} ]"
+					description=f"[ {await locale_format(loc, loc.get_string('errors.no_path'))} ]"
 					+ ("" if not debugging() else f"\n-# Debug: {e}"),
 					color=Colors.BAD,
 				)
@@ -281,16 +254,21 @@ class InteractCommands(Extension):
 		if not isinstance(interaction, tuple) and self.ie_only_basic(interaction.phrases):
 			await self.send_phrase((ctx, loc), (path, user_one, user_two))
 			return await ctx.message.edit(content="".join(stuff), allowed_mentions=none_allowed)
-		return await self.respond((ctx, loc), (int(page), path, user_one, user_two))
+		return await self.respond((ctx, loc, loading), (int(page), path, user_one, user_two))
 
 	async def respond(
 		self,
-		cx: tuple[ComponentContext | ContextMenuContext | SlashContext, Localization],
+		cx: tuple[ComponentContext | ContextMenuContext | SlashContext, Localization, Awaitable],
 		state: tuple[int, str, str | User, str | User],
 	):
-		ctx, loc = cx
+		if len(cx) < 2:
+			cx = (cx[0], cx[1], None)
+		if cx[2] is None:
+			cx[2] = filler_task()
+		ctx, loc, loading = cx
+
 		page, path, user_one, user_two = state
-		interaction_raw: dict | tuple = await locale_format(loc, loc.get_string(f"interact{path}", typecheck=Any))  # type:ignore
+		interaction_raw: dict | tuple = await locale_format(loc, loc.get_string(path, typecheck=Any))  # type:ignore
 		assert not isinstance(interaction_raw, str)
 		interaction = (
 			InteractionEntry(interaction_raw["name"], phrases=interaction_raw["phrases"])
@@ -303,9 +281,10 @@ class InteractCommands(Extension):
 		for i in range(len(phrases)):
 			phrase = phrases[i]
 			if isinstance(phrase, str):
+				await loading
 				return await ctx.send(
 					embeds=Embed(
-						description=f"[ {await locale_format(loc, loc.get_string('interact.errors.500'))} ]",
+						description=f"[ {await locale_format(loc, loc.get_string('errors.500'))} ]",
 						color=Colors.BAD,
 					)
 				)
@@ -415,11 +394,11 @@ class InteractCommands(Extension):
 					Button(
 						style=ButtonStyle.DANGER,
 						emoji="🔝",
-						label=await locale_format(loc, loc.get_string("generic.buttons.top")),
+						label=await locale_format(loc, loc.get_string("generic.buttons.top", prefix_override="main")),
 					)
 				)
 			)
-
+		await loading
 		return await ctx.edit(
 			content=f"[ {self.format_mention(user_one)} → ❔ → {self.format_mention(user_two)} ]",
 			embeds=[],
@@ -437,7 +416,7 @@ class InteractCommands(Extension):
 
 		interaction: Any = await locale_format(
 			loc,
-			loc.get_string(f"interact{quote_path}", typecheck=Any),  # type: ignore
+			loc.get_string(quote_path, typecheck=Any),  # type: ignore
 			user_one=self.format_mention(user_one),
 			user_two=self.format_mention(user_two),
 		)
@@ -467,7 +446,7 @@ class InteractCommands(Extension):
 		except Exception as e:
 			return await ctx.send(
 				embeds=Embed(
-					description=f"[ {await locale_format(loc, loc.get_string('interact.errors.fail'))} ]",
+					description=f"[ {await locale_format(loc, loc.get_string('errors.fail'))} ]",
 					color=Colors.BAD,
 				)
 			)

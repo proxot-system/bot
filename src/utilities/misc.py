@@ -1,3 +1,4 @@
+import asyncio
 import copy
 import io
 import re
@@ -449,3 +450,8 @@ def sanitize_filename(name: str | None, default: str = "attachment") -> str:
 		return f"{clean(base)}{ext}"
 	else:
 		return clean(filename)
+
+def filler_task(returns: Any = None) -> asyncio.Future:
+	future = asyncio.get_running_loop().create_future()
+	future.set_result(returns)
+	return future

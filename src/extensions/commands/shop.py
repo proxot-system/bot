@@ -994,6 +994,6 @@ class ShopCommands(Extension):
 		await self.get_shop()
 
 		embeds, button = await self.embed_manager(ctx, "main_shop")
-		await loading
 
+		await loading
 		await ctx.edit(embeds=embeds, components=button)
