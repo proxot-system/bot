@@ -69,11 +69,11 @@ async def load_profile_assets():
 
 	wool_icon = Image.open(await cached_get(make_emoji_cdn_url(emojis["icons"]["wool"], size=32)))
 	if debugging():
-		print(f"| Wool icon")
+		print("| Wool icon")
 	assets += 1
 	sun_icon = Image.open(await cached_get(make_emoji_cdn_url(emojis["icons"]["sun"], size=32)))
 	if debugging():
-		print(f"| Sun icon")
+		print("| Sun icon")
 	assets += 1
 	if not debugging():
 		print(f"\033[udone ({assets})", flush=True)
@@ -88,7 +88,7 @@ async def draw_profile(
 	alt: str | None = None,
 	loc: Localization = source_loc,
 ) -> File:
-	if wool_icon == None or sun_icon == None or font == None:
+	if wool_icon is None or sun_icon is None or font is None:
 		await load_profile_assets()
 	assert (
 		isinstance(wool_icon, Image.Image)
@@ -98,6 +98,7 @@ async def draw_profile(
 		and all(isinstance(icon, Image.Image) for icon in icons)
 		and all(isinstance(icon, Image.Image) for icon in shop_icons)
 	), "linter pleasing failed"
+	loc = Localization(loc, prefix="commands.profile.view")
 	user_id = user.id
 	user_pfp_url = user.display_avatar._url
 	animated = user.display_avatar.animated
@@ -110,7 +111,7 @@ async def draw_profile(
 
 	user_data: UserData = await UserData(_id=user_id).fetch()
 
-	title = await locale_format(loc, loc.get("profile.view.image.title"), target_id=user.id)
+	title = await locale_format(loc, loc.get("image.title"), target_id=user.id)
 
 	backgrounds = await fetch_background()
 	image = Image.open(await cached_get(backgrounds[user_data.equipped_bg]["image"]))
@@ -205,7 +206,7 @@ async def draw_profile(
 
 	base_profile.text(
 		(42, 251),
-		await locale_format(loc, loc.get("profile.view.image.unlocked.stamps"), username=user.username),
+		await locale_format(loc, loc.get("image.unlocked.stamps"), username=user.username),
 		font=font,
 		fill=(255, 255, 255),
 		stroke_width=2,
@@ -247,7 +248,7 @@ async def draw_profile(
 		if alt is not None
 		else await locale_format(
 			loc,
-			loc.get("profile.view.image.alt"),
+			loc.get("image.alt"),
 			username=username,
 			suns=user_data.suns,
 			wool=user_data.wool,

@@ -24,8 +24,8 @@ from utilities.shop.fetch_items import fetch_treasure
 	opt_type=OptionType.BOOLEAN,
 )
 async def command(self, ctx: SlashContext, user: User | None = None, public: bool = False):
-	loc = Localization(ctx, prefix="commands.inventory")
-	treasure_loc = Localization(ctx, prefix="commands.inventory.commands.treasures")
+	loc = Localization(ctx, prefix="commands.inventory.base")
+	treasure_loc = Localization(ctx, prefix="commands.inventory.treasures")
 
 	if user is None:
 		user = ctx.user

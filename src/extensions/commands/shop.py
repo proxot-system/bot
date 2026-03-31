@@ -102,7 +102,7 @@ class ShopCommands(Extension):
 		await ctx.defer(edit_origin=True)
 
 		base_loc = Localization(ctx, prefix="commands.shop.base")
-		inventory_loc = Localization(ctx, prefix="commands.inventory")
+		inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 
 		await self.get_shop()
 
@@ -186,7 +186,7 @@ class ShopCommands(Extension):
 		await ctx.defer(edit_origin=True)
 
 		base_loc = Localization(ctx, prefix="commands.shop.base")
-		inventory_loc = Localization(ctx, prefix="commands.inventory")
+		inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 
 		await self.get_shop()
 
@@ -303,7 +303,7 @@ class ShopCommands(Extension):
 
 		base_loc = Localization(ctx, prefix="commands.shop.base")
 		capsules_loc = Localization(ctx, prefix="commands.shop.capsules")
-		inventory_loc = Localization(ctx, prefix="commands.inventory")
+		inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 
 		user_data: UserData = await UserData(_id=ctx.author.id).fetch()
 		nikogotchi: Nikogotchi = await Nikogotchi(_id=ctx.author.id).fetch()
@@ -345,7 +345,7 @@ class ShopCommands(Extension):
 		await ctx.defer(edit_origin=True)
 
 		base_loc = Localization(ctx, prefix="commands.shop.base")
-		inventory_loc = Localization(ctx, prefix="commands.inventory")
+		inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 
 		user_data: UserData = await UserData(_id=ctx.author.id).fetch()
 		nikogotchi_data: Nikogotchi = await Nikogotchi(_id=ctx.author.id).fetch()
@@ -558,7 +558,7 @@ class ShopCommands(Extension):
 			components.append(ActionRow(*buttons))
 		elif category == "pancakes":
 			pancakes_loc = Localization(ctx, prefix="commands.shop.pancakes")
-			inventory_loc = Localization(ctx, prefix="commands.inventory")
+			inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 
 			pancake_data = await fetch_item()
 
@@ -617,7 +617,7 @@ class ShopCommands(Extension):
 			components.append(ActionRow(*buttons))
 		elif category == "Backgrounds":
 			backgrounds_loc = Localization(ctx, prefix="commands.shop.backgrounds")
-			inventory_loc = Localization(ctx, prefix="commands.inventory")
+			inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 			bg_page = kwargs["page"]
 			background = daily_shop.background_stock[bg_page]
 			all_bgs = await fetch_background()
@@ -681,7 +681,7 @@ class ShopCommands(Extension):
 			components.append(ActionRow(*buttons))
 		elif category == "Treasures":
 			treasures_loc = Localization(ctx, prefix="commands.shop.treasures")
-			inventory_loc = Localization(ctx, prefix="commands.inventory")
+			inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 			stock: str = await locale_format(
 				treasures_loc,
 				treasures_loc.get("stock_market"),
@@ -841,7 +841,7 @@ class ShopCommands(Extension):
 			components = [ActionRow(select_menu), ActionRow(*buttons)]
 		elif category == "Sell_Treasures":
 			treasures_loc = Localization(ctx, prefix="commands.shop.treasures")
-			inventory_loc = Localization(ctx, prefix="commands.inventory")
+			inventory_loc = Localization(ctx, prefix="commands.inventory.base")
 			stock: str = await locale_format(
 				treasures_loc,
 				treasures_loc.get("stock_market"),
@@ -986,7 +986,7 @@ class ShopCommands(Extension):
 	@slash_command(description="Open Magpie's Shop")
 	@integration_types(guild=True, user=True)
 	@contexts(bot_dm=True)
-	async def shop(self, ctx: SlashContext):  #
+	async def shop(self, ctx: SlashContext):
 		await ctx.defer(ephemeral=True)
 		loc = Localization(ctx, prefix="commands.shop.base")
 		loading = asyncio.create_task(fancy_message(ctx, await locale_format(loc, loc.get("loading"))))

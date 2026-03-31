@@ -38,7 +38,7 @@ class SettingsCommands(Extension):
 		if not isinstance(channel, MessageableMixin):
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("settings.errors.channel_not_messageable")),
+				await locale_format(loc, loc.get("errors.channel_not_messageable")),
 				color=Colors.BAD,
 			)
 			return False
@@ -48,7 +48,7 @@ class SettingsCommands(Extension):
 		if not has_perms:
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("settings.errors.channel_insufficient_perms")),
+				await locale_format(loc, loc.get("errors.channel_insufficient_perms")),
 				color=Colors.BAD,
 			)
 		return True
@@ -60,7 +60,7 @@ class SettingsCommands(Extension):
 		if not member:
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("settings.errors.weird_edgecase_number_0")),
+				await locale_format(loc, loc.get("errors.weird_edgecase_number_0")),
 				color=Colors.BAD,
 				ephemeral=True,
 			)
@@ -69,7 +69,7 @@ class SettingsCommands(Extension):
 		if not ctx.member.has_permission(Permissions.MANAGE_GUILD):
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("settings.errors.missing_permissions")),
+				await locale_format(loc, loc.get("errors.missing_permissions")),
 				color=Colors.BAD,
 				ephemeral=True,
 			)
@@ -81,7 +81,7 @@ class SettingsCommands(Extension):
 		self, ctx: ModalContext | SlashContext, defer: bool = True
 	) -> tuple[Localization | None, ServerData | None]:
 		assert ctx.guild is not None
-		loc = Localization(ctx)
+		loc = Localization(ctx, prefix="commands.settings.server")
 		if not await self.botmember_permission_check(loc, ctx):
 			return (None, None)
 		if defer:
@@ -109,7 +109,7 @@ class SettingsCommands(Extension):
 
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get(f"settings.transmissions.enabled.{'yah' if value else 'nah'}")),
+			await locale_format(loc, loc.get(f"transmissions.enabled.{'yah' if value else 'nah'}")),
 			ephemeral=True,
 		)
 
@@ -129,9 +129,7 @@ class SettingsCommands(Extension):
 
 		if channel is None:
 			await server_data.transmissions.update(channel_id=None)
-			return await fancy_message(
-				ctx, await locale_format(loc, loc.get("settings.transmissions.channel.auto")), ephemeral=True
-			)
+			return await fancy_message(ctx, await locale_format(loc, loc.get("transmissions.channel.auto")), ephemeral=True)
 
 		if not await self.channel_permission_check(loc, ctx, channel):
 			return
@@ -139,7 +137,7 @@ class SettingsCommands(Extension):
 		await server_data.transmissions.update(channel_id=str(channel.id))
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get("settings.transmissions.channel.Changed"), channel=channel.mention),
+			await locale_format(loc, loc.get("transmissions.channel.Changed"), channel=channel.mention),
 			ephemeral=True,
 		)
 
@@ -161,7 +159,7 @@ class SettingsCommands(Extension):
 		await server_data.transmissions.update(allow_images=value)
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get(f"settings.transmissions.images.{'enabled' if value else 'disabled'}")),
+			await locale_format(loc, loc.get(f"transmissions.images.{'enabled' if value else 'disabled'}")),
 			ephemeral=True,
 		)
 
@@ -184,9 +182,7 @@ class SettingsCommands(Extension):
 
 		return await fancy_message(
 			ctx,
-			await locale_format(
-				loc, loc.get(f"settings.transmissions.anonymous.{'enabled' if value else 'disabled'}")
-			),
+			await locale_format(loc, loc.get(f"transmissions.anonymous.{'enabled' if value else 'disabled'}")),
 			ephemeral=True,
 		)
 
@@ -209,15 +205,13 @@ class SettingsCommands(Extension):
 		blocklist = server_data.transmissions.blocked_servers
 
 		try:
-			server_id = int(
-				server
-			)  # this int() checks whether the input was a proper integer (we could use the string in get_guild too)
+			server_id = int(server)
 			guild = ctx.client.get_guild(server_id)
 		except ValueError:
 			return await fancy_message(
 				ctx,
 				embed=Embed(
-					description=f"{await locale_format(loc, loc.get('settings.errors.invalid_server_id'))}\n-# {await locale_format(loc, loc.get('settings.errors.get_server_id'))}",
+					description=f"{await locale_format(loc, loc.get('errors.invalid_server_id'))}\n-# {await locale_format(loc, loc.get('errors.get_server_id'))}",
 					color=Colors.BAD,
 				),
 			)
@@ -230,17 +224,17 @@ class SettingsCommands(Extension):
 			ctx,
 			await locale_format(
 				loc,
-				loc.get(f"settings.transmissions.blocked.{'yah' if server_id in blocklist else 'nah'}"),
+				loc.get(f"transmissions.blocked.{'yah' if server_id in blocklist else 'nah'}"),
 				server_name=guild.name if guild else server_id,
 			)
-			+ (("\n-# " + await locale_format(loc, loc.get("settings.errors.uncached_server"))) if not guild else ""),
+			+ (("\n-# " + await locale_format(loc, loc.get("errors.uncached_server"))) if not guild else ""),
 			ephemeral=True,
 		)
 
 	@transmissions_block.autocomplete("server")
 	async def block_server_autocomplete(self, ctx: AutocompleteContext):
 		server_data: ServerData = await ServerData(_id=str(ctx.guild_id)).fetch()
-		loc = Localization(ctx)
+		loc = Localization(ctx, prefix="commands.settings.server")
 		guilds = [
 			await ctx.client.fetch_guild(id) or id
 			for id in list(set(server_data.transmissions.known_servers + server_data.transmissions.blocked_servers))
@@ -248,7 +242,12 @@ class SettingsCommands(Extension):
 		servers = {
 			guild.id if isinstance(guild, Guild) else guild: guild.name
 			if isinstance(guild, Guild)
-			else (await locale_format(loc, loc.get("transmit.autocomplete.unknown_server"), server_id=guild), True)
+			else (
+				await locale_format(
+					loc, loc.get("autocomplete.unknown_server", prefix_override="commands.transmit"), server_id=guild
+				),
+				True,
+			)
 			for guild in guilds
 		}
 
@@ -286,13 +285,13 @@ class SettingsCommands(Extension):
 		error = (
 			""
 			if not server_data.welcome.errored
-			else await put_mini(loc, "settings.errors.channel_lost_warn", type="warn", pre="\n\n")
+			else await put_mini(loc, "errors.channel_lost_warn", type="warn", pre="\n\n")
 		)
 		await server_data.welcome.update(disabled=not value)
 
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get(f"settings.welcome.enabled.{'yah' if value else 'nah'}")) + error,
+			await locale_format(loc, loc.get(f"welcome.enabled.{'yah' if value else 'nah'}")) + error,
 			ephemeral=True,
 		)
 
@@ -314,13 +313,13 @@ class SettingsCommands(Extension):
 		error = (
 			""
 			if not server_data.welcome.errored
-			else await put_mini(loc, "settings.errors.channel_lost_warn", type="warn", pre="\n\n")
+			else await put_mini(loc, "errors.channel_lost_warn", type="warn", pre="\n\n")
 		)
 		await server_data.welcome.update(ping=not value)
 
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get(f"settings.welcome.ping.{'yah' if value else 'nah'}")) + error,
+			await locale_format(loc, loc.get(f"welcome.ping.{'yah' if value else 'nah'}")) + error,
 			ephemeral=True,
 		)
 
@@ -333,10 +332,10 @@ class SettingsCommands(Extension):
 		return await ctx.send_modal(
 			Modal(
 				InputText(
-					label=await locale_format(loc, loc.get("settings.welcome.editor.input")),
+					label=await locale_format(loc, loc.get("welcome.editor.input")),
 					style=TextStyles.PARAGRAPH,
 					custom_id="text",
-					placeholder=await locale_format(loc, loc.get("settings.welcome.editor.placeholder")),
+					placeholder=await locale_format(loc, loc.get("welcome.editor.placeholder")),
 					max_length=get_config(
 						"textbox.limits.frame-text-length",
 						typecheck=int,
@@ -344,9 +343,9 @@ class SettingsCommands(Extension):
 					)
 					or 1423,
 					required=False,
-					value=server_data.welcome.message or loc.get("settings.welcome.editor.templates.default"),
+					value=server_data.welcome.message or loc.get("welcome.editor.templates.default"),
 				),
-				title=await locale_format(loc, loc.get("settings.welcome.editor.title")),
+				title=await locale_format(loc, loc.get("welcome.editor.title")),
 				custom_id="welcome_message_editor",
 			)
 		)
@@ -360,17 +359,17 @@ class SettingsCommands(Extension):
 		config = server_data.welcome
 		old_text = config.message
 		new_text = text
-		if new_text == loc.get("settings.welcome.editor.templates.default") or new_text == "":
+		if new_text == loc.get("welcome.editor.templates.default") or new_text == "":
 			new_text = None
 		if old_text is None or old_text == "":
-			old_text = loc.get("settings.welcome.editor.templates.default")
+			old_text = loc.get("welcome.editor.templates.default")
 
 		await config.update(message=new_text)
 		Changed = "\n" + await locale_format(
 			loc,
-			loc.get("settings.welcome.editor.Changed"),
+			loc.get("welcome.editor.Changed"),
 			old_text=f"```\n{old_text.replace('```', '` ``')}```",
-			new_text=f"\n-# *{await locale_format(loc, loc.get('settings.welcome.editor.new_none'))}*"
+			new_text=f"\n-# *{await locale_format(loc, loc.get('welcome.editor.new_none'))}*"
 			if new_text is None
 			else f"```\n{text.replace('```', '` ``')}```",
 		)
@@ -379,20 +378,16 @@ class SettingsCommands(Extension):
 			if not config.disabled
 			else await put_mini(
 				loc,
-				"settings.welcome.editor.disabled_note",
+				"welcome.editor.disabled_note",
 				user_id=ctx.user.id,
 				pre="\n\n",
 			)
 		)
-		error = (
-			""
-			if not config.errored
-			else await put_mini(loc, "settings.errors.channel_lost_warn", type="warn", pre="\n\n")
-		)
+		error = "" if not config.errored else await put_mini(loc, "errors.channel_lost_warn", type="warn", pre="\n\n")
 
 		await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get("settings.welcome.editor.done")) + Changed + warn + error,
+			await locale_format(loc, loc.get("welcome.editor.done")) + Changed + warn + error,
 			ephemeral=True,
 		)
 
@@ -423,28 +418,22 @@ class SettingsCommands(Extension):
 
 		if channel is None:
 			await config.update(channel_id=None, errored=False)
-			return await fancy_message(
-				ctx, await locale_format(loc, loc.get("settings.welcome.channel.auto")), ephemeral=True
-			)
+			return await fancy_message(ctx, await locale_format(loc, loc.get("welcome.channel.auto")), ephemeral=True)
 
-		error = (
-			""
-			if not config.errored
-			else await put_mini(loc, "settings.errors.channel_lost_warn", type="warn", pre="\n\n")
-		)
+		error = "" if not config.errored else await put_mini(loc, "errors.channel_lost_warn", type="warn", pre="\n\n")
 
 		warn = ""
 		if config.disabled:
 			warn += await put_mini(
 				loc,
-				"settings.welcome.editor.disabled_note",
+				"welcome.editor.disabled_note",
 				user_id=ctx.user.id,
 				pre="\n\n",
 			)
 		if not config.message:
 			warn += await put_mini(
 				loc,
-				"settings.welcome.enabled.default_tip",
+				"welcome.enabled.default_tip",
 				user_id=ctx.user.id,
 				show_up_amount=15,
 				pre="\n\n",
@@ -452,7 +441,5 @@ class SettingsCommands(Extension):
 		await config.update(channel_id=str(channel.id), errored=False)
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get("settings.welcome.channel.Changed"), channel=channel.mention)
-			+ warn
-			+ error,
+			await locale_format(loc, loc.get("welcome.channel.Changed"), channel=channel.mention) + warn + error,
 		)
