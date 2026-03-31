@@ -25,17 +25,17 @@ async def earn_badge(
 			embeds=Embed(
 				title=await locale_format(
 					loc,
-					loc.get_string("profile.notifications.badge.title"),
+					loc.get("profile.notifications.badge.title"),
 					emoji=f"<:i:{badge_data['emoji']}>",
 					badge_name=badge_name,
 				),
 				description=await locale_format(
 					loc,
-					loc.get_string("profile.notifications.badge.description"),
+					loc.get("profile.notifications.badge.description"),
 					target_id=target.id,
 					badge_message=await locale_format(
 						loc,
-						loc.get_string(f'profile.notifications.badge.types["{badge_data["type"]}"]'),
+						loc.get(f'profile.notifications.badge.types["{badge_data["type"]}"]'),
 						amount=badge_data["requirement"],
 					),
 				),
@@ -44,7 +44,7 @@ async def earn_badge(
 				# await locale_format(loc, loc.get_string("profile.notifications.badge.settings_note"))# noqa: ERA001
 				# await put_mini(loc, "profile.notifications.badge.settings_note", user_id=ctx.user.id)# noqa: ERA001
 			),
-			content=await locale_format(loc, loc.get_string("profile.notifications.badge.content")),
+			content=await locale_format(loc, loc.get("profile.notifications.badge.content")),
 		)
 
 

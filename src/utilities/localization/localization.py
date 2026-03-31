@@ -241,12 +241,12 @@ class Localization:
 			return input
 
 	@overload
-	def get_string(self, path: str, *, typecheck: Type[T], **variables: Any) -> T: ...
+	def get(self, path: str, *, typecheck: Type[T], **variables: Any) -> T: ...
 
 	@overload
-	def get_string(self, path: str, *, prefix_override: str | None = None, **variables: Any) -> str: ...
+	def get(self, path: str, *, prefix_override: str | None = None, **variables: Any) -> str: ...
 
-	def get_string(
+	def get(
 		self, path: str, *, prefix_override: str | None = None, typecheck: Any = str, **variables: Any
 	) -> Any:
 		prefix = self.prefix
@@ -256,11 +256,11 @@ class Localization:
 			path = f"{prefix}.{path}"
 		elif path.startswith("["):
 			path = f"{prefix}{path}"
-		return self.static_get_string(path=path, locale=self.locale, typecheck=typecheck, **variables)
+		return self.static_get(path=path, locale=self.locale, typecheck=typecheck, **variables)
 
 	@staticmethod
 	@overload
-	def static_get_string(
+	def static_get(
 		path: str,
 		locale: str | None,
 		*,
@@ -271,10 +271,10 @@ class Localization:
 
 	@staticmethod
 	@overload
-	def static_get_string(path: str, locale: str | None) -> str: ...
+	def static_get(path: str, locale: str | None) -> str: ...
 
 	@staticmethod
-	def static_get_string(
+	def static_get(
 		path: str,
 		locale: str | None = None,
 		*,

@@ -193,7 +193,7 @@ class InteractCommands(Extension):
 		loc = Localization(ctx, prefix="commands.interact")
 		loading = asyncio.create_task(
 			ctx.respond(
-				content=await locale_format(loc, loc.get_string("generic.loading.generic", prefix_override="main")),
+				content=await locale_format(loc, loc.get("generic.loading.generic", prefix_override="main")),
 				ephemeral=True,
 			)
 		)
@@ -207,7 +207,7 @@ class InteractCommands(Extension):
 		if ctx.message is None:
 			return await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("generic.errors.expired", prefix_override="main")),
+				await locale_format(loc, loc.get("generic.errors.expired", prefix_override="main")),
 				color=Colors.BAD,
 				ephemeral=True,
 			)
@@ -235,7 +235,7 @@ class InteractCommands(Extension):
 			user_two = user_two[2:-2]
 		user_one, user_two = await self.parse_args(ctx, user_one, user_two)
 		try:
-			interaction_raw = await locale_format(loc, loc.get_string(path, typecheck=Any))  # type:ignore
+			interaction_raw = await locale_format(loc, loc.get(path, typecheck=Any))  # type:ignore
 			assert not isinstance(interaction_raw, str), "Assertion failed: " + interaction_raw
 			interaction = (
 				InteractionEntry(interaction_raw["name"], phrases=interaction_raw["phrases"])
@@ -246,7 +246,7 @@ class InteractCommands(Extension):
 			print_exc()
 			return await ctx.send(
 				embeds=Embed(
-					description=f"[ {await locale_format(loc, loc.get_string('errors.no_path'))} ]"
+					description=f"[ {await locale_format(loc, loc.get('errors.no_path'))} ]"
 					+ ("" if not debugging() else f"\n-# Debug: {e}"),
 					color=Colors.BAD,
 				)
@@ -268,7 +268,7 @@ class InteractCommands(Extension):
 		ctx, loc, loading = cx
 
 		page, path, user_one, user_two = state
-		interaction_raw: dict | tuple = await locale_format(loc, loc.get_string(path, typecheck=Any))  # type:ignore
+		interaction_raw: dict | tuple = await locale_format(loc, loc.get(path, typecheck=Any))  # type:ignore
 		assert not isinstance(interaction_raw, str)
 		interaction = (
 			InteractionEntry(interaction_raw["name"], phrases=interaction_raw["phrases"])
@@ -284,7 +284,7 @@ class InteractCommands(Extension):
 				await loading
 				return await ctx.send(
 					embeds=Embed(
-						description=f"[ {await locale_format(loc, loc.get_string('errors.500'))} ]",
+						description=f"[ {await locale_format(loc, loc.get('errors.500'))} ]",
 						color=Colors.BAD,
 					)
 				)
@@ -394,7 +394,7 @@ class InteractCommands(Extension):
 					Button(
 						style=ButtonStyle.DANGER,
 						emoji="🔝",
-						label=await locale_format(loc, loc.get_string("generic.buttons.top", prefix_override="main")),
+						label=await locale_format(loc, loc.get("generic.buttons.top", prefix_override="main")),
 					)
 				)
 			)
@@ -416,7 +416,7 @@ class InteractCommands(Extension):
 
 		interaction: Any = await locale_format(
 			loc,
-			loc.get_string(quote_path, typecheck=Any),  # type: ignore
+			loc.get(quote_path, typecheck=Any),  # type: ignore
 			user_one=self.format_mention(user_one),
 			user_two=self.format_mention(user_two),
 		)
@@ -446,7 +446,7 @@ class InteractCommands(Extension):
 		except Exception as e:
 			return await ctx.send(
 				embeds=Embed(
-					description=f"[ {await locale_format(loc, loc.get_string('errors.fail'))} ]",
+					description=f"[ {await locale_format(loc, loc.get('errors.fail'))} ]",
 					color=Colors.BAD,
 				)
 			)

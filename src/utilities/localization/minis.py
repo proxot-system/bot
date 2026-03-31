@@ -21,6 +21,6 @@ async def put_mini(
 		if show_up_amount != -1 and show_up_amount <= reacher:
 			return ""
 		asyncio.create_task(user_data.minis_shown.increment_key(database_key))
-	name: str = await locale_format(loc, loc.get_string(f"generic.minis.{type}", prefix_override="main"))
-	msg: str = await locale_format(loc, loc.get_string(message))
+	name: str = await locale_format(loc, loc.get(f"generic.minis.{type}", prefix_override="main"))
+	msg: str = await locale_format(loc, loc.get(message))
 	return f"{pre}{'-# ' if markdown else ''}{name} {msg}"

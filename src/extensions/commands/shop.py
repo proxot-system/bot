@@ -130,7 +130,7 @@ class ShopCommands(Extension):
 		result_text = ""
 
 		treasure_loc: dict = await locale_format(
-			inventory_loc, inventory_loc.get_string(f"items.treasures.{treasure_id}", typecheck=dict)
+			inventory_loc, inventory_loc.get(f"items.treasures.{treasure_id}", typecheck=dict)
 		)
 
 		async def update():
@@ -141,7 +141,7 @@ class ShopCommands(Extension):
 			await ctx.edit(embeds=embeds, components=components)
 
 		if amount_of_treasure <= 0:
-			result_text = await locale_format(base_loc, base_loc.get_string("responses.errors.generic_trade_fail"))
+			result_text = await locale_format(base_loc, base_loc.get("responses.errors.generic_trade_fail"))
 			await update()
 			return
 
@@ -166,7 +166,7 @@ class ShopCommands(Extension):
 		await user_data.update(owned_treasures=owned_treasure)
 		result_text = await locale_format(
 			base_loc,
-			base_loc.get_string("responses.selling.success"),
+			base_loc.get("responses.selling.success"),
 			item_name=treasure_loc["name"],
 			amount=amount,
 			price=sell_price,
@@ -216,14 +216,14 @@ class ShopCommands(Extension):
 			await ctx.edit(embeds=embeds, components=components)
 
 		if user_data.wool < treasure_price:
-			return await update(await locale_format(base_loc, base_loc.get_string("responses.errors.generic_trade_fail")))
+			return await update(await locale_format(base_loc, base_loc.get("responses.errors.generic_trade_fail")))
 
 		current_balance = user_data.wool
 		max_allowed = max(1, min(self.max_buy_sell_limit, self.max_wool_limit // max(1, treasure_price)))
 		limit_reached = None
 
 		treasure_loc: dict = await locale_format(
-			inventory_loc, inventory_loc.get_string(f"items.treasures.{treasure_id}", typecheck=dict)
+			inventory_loc, inventory_loc.get(f"items.treasures.{treasure_id}", typecheck=dict)
 		)
 		name = treasure_loc["name"]
 
@@ -249,7 +249,7 @@ class ShopCommands(Extension):
 		return await update(
 			await locale_format(
 				base_loc,
-				base_loc.get_string("responses.buying.success"),
+				base_loc.get("responses.buying.success"),
 				item_name=name,
 				amount=int(amount),
 				price=int(price),
@@ -282,19 +282,19 @@ class ShopCommands(Extension):
 
 		embeds, components = await self.embed_manager(ctx, "Backgrounds", page=page)
 		if bg_id in owned_backgrounds:
-			embeds[0].set_footer(await locale_format(base_loc, base_loc.get_string("buttons.owned")))
+			embeds[0].set_footer(await locale_format(base_loc, base_loc.get("buttons.owned")))
 		elif user.wool < get_background["price"]:
-			embeds[0].set_footer(await locale_format(base_loc, base_loc.get_string("buttons.cannot_afford.single")))
+			embeds[0].set_footer(await locale_format(base_loc, base_loc.get("buttons.cannot_afford.single")))
 		else:
 			await owned_backgrounds.append(bg_id)
 
 			embeds[0].description = await locale_format(
 				backgrounds_loc,
-				backgrounds_loc.get_string("newly_owned"),
-				user_wool=await locale_format(base_loc, base_loc.get_string("user_wool"), wool=user.wool),
+				backgrounds_loc.get("newly_owned"),
+				user_wool=await locale_format(base_loc, base_loc.get("user_wool"), wool=user.wool),
 			)
 			await user.manage_wool(-get_background["price"])
-			embeds[0].set_footer(await locale_format(backgrounds_loc, backgrounds_loc.get_string("traded")))
+			embeds[0].set_footer(await locale_format(backgrounds_loc, backgrounds_loc.get("traded")))
 		await ctx.send(embeds=embeds, components=components, ephemeral=True)
 
 	@component_callback("nikogotchi_buy")
@@ -314,7 +314,7 @@ class ShopCommands(Extension):
 
 		nikogotchi_capsule = Item(**capsules[capsule_id])
 		capsule_loc = await locale_format(
-			inventory_loc, inventory_loc.get_string(f"items.capsules.{nikogotchi_capsule.id}")
+			inventory_loc, inventory_loc.get(f"items.capsules.{nikogotchi_capsule.id}")
 		)
 
 		async def update(result: str):
@@ -324,17 +324,17 @@ class ShopCommands(Extension):
 			await ctx.edit(embeds=embeds, components=components)
 
 		if nikogotchi.status > -1 or nikogotchi.available:
-			return await update(await locale_format(base_loc, base_loc.get_string("responses.errors.generic_trade_fail")))
+			return await update(await locale_format(base_loc, base_loc.get("responses.errors.generic_trade_fail")))
 
 		if user_data.wool < nikogotchi_capsule.cost:
-			return await update(await locale_format(base_loc, base_loc.get_string("responses.errors.generic_trade_fail")))
+			return await update(await locale_format(base_loc, base_loc.get("responses.errors.generic_trade_fail")))
 
 		await nikogotchi.update(available=True, rarity=capsule_id)
 		await user_data.manage_wool(-50_000)
 
 		await update(
 			await locale_format(
-				capsules_loc, capsules_loc.get_string("result.message"), amount=50_000, capsule_name=capsule_loc
+				capsules_loc, capsules_loc.get("result.message"), amount=50_000, capsule_name=capsule_loc
 			)
 		)
 
@@ -372,18 +372,18 @@ class ShopCommands(Extension):
 
 		item_loc: dict = await locale_format(
 			inventory_loc,
-			inventory_loc.get_string(
+			inventory_loc.get(
 				f"items.pancakes.{pancake_id_to_emoji_index_please_rename_them_in_db(item.id)}",
 				typecheck=dict,
 			),
 		)
 
 		if user_data.wool < item.cost:
-			result_text = await locale_format(base_loc, base_loc.get_string("responses.errors.generic_trade_fail"))
+			result_text = await locale_format(base_loc, base_loc.get("responses.errors.generic_trade_fail"))
 			return await update()
 
 		result_text = await locale_format(
-			base_loc, base_loc.get_string("responses.buying.success"), amount=1, item_name=item_loc["name"]
+			base_loc, base_loc.get("responses.buying.success"), amount=1, item_name=item_loc["name"]
 		)
 
 		json_data = asdict(nikogotchi_data)
@@ -408,7 +408,7 @@ class ShopCommands(Extension):
 	async def page_callback(self, ctx: ComponentContext):
 		loc = Localization(ctx, prefix="commands.shop.base")
 		loading = asyncio.create_task(
-			fancy_message(ctx, await locale_format(loc, loc.get_string("loading")), edit_origin=True)
+			fancy_message(ctx, await locale_format(loc, loc.get("loading")), edit_origin=True)
 		)
 
 		daily_shop = await self.get_shop()
@@ -450,7 +450,7 @@ class ShopCommands(Extension):
 
 		wool: int = user_data.wool
 
-		user_wool = await locale_format(base_loc, base_loc.get_string("user_wool"), wool=user_data.wool)
+		user_wool = await locale_format(base_loc, base_loc.get("user_wool"), wool=user_data.wool)
 		magpie_image = EmbedAttachment(
 			"https://cdn.discordapp.com/attachments/1025158352549982299/1176956900928131143/Magpie.webp"
 		)
@@ -458,11 +458,11 @@ class ShopCommands(Extension):
 		go_back = Button(
 			style=ButtonStyle.GRAY,
 			custom_id="go_back",
-			label=await locale_format(base_loc, base_loc.get_string("buttons.go_back")),
+			label=await locale_format(base_loc, base_loc.get("buttons.go_back")),
 		)
 
-		b_owned: str = await locale_format(base_loc, base_loc.get_string("buttons.owned"))
-		b_poor: str = await locale_format(base_loc, base_loc.get_string("buttons.cannot_afford.single"))
+		b_owned: str = await locale_format(base_loc, base_loc.get("buttons.owned"))
+		b_poor: str = await locale_format(base_loc, base_loc.get("buttons.cannot_afford.single"))
 		embeds = []
 		components = []
 		if category == "main_shop" or category == "go_back":
@@ -472,14 +472,14 @@ class ShopCommands(Extension):
 			backgrounds_loc = Localization(ctx, prefix="commands.shop.backgrounds")
 			treasures_loc = Localization(ctx, prefix="commands.shop.treasures")
 
-			motds: tuple = await locale_format(main_loc, main_loc.get_string("motds", typecheck=tuple))
+			motds: tuple = await locale_format(main_loc, main_loc.get("motds", typecheck=tuple))
 
 			motd = motds[daily_shop.motd]
 
 			embeds.append(
 				Embed(
-					title=await locale_format(main_loc, main_loc.get_string("title")),
-					description=await locale_format(main_loc, main_loc.get_string("description"), motd=motd, user_wool=user_wool),
+					title=await locale_format(main_loc, main_loc.get("title")),
+					description=await locale_format(main_loc, main_loc.get("description"), motd=motd, user_wool=user_wool),
 					thumbnail=magpie_image,
 					color=Colors.SHOP,
 				)
@@ -487,25 +487,25 @@ class ShopCommands(Extension):
 
 			buttons = [
 				Button(
-					label=await locale_format(capsules_loc, capsules_loc.get_string("title")),
+					label=await locale_format(capsules_loc, capsules_loc.get("title")),
 					emoji=emojis["icons"]["capsule"],
 					style=ButtonStyle.BLURPLE,
 					custom_id="capsules",
 				),
 				Button(
-					label=await locale_format(pancakes_loc, pancakes_loc.get_string("title")),
+					label=await locale_format(pancakes_loc, pancakes_loc.get("title")),
 					emoji=emojis["pancakes"]["normal"],
 					style=ButtonStyle.BLURPLE,
 					custom_id="pancakes",
 				),
 				Button(
-					label=await locale_format(backgrounds_loc, backgrounds_loc.get_string("title")),
+					label=await locale_format(backgrounds_loc, backgrounds_loc.get("title")),
 					emoji=emojis["treasures"]["card"],
 					style=ButtonStyle.BLURPLE,
 					custom_id="Backgrounds",
 				),
 				Button(
-					label=await locale_format(treasures_loc, treasures_loc.get_string("buying.title")),
+					label=await locale_format(treasures_loc, treasures_loc.get("buying.title")),
 					emoji=emojis["icons"]["inverted_clover"],
 					style=ButtonStyle.BLURPLE,
 					custom_id="Treasures",
@@ -522,7 +522,7 @@ class ShopCommands(Extension):
 
 			item = Item(**capsules[-1])
 			button = Button(
-				label=await locale_format(base_loc, base_loc.get_string("buttons.buying.single")),
+				label=await locale_format(base_loc, base_loc.get("buttons.buying.single")),
 				emoji=PartialEmoji(1147279947086438431),
 				style=ButtonStyle.BLURPLE,
 				custom_id="nikogotchi_buy",
@@ -542,9 +542,9 @@ class ShopCommands(Extension):
 
 			buttons.append(go_back)
 
-			title = await locale_format(capsules_loc, capsules_loc.get_string("title"))
+			title = await locale_format(capsules_loc, capsules_loc.get("title"))
 			description = await locale_format(
-				capsules_loc, capsules_loc.get_string("description"), cost=cost, user_wool=user_wool
+				capsules_loc, capsules_loc.get("description"), cost=cost, user_wool=user_wool
 			)
 
 			embeds.append(
@@ -572,12 +572,12 @@ class ShopCommands(Extension):
 				owned = nikogotchi_data.__getattribute__(pancake.id) or 0
 
 				pancake_loc: dict = await locale_format(
-					inventory_loc, inventory_loc.get_string(f"items.pancakes.{pancake_id}", typecheck=dict)
+					inventory_loc, inventory_loc.get(f"items.pancakes.{pancake_id}", typecheck=dict)
 				)
 				pancake_text_parts.append(
 					await locale_format(
 						pancakes_loc,
-						pancakes_loc.get_string("item_template"),
+						pancakes_loc.get("item_template"),
 						pancake_emoji=emojis["pancakes"][pancake_id],
 						name=pancake_loc["name"],
 						cost=pancake.cost,
@@ -586,7 +586,7 @@ class ShopCommands(Extension):
 					)
 				)
 				button = Button(
-					label=await locale_format(base_loc, base_loc.get_string("buttons.buying.single")),
+					label=await locale_format(base_loc, base_loc.get("buttons.buying.single")),
 					emoji=emojis["pancakes"][pancake_id],
 					style=ButtonStyle.BLURPLE,
 					custom_id=f"buy_pancakes_{id_}",
@@ -601,9 +601,9 @@ class ShopCommands(Extension):
 
 			buttons.append(go_back)
 
-			title = await locale_format(pancakes_loc, pancakes_loc.get_string("title"))
+			title = await locale_format(pancakes_loc, pancakes_loc.get("title"))
 			description = await locale_format(
-				pancakes_loc, pancakes_loc.get_string("description"), items="\n".join(pancake_text_parts), user_wool=user_wool
+				pancakes_loc, pancakes_loc.get("description"), items="\n".join(pancake_text_parts), user_wool=user_wool
 			)
 
 			embeds.append(
@@ -626,11 +626,11 @@ class ShopCommands(Extension):
 			user_backgrounds = user_data.owned_backgrounds
 
 			background_name = await locale_format(
-				inventory_loc, inventory_loc.get_string(f'items.backgrounds["{background}"]')
+				inventory_loc, inventory_loc.get(f'items.backgrounds["{background}"]')
 			)
 			background_description = await locale_format(
 				backgrounds_loc,
-				backgrounds_loc.get_string("description"),
+				backgrounds_loc.get("description"),
 				amount=fetched_background["price"],
 				user_wool=user_wool,
 			)
@@ -652,7 +652,7 @@ class ShopCommands(Extension):
 					custom_id=f"page_prev_{bg_page}",
 				),
 				Button(
-					label=await locale_format(base_loc, base_loc.get_string("buttons.buying.single")),
+					label=await locale_format(base_loc, base_loc.get("buttons.buying.single")),
 					style=ButtonStyle.GREEN,
 					custom_id=f"buy_bg_{background}_{bg_page}",
 				),
@@ -684,7 +684,7 @@ class ShopCommands(Extension):
 			inventory_loc = Localization(ctx, prefix="commands.inventory")
 			stock: str = await locale_format(
 				treasures_loc,
-				treasures_loc.get_string("stock_market"),
+				treasures_loc.get("stock_market"),
 				change=daily_shop.stock.value,
 				rate=daily_shop.stock.price,
 			)
@@ -703,7 +703,7 @@ class ShopCommands(Extension):
 			if selected_treasure is not None:
 				get_selected_treasure = all_treasures[selected_treasure]
 				selected_treasure_loc: dict = await locale_format(
-					inventory_loc, inventory_loc.get_string(f"items.treasures.{selected_treasure}", typecheck=dict)
+					inventory_loc, inventory_loc.get(f"items.treasures.{selected_treasure}", typecheck=dict)
 				)
 
 				amount_owned = owned.get(selected_treasure, 0)
@@ -722,7 +722,7 @@ class ShopCommands(Extension):
 
 				treasure_details = await locale_format(
 					treasures_loc,
-					treasures_loc.get_string("selection"),
+					treasures_loc.get("selection"),
 					treasure_icon=emojis["treasures"][selected_treasure],
 					treasure_name=selected_treasure_loc["name"],
 					owned_count=amount_owned,
@@ -746,14 +746,14 @@ class ShopCommands(Extension):
 				get_treasure = all_treasures[treasure]
 
 				treasure_loc: dict = await locale_format(
-					inventory_loc, inventory_loc.get_string(f"items.treasures.{treasure}", typecheck=dict)
+					inventory_loc, inventory_loc.get(f"items.treasures.{treasure}", typecheck=dict)
 				)
 
 				treasure_list.append(
 					StringSelectOption(
 						label=await locale_format(
 							treasures_loc,
-							treasures_loc.get_string("buying.select_menu.option"),
+							treasures_loc.get("buying.select_menu.option"),
 							name=treasure_loc["name"],
 							price=get_treasure["price"],
 						),
@@ -767,7 +767,7 @@ class ShopCommands(Extension):
 				get_selected_treasure = all_treasures[selected_treasure]
 
 				button = Button(
-					label=await locale_format(base_loc, base_loc.get_string("buttons.buying.single")),
+					label=await locale_format(base_loc, base_loc.get("buttons.buying.single")),
 					emoji=emojis["treasures"][selected_treasure],
 					style=ButtonStyle.BLURPLE,
 					custom_id=f"treasure_buy_{selected_treasure}_One",
@@ -775,7 +775,7 @@ class ShopCommands(Extension):
 
 				button_all = Button(
 					label=await locale_format(
-						base_loc, base_loc.get_string("buttons.buying.multiple"), amount=amount, limit_reached=limit_reached
+						base_loc, base_loc.get("buttons.buying.multiple"), amount=amount, limit_reached=limit_reached
 					),
 					emoji=emojis["treasures"][selected_treasure],
 					style=ButtonStyle.BLURPLE,
@@ -796,7 +796,7 @@ class ShopCommands(Extension):
 
 			buttons.append(
 				Button(
-					label=await locale_format(treasures_loc, treasures_loc.get_string("selling.title")),
+					label=await locale_format(treasures_loc, treasures_loc.get("selling.title")),
 					style=ButtonStyle.GREEN,
 					custom_id="sell_treasure_menu",
 				)
@@ -804,10 +804,10 @@ class ShopCommands(Extension):
 
 			buttons.append(go_back)
 
-			title = await locale_format(treasures_loc, treasures_loc.get_string("buying.title"))
+			title = await locale_format(treasures_loc, treasures_loc.get("buying.title"))
 			description = await locale_format(
 				treasures_loc,
-				treasures_loc.get_string("buying.description"),
+				treasures_loc.get("buying.description"),
 				stock_market=stock,
 				selected_treasure=treasure_details,
 				user_wool=user_wool,
@@ -827,13 +827,13 @@ class ShopCommands(Extension):
 			if len(treasure_list) > 0:
 				select_menu = StringSelectMenu(
 					*treasure_list,
-					placeholder=await locale_format(treasures_loc, treasures_loc.get_string("buying.select_menu.placeholder")),
+					placeholder=await locale_format(treasures_loc, treasures_loc.get("buying.select_menu.placeholder")),
 					custom_id="select_treasure",
 				)
 			else:
 				select_menu = StringSelectMenu(
 					"💥💥💥💥💥💥💥💥💥💥💥💥",
-					placeholder=await locale_format(treasures_loc, treasures_loc.get_string("buying.select_menu.no_treasures")),
+					placeholder=await locale_format(treasures_loc, treasures_loc.get("buying.select_menu.no_treasures")),
 					custom_id="select_treasure",
 					disabled=True,
 				)
@@ -844,13 +844,13 @@ class ShopCommands(Extension):
 			inventory_loc = Localization(ctx, prefix="commands.inventory")
 			stock: str = await locale_format(
 				treasures_loc,
-				treasures_loc.get_string("stock_market"),
+				treasures_loc.get("stock_market"),
 				change=daily_shop.stock.value,
 				rate=daily_shop.stock.price,
 			)
 
 			go_back = Button(
-				label=await locale_format(base_loc, base_loc.get_string("buttons.go_back")),
+				label=await locale_format(base_loc, base_loc.get("buttons.go_back")),
 				style=ButtonStyle.GRAY,
 				custom_id="Treasures",
 			)
@@ -869,7 +869,7 @@ class ShopCommands(Extension):
 			if selected_treasure is not None:
 				get_selected_treasure = all_treasures[selected_treasure]
 				selected_treasure_loc: dict = await locale_format(
-					inventory_loc, inventory_loc.get_string(f"items.treasures.{selected_treasure}", typecheck=dict)
+					inventory_loc, inventory_loc.get(f"items.treasures.{selected_treasure}", typecheck=dict)
 				)
 
 				sell_price_one = int(get_selected_treasure["price"] * daily_shop.stock.price)
@@ -884,7 +884,7 @@ class ShopCommands(Extension):
 				if amount_owned > 0:
 					treasure_details = await locale_format(
 						treasures_loc,
-						treasures_loc.get_string("selection"),
+						treasures_loc.get("selection"),
 						treasure_icon=emojis["treasures"][selected_treasure],
 						treasure_name=selected_treasure_loc["name"],
 						owned_count=amount_owned,
@@ -906,14 +906,14 @@ class ShopCommands(Extension):
 					continue
 
 				treasure_loc = await locale_format(
-					inventory_loc, inventory_loc.get_string(f"items.treasures.{treasure_id}", typecheck=dict)
+					inventory_loc, inventory_loc.get(f"items.treasures.{treasure_id}", typecheck=dict)
 				)
 
 				treasure_selection.append(
 					StringSelectOption(
 						label=await locale_format(
 							treasures_loc,
-							treasures_loc.get_string("selling.select_menu.option"),
+							treasures_loc.get("selling.select_menu.option"),
 							name=treasure_loc["name"],
 							amount=amount,
 						),
@@ -930,14 +930,14 @@ class ShopCommands(Extension):
 
 				buttons = [
 					Button(
-						label=await locale_format(base_loc, base_loc.get_string("buttons.selling.single")),
+						label=await locale_format(base_loc, base_loc.get("buttons.selling.single")),
 						custom_id=f"treasure_sell_{treasure_id}_one",
 						style=ButtonStyle.GREEN,
 					),
 					Button(
 						label=await locale_format(
 							base_loc,
-							base_loc.get_string("buttons.selling.multiple"),
+							base_loc.get("buttons.selling.multiple"),
 							amount=amount_selected,
 							limit_reached=limit_reached,
 						),
@@ -950,10 +950,10 @@ class ShopCommands(Extension):
 
 			embeds.append(
 				Embed(
-					title=await locale_format(treasures_loc, treasures_loc.get_string("selling.title")),
+					title=await locale_format(treasures_loc, treasures_loc.get("selling.title")),
 					description=await locale_format(
 						treasures_loc,
-						treasures_loc.get_string("selling.description"),
+						treasures_loc.get("selling.description"),
 						stock_market=stock,
 						selected_treasure=treasure_details,
 						user_wool=user_wool,
@@ -968,13 +968,13 @@ class ShopCommands(Extension):
 			if len(treasure_selection) > 0:
 				select_menu = StringSelectMenu(
 					*treasure_selection,
-					placeholder=await locale_format(treasures_loc, treasures_loc.get_string("selling.select_menu.placeholder")),
+					placeholder=await locale_format(treasures_loc, treasures_loc.get("selling.select_menu.placeholder")),
 					custom_id="select_treasure_sell",
 				)
 			else:
 				select_menu = StringSelectMenu(
 					"💥💥💥💥💥💥💥💥💥💥💥💥",
-					placeholder=await locale_format(treasures_loc, treasures_loc.get_string("selling.select_menu.no_treasures")),
+					placeholder=await locale_format(treasures_loc, treasures_loc.get("selling.select_menu.no_treasures")),
 					custom_id="select_treasure_sell",
 					disabled=True,
 				)
@@ -989,7 +989,7 @@ class ShopCommands(Extension):
 	async def shop(self, ctx: SlashContext):  #
 		await ctx.defer(ephemeral=True)
 		loc = Localization(ctx, prefix="commands.shop.base")
-		loading = asyncio.create_task(fancy_message(ctx, await locale_format(loc, loc.get_string("loading"))))
+		loading = asyncio.create_task(fancy_message(ctx, await locale_format(loc, loc.get("loading"))))
 
 		await self.get_shop()
 

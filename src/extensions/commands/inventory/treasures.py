@@ -30,12 +30,12 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 	if user is None:
 		user = ctx.user
 	if user.bot:
-		return await ctx.send(await locale_format(loc, treasure_loc.get_string("empty"), user_id=user.id), ephemeral=True)
+		return await ctx.send(await locale_format(loc, treasure_loc.get("empty"), user_id=user.id), ephemeral=True)
 
 	message = asyncio.create_task(
 		fancy_message(
 			ctx,
-			await locale_format(loc, treasure_loc.get_string("loading"), target_type="current" if user == ctx.user else "other"),
+			await locale_format(loc, treasure_loc.get("loading"), target_type="current" if user == ctx.user else "other"),
 			ephemeral=not public,
 		)
 	)
@@ -45,12 +45,12 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 	owned_treasures = user_data.owned_treasures
 	if len(list(user_data.owned_treasures.items())) == 0:
 		await message
-		return await fancy_message(ctx, await locale_format(loc, treasure_loc.get_string("empty"), user_id=user.id), edit=True)
+		return await fancy_message(ctx, await locale_format(loc, treasure_loc.get("empty"), user_id=user.id), edit=True)
 
 	max_amount_length = len(fnum(max(owned_treasures.values(), default=0), locale=loc.locale))
 	treasure_string = ""
 	for treasure_nid, item in all_treasures.items():
-		treasure_metadata: dict = await locale_format(loc, loc.get_string("items.treasures", typecheck=dict))
+		treasure_metadata: dict = await locale_format(loc, loc.get("items.treasures", typecheck=dict))
 
 		name = treasure_metadata[treasure_nid]["name"]
 
@@ -59,7 +59,7 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 		treasure_string += (
 			await locale_format(
 				loc,
-				loc.get_string("items.entry_template"),
+				loc.get("items.entry_template"),
 				spacer=rjust.replace(num, ""),
 				amount=num,
 				icon=emojis["treasures"][treasure_nid],
@@ -71,7 +71,7 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 	await ctx.edit(
 		embed=Embed(
 			description=await locale_format(
-				loc, treasure_loc.get_string("message"), user=user.mention, treasures=treasure_string
+				loc, treasure_loc.get("message"), user=user.mention, treasures=treasure_string
 			)
 			+ (
 				await put_mini(

@@ -32,7 +32,7 @@ class MemberAddEvent(Extension):
 
 		if not target_channel:
 			return
-		message = config.message or loc.get_string("settings.welcome.editor.templates.default", typecheck=str)
+		message = config.message or loc.get("settings.welcome.editor.templates.default", typecheck=str)
 		message = await locale_format(
 			loc,
 			message,

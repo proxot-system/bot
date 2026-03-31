@@ -27,14 +27,14 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5", public:
 	loc = Localization(ctx)
 	sloc = Localization(ctx, prefix="commands.textbox.state")
 	await fancy_message(
-		ctx, await locale_format(loc, loc.get_string("generic.loading.checking_developer_status")), ephemeral=not public
+		ctx, await locale_format(loc, loc.get("generic.loading.checking_developer_status")), ephemeral=not public
 	)
 
 	if str(ctx.author.id) not in get_config("dev.whitelist", typecheck=list):
 		await asyncio.sleep(3)
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get_string("generic.errors.not_a_developer")),
+			await locale_format(loc, loc.get("generic.errors.not_a_developer")),
 			facepic=await get_facepic("OneShot (fan)/Nikonlanger/Jii"),
 			edit=True,
 		)
@@ -56,7 +56,7 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5", public:
 				if not int_regex.match(user_id) and user_id != "me":
 					return await ctx.edit(
 						embeds=Embed(
-							color=Colors.BAD, title=await locale_format(sloc, sloc.get_string("errors.invalid_user_id"))
+							color=Colors.BAD, title=await locale_format(sloc, sloc.get("errors.invalid_user_id"))
 						)
 					)
 
@@ -70,7 +70,7 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5", public:
 					return await ctx.edit(
 						embeds=Embed(
 							color=Colors.BAD,
-							title=await locale_format(sloc, sloc.get_string("errors.not_found"), sid=filter_str),
+							title=await locale_format(sloc, sloc.get("errors.not_found"), sid=filter_str),
 						)
 					)
 				states2show = [(filter_str, states[filter_str])]
@@ -87,7 +87,7 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5", public:
 		except ValueError:
 			return await ctx.edit(
 				embeds=Embed(
-					color=Colors.BAD, title=await locale_format(sloc, sloc.get_string("errors.invalid_paging"))
+					color=Colors.BAD, title=await locale_format(sloc, sloc.get("errors.invalid_paging"))
 				)
 			)
 
@@ -97,7 +97,7 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5", public:
 			return await ctx.edit(
 				embeds=Embed(
 					color=Colors.BAD,
-					title=await locale_format(sloc, sloc.get_string("errors.out_of_bounds"), max=len(states2show)),
+					title=await locale_format(sloc, sloc.get("errors.out_of_bounds"), max=len(states2show)),
 				)
 			)
 		states2show = states2show[start_index : start_index + items_per_page]
@@ -107,14 +107,14 @@ async def command_(self, ctx: SlashContext, search: str = "user:me!0:5", public:
 		return await ctx.edit(
 			embeds=Embed(
 				color=Colors.BAD,
-				title=await locale_format(sloc, sloc.get_string(f"errors.nothing_found{reason}")),
+				title=await locale_format(sloc, sloc.get(f"errors.nothing_found{reason}")),
 			)
 		)
 
 	return await ctx.edit(
 		embeds=Embed(
 			color=Colors.DEFAULT,
-			title=await locale_format(sloc, sloc.get_string("results"), count=len(states2show)),
+			title=await locale_format(sloc, sloc.get("results"), count=len(states2show)),
 			description="\n".join(map(lambda a: f"-# {a[0]}:\n```{a[1]}```", states2show)),
 		)
 	)

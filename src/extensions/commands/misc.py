@@ -40,20 +40,20 @@ class MiscellaneousCommands(Extension):
 	@contexts(bot_dm=True)
 	async def random_wikipedia(self, ctx: SlashContext, public: bool = False):
 		loc = Localization(ctx)
-		await fancy_message(ctx, message=await locale_format(loc, loc.get_string("generic.loading.generic")), ephemeral=not public)
+		await fancy_message(ctx, message=await locale_format(loc, loc.get("generic.loading.generic")), ephemeral=not public)
 		try:
 			response = await fetch("https://en.wikipedia.org/api/rest_v1/page/random/summary", output="json")
 		except:
 			print_exc()
 			return await fancy_message(
-				ctx, edit=True, message=await locale_format(loc, loc.get_string("generic.loading.failed")), ephemeral=not public
+				ctx, edit=True, message=await locale_format(loc, loc.get("generic.loading.failed")), ephemeral=not public
 			)
 
 		await fancy_message(
 			ctx,
 			await locale_format(
 				loc,
-				loc.get_string("commands.misc.commands.random_wikipedia.wikipedia"),
+				loc.get("commands.misc.commands.random_wikipedia.wikipedia"),
 				link=response["content_urls"]["desktop"]["page"],
 				title=response["title"],
 			),
@@ -98,14 +98,14 @@ class MiscellaneousCommands(Extension):
 	@contexts(bot_dm=True)
 	async def cat(self, ctx: SlashContext, public: bool = False):
 		loc = Localization(ctx, prefix="commands.misc.commands.cat")
-		embed = Embed(title=await locale_format(loc, loc.get_string("miaou.title")), color=Colors.DEFAULT)
+		embed = Embed(title=await locale_format(loc, loc.get("miaou.title")), color=Colors.DEFAULT)
 
 		if random.randint(0, 100) == 30 + 6 + 14:
-			embed.description = await locale_format(loc, loc.get_string("miaou.finding.noik"))
+			embed.description = await locale_format(loc, loc.get("miaou.finding.noik"))
 			embed.set_image(
 				"https://cdn.discordapp.com/attachments/1028022857877422120/1075445796113219694/ezgif.com-gif-maker_1.gif"
 			)
-			embed.set_footer(await locale_format(loc, loc.get_string("miaou.finding.footer", return_None_on_not_found=True) or ""))
+			embed.set_footer(await locale_format(loc, loc.get("miaou.finding.footer", return_None_on_not_found=True) or ""))
 			return await ctx.send(embed=embed)
 
 		async with aiohttp.ClientSession() as session:
@@ -114,7 +114,7 @@ class MiscellaneousCommands(Extension):
 
 		image = data[0]["url"]
 
-		embed.description = await locale_format(loc, loc.get_string("miaou.finding.cat"))
+		embed.description = await locale_format(loc, loc.get("miaou.finding.cat"))
 		embed.set_image(image)
 		return await ctx.send(embed=embed, ephemeral=not public)
 
@@ -131,7 +131,7 @@ class MiscellaneousCommands(Extension):
 		loc = Localization(ctx)
 		await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get_string("generic.loading.checking_developer_status")),
+			await locale_format(loc, loc.get("generic.loading.checking_developer_status")),
 			ephemeral=True,
 		)
 
@@ -139,13 +139,13 @@ class MiscellaneousCommands(Extension):
 			await asyncio.sleep(3)
 			return await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("generic.errors.not_a_developer")),
+				await locale_format(loc, loc.get("generic.errors.not_a_developer")),
 				facepic=await get_facepic("OneShot (fan)/Nikonlanger/Jii"),
 				edit=True,
 			)
 
 		asyncio.create_task(
-			fancy_message(ctx, await locale_format(loc, loc.get_string("generic.loading.evaluating")), ephemeral=not public)
+			fancy_message(ctx, await locale_format(loc, loc.get("generic.loading.evaluating")), ephemeral=not public)
 		)
 
 		method = "eval"

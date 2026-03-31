@@ -249,7 +249,7 @@ async def send_output(
 	pos = ""
 	message = await ctx.respond(
 		embed=Embed(
-			description=await locale_format(loc, loc.get_string("monologue.rendering")) + pos,
+			description=await locale_format(loc, loc.get("monologue.rendering")) + pos,
 			color=Colors.DARKER_WHITE,
 		),
 		ephemeral=True,
@@ -264,7 +264,7 @@ async def send_output(
 		ctx.edit(
 			message=message,
 			embed=Embed(
-				description=await locale_format(loc, loc.get_string("monologue.sending")) + pos,
+				description=await locale_format(loc, loc.get("monologue.sending")) + pos,
 				color=Colors.DARKER_WHITE,
 			),
 		)
@@ -287,15 +287,15 @@ async def send_output(
 			embed=Embed(
 				description=await locale_format(
 					loc,
-					loc.get_string(f"errors.failed_to_send{'_dm' if state.options.send_to == 3 else ''}"),
+					loc.get(f"errors.failed_to_send{'_dm' if state.options.send_to == 3 else ''}"),
 				),
 				color=Colors.DARKER_WHITE,
 			),
 		)
-	desc = await locale_format(loc, loc.get_string("monologue.done"))
+	desc = await locale_format(loc, loc.get("monologue.done"))
 	if debugging():
 		desc += "\n-# " + await locale_format(
-			loc, loc.get_string("monologue.debug"), time=took.total_seconds(), sid=state_id
+			loc, loc.get("monologue.debug"), time=took.total_seconds(), sid=state_id
 		)
 	if (
 		state.options.filetype in ("WEBP", "GIF", "APNG") and sent_message and MessageFlags.EPHEMERAL in sent_message.flags
@@ -325,7 +325,7 @@ async def render_to_file(
 		frames = [state.frames[int(frame_preview_index)]]
 	filename = await locale_format(
 		loc,
-		loc.get_string(f"alt.{'single' if frame_preview_index is not None else 'multi'}_frame.filename"),
+		loc.get(f"alt.{'single' if frame_preview_index is not None else 'multi'}_frame.filename"),
 		frames=len(frames),
 		timestamp=str(round(datetime.now().timestamp())),
 	)
@@ -347,15 +347,15 @@ async def init_change_text_flow(ctx: ComponentContext | SlashContext, state_id: 
 			custom_id="new_text",
 			required=False,
 			value=frame_data.text,
-			label=await locale_format(loc, loc.get_string("modal.edit_text.input.label"), index=int(frame_index) + 1),
-			placeholder=await locale_format(loc, loc.get_string("modal.edit_text.input.placeholder")),
+			label=await locale_format(loc, loc.get("modal.edit_text.input.label"), index=int(frame_index) + 1),
+			placeholder=await locale_format(loc, loc.get("modal.edit_text.input.placeholder")),
 			min_length=0,
 			max_length=get_config("textbox.limits.frame-text-length", typecheck=int),
 		),
 		custom_id=f"textbox update_text_finish {state_id} {frame_index}",
 		title=await locale_format(
 			loc,
-			loc.get_string("modal.edit_text.title"),
+			loc.get("modal.edit_text.title"),
 			index=int(frame_index) + 1,
 			total=len(state.frames),
 		),
@@ -403,13 +403,13 @@ async def init_edit_flow(ctx: ComponentContext | SlashContext, state_id: str, fr
 			custom_id="updated_frames",
 			required=False,
 			value=frames,
-			label=await locale_format(loc, loc.get_string("modal.edit_frames.input.label"), index=int(frame_index) + 1),
-			placeholder=await locale_format(loc, loc.get_string("modal.edit_frames.input.placeholder")),
+			label=await locale_format(loc, loc.get("modal.edit_frames.input.label"), index=int(frame_index) + 1),
+			placeholder=await locale_format(loc, loc.get("modal.edit_frames.input.placeholder")),
 		),
 		custom_id=f"textbox edit_finish {state_id} {frame_index}",
 		title=await locale_format(
 			loc,
-			loc.get_string("modal.edit_frames.title"),
+			loc.get("modal.edit_frames.title"),
 			index=int(frame_index) + 1,
 			total=len(state.frames),
 		),
@@ -471,7 +471,7 @@ async def respond(
 			warnings = []
 		pos = ""
 		if len(state.frames) > 1 or frame_index != 0:
-			pos = f"\n-# {await locale_format(loc, loc.get_string('frame_position'), current=int(frame_index) + 1, total=len(state.frames))}"
+			pos = f"\n-# {await locale_format(loc, loc.get('frame_position'), current=int(frame_index) + 1, total=len(state.frames))}"
 		if debugging():
 			pos += "\n-# **sid**: " + state_id
 		next_frame_exists = len(state.frames) != int(frame_index) + 1
@@ -504,18 +504,18 @@ async def respond(
 						style=ButtonStyle.BLURPLE,
 						label=await locale_format(
 							loc,
-							loc.get_string(f"button.text.{'edit' if frame_data.text else 'add'}"),
+							loc.get(f"button.text.{'edit' if frame_data.text else 'add'}"),
 						),
 						custom_id=f"textbox change_text {state_id} {frame_index}",
 					),
 					Button(
 						style=ButtonStyle.BLURPLE,
-						label=await locale_format(loc, loc.get_string("button.face")),
+						label=await locale_format(loc, loc.get("button.face")),
 						custom_id=f"textbox_fs init {state_id} {frame_index}",
 					),
 					Button(
 						style=ButtonStyle.BLURPLE,
-						label=await locale_format(loc, loc.get_string("button.edit")),
+						label=await locale_format(loc, loc.get("button.edit")),
 						custom_id=f"textbox edit {state_id} {frame_index}",
 					),
 				),
@@ -526,7 +526,7 @@ async def respond(
 							style=ButtonStyle.GRAY,
 							label=await locale_format(
 								loc,
-								loc.get_string("button.frame.previous"),
+								loc.get("button.frame.previous"),
 							),
 							custom_id=f"textbox refresh {state_id} {int(frame_index) - 1}",
 							disabled=int(frame_index) - 1 < 0,
@@ -535,10 +535,10 @@ async def respond(
 							style=ButtonStyle.GREEN,
 							label=await locale_format(
 								loc,
-								loc.get_string("button.render" + ("send" if state.options.send_to != 1 else "")),
+								loc.get("button.render" + ("send" if state.options.send_to != 1 else "")),
 								type=await locale_format(
 									loc,
-									loc.get_string(f"filetypes.{state.options.filetype}"),
+									loc.get(f"filetypes.{state.options.filetype}"),
 								),
 							),
 							custom_id=f"textbox render {state_id} {frame_index}",
@@ -547,7 +547,7 @@ async def respond(
 							style=ButtonStyle.DANGER if frame_data.text else ButtonStyle.GRAY,
 							label=await locale_format(
 								loc,
-								loc.get_string(f"button.frame.{'clear' if len(state.frames) == 1 else 'delete'}"),
+								loc.get(f"button.frame.{'clear' if len(state.frames) == 1 else 'delete'}"),
 							),
 							custom_id=f"textbox delete_frame {state_id} {frame_index}",
 						),
@@ -555,7 +555,7 @@ async def respond(
 							style=ButtonStyle.GRAY,
 							label=await locale_format(
 								loc,
-								loc.get_string(f"button.frame.{'next' if next_frame_exists else 'add'}"),
+								loc.get(f"button.frame.{'next' if next_frame_exists else 'add'}"),
 							),
 							custom_id=f"textbox refresh {state_id} {int(frame_index) + 1}",
 						),
@@ -565,7 +565,7 @@ async def respond(
 		)
 	elif type == "loading":
 		loc = Localization(ctx)
-		content = await locale_format(loc, loc.get_string("generic.loading.textbox"))
+		content = await locale_format(loc, loc.get("generic.loading.textbox"))
 		accent_color = Colors.DEFAULT.value
 		edit = False
 	elif type == "error":

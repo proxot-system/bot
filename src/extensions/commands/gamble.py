@@ -80,13 +80,13 @@ class GambleCommands(Extension):
 	)
 	async def wool(self, ctx: SlashContext, bet: int):
 		loc = Localization(ctx)
-		await fancy_message(ctx, await locale_format(loc, loc.get_string("generic.loading.generic")))
+		await fancy_message(ctx, await locale_format(loc, loc.get("generic.loading.generic")))
 		user_data: UserData = await UserData(_id=ctx.author.id).fetch()
 
 		if user_data.wool < bet:
 			return await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("wool.gamble.errors.not_enough_wool")),
+				await locale_format(loc, loc.get("wool.gamble.errors.not_enough_wool")),
 				ephemeral=True,
 				color=Colors.BAD,
 			)
@@ -176,10 +176,10 @@ class GambleCommands(Extension):
 					else:
 						ticker += f"{s} ┋ "
 			return Embed(
-				description=f"## {await locale_format(loc, loc.get_string('wool.gamble.slots.title'))}\n\n"
+				description=f"## {await locale_format(loc, loc.get('wool.gamble.slots.title'))}\n\n"
 				+ await locale_format(
 					loc,
-					loc.get_string(f"wool.gamble.slots.description_{'running' if not result else 'result'}"),
+					loc.get(f"wool.gamble.slots.description_{'running' if not result else 'result'}"),
 					bettor_id=ctx.author.id,
 					bet_amount=bet,
 					result=result[0] if result else None,
@@ -252,7 +252,7 @@ class GambleCommands(Extension):
 			value = int(abs(slot.value) * 100)
 			tasks.append(
 				loc.format(
-					loc.get_string("wool.gamble.slots.guide.value_entry"),
+					loc.get("wool.gamble.slots.guide.value_entry"),
 					icon=slot.emoji,
 					value=value,
 					value_sign="negative" if slot.value < 0 else "positive",
@@ -263,6 +263,6 @@ class GambleCommands(Extension):
 
 		await fancy_message(
 			ctx,
-			f"## {await locale_format(loc, loc.get_string('wool.gamble.slots.title'))}\n"
-			+ await locale_format(loc, loc.get_string("wool.gamble.slots.guide.description"), slot_values="\n".join(point_rows)),
+			f"## {await locale_format(loc, loc.get('wool.gamble.slots.title'))}\n"
+			+ await locale_format(loc, loc.get("wool.gamble.slots.guide.description"), slot_values="\n".join(point_rows)),
 		)

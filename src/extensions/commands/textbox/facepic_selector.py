@@ -53,7 +53,7 @@ async def render_selector_ui(
 	loc_path = ".".join(f'["{name}"]' for name in path)
 	prev_loc_path = ".".join(f'["{name}"]' for name in path[:-1])
 	name = (
-		loc_facepics.get_string(f"{loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
+		loc_facepics.get(f"{loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
 		if len(path) > 0
 		else None
 	)
@@ -75,12 +75,12 @@ async def render_selector_ui(
 	)
 	is_icon_metadata_facepic = "icon" in previous_level and previous_level.get("icon") is icon
 
-	description = loc_facepics.get_string(
+	description = loc_facepics.get(
 		f"{loc_path if not is_icon_metadata_facepic else prev_loc_path}._description",
 		typecheck=Any,
 		return_None_on_not_found=True,
 	)
-	credits = loc_facepics.get_string(
+	credits = loc_facepics.get(
 		f"{loc_path if not is_icon_metadata_facepic else prev_loc_path}._credits",
 		typecheck=Any,
 		return_None_on_not_found=True,
@@ -90,14 +90,14 @@ async def render_selector_ui(
 		if not is_icon_metadata_facepic:
 			expression = name
 		name = (
-			loc_facepics.get_string(f"{prev_loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
+			loc_facepics.get(f"{prev_loc_path}._name", typecheck=Any, return_None_on_not_found=True) or path[-1]
 			if len(path) > 0
 			else None
 		)
 	embed = Embed(
 		description=await locale_format(
 			loc,
-			loc.get_string("facepic_picker.layout"),
+			loc.get("facepic_picker.layout"),
 			location=location,
 			name=name,
 			expression=expression,

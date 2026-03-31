@@ -69,7 +69,7 @@ class State:
 			state_template,
 			comment=await locale_format(
 				sloc,
-				sloc.get_string("ttb.comment"),
+				sloc.get("ttb.comment"),
 				link="https://github.com/proxot-system/bot/blob/main/md/en/textbox/index.md#raw-file-editing-tbb",  # /md/{sloc.locale}/textbox
 			),
 			filetype=self.options.filetype,
@@ -260,7 +260,7 @@ async def state_shortcut(
 	except KeyError:
 		await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get_string("generic.errors.expired")) + f"\n-# **sid:** {str(state_id)}",
+			await locale_format(loc, loc.get("generic.errors.expired")) + f"\n-# **sid:** {str(state_id)}",
 			components=[],
 			ephemeral=True,
 		)
@@ -274,7 +274,7 @@ async def state_shortcut(
 	except ValueError:
 		await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get_string("errors.invalid_frame_index"), index=str(frame_index)),
+			await locale_format(loc, loc.get("errors.invalid_frame_index"), index=str(frame_index)),
 			ephemeral=True,
 		)
 		raise StateShortcutError(f"Frame index '{frame_index}' is not a valid integer.")
@@ -287,7 +287,7 @@ async def state_shortcut(
 		else:
 			await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("errors.unknown_frame"), id=str(frame_index)),
+				await locale_format(loc, loc.get("errors.unknown_frame"), id=str(frame_index)),
 				ephemeral=True,
 			)
 			raise StateShortcutError(f"Frame with index '{idx}' not found in state '{state_id}'.")

@@ -283,7 +283,7 @@ async def render_frame(
 			out = None
 			mt_loc = Localization(loc, prefix="")
 			try:
-				out = parse_textbox_text(await locale_format(mt_loc, mt_loc.get_string(command.path)))
+				out = parse_textbox_text(await locale_format(mt_loc, mt_loc.get(command.path)))
 			except Exception as e:
 				out = ["[ " + str(e) + " ]"]
 			i += 1

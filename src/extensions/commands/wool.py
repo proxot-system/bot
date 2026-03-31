@@ -83,7 +83,7 @@ class WoolCommands(Extension):
 			ctx,
 			await locale_format(
 				loc,
-				loc.get_string(f"wool.balance.{who_path}.{'none' if wool == 0 else 'some'}"),
+				loc.get(f"wool.balance.{who_path}.{'none' if wool == 0 else 'some'}"),
 				account_holder_id=of.id,
 				balance=fnum(wool, locale=ctx.locale),
 			),
@@ -120,7 +120,7 @@ class WoolCommands(Extension):
 		if to.id == ctx.author.id:
 			return await fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("wool.transfer.errors.self_transfer")),
+				await locale_format(loc, loc.get("wool.transfer.errors.self_transfer")),
 				ephemeral=True,
 				color=Colors.BAD,
 			)
@@ -129,19 +129,19 @@ class WoolCommands(Extension):
 			buttons = [
 				Button(
 					style=ButtonStyle.RED,
-					label=await locale_format(loc, loc.get_string("generic.buttons.yes")),
+					label=await locale_format(loc, loc.get("generic.buttons.yes")),
 					custom_id="yes",
 				),
 				Button(
 					style=ButtonStyle.GRAY,
-					label=await locale_format(loc, loc.get_string("generic.buttons.cancel")),
+					label=await locale_format(loc, loc.get("generic.buttons.cancel")),
 					custom_id="cancel",
 				),
 			]
 
 			confirmation_m = await fancy_message(
 				ctx,
-				message=await locale_format(loc, loc.get_string("wool.transfer.to.bot.confirmation"))
+				message=await locale_format(loc, loc.get("wool.transfer.to.bot.confirmation"))
 				+ await put_mini(
 					loc,
 					"wool.transfer.to.bot.notefirmation",
@@ -161,7 +161,7 @@ class WoolCommands(Extension):
 					return
 			except asyncio.TimeoutError:
 				await confirmation_m.edit(
-					content=await locale_format(loc, loc.get_string("generic.responses.timeout.yn")), components=[]
+					content=await locale_format(loc, loc.get("generic.responses.timeout.yn")), components=[]
 				)
 				await ctx.delete()
 				await asyncio.sleep(15)
@@ -170,7 +170,7 @@ class WoolCommands(Extension):
 		loading = asyncio.create_task(
 			fancy_message(
 				ctx,
-				await locale_format(loc, loc.get_string("generic.loading.hint")),
+				await locale_format(loc, loc.get("generic.loading.hint")),
 				ephemeral=ephemeral_override if ephemeral_override is not None else False,
 			)
 		)
@@ -183,7 +183,7 @@ class WoolCommands(Extension):
 				ctx,
 				await locale_format(
 					loc,
-					loc.get_string("wool.transfer.errors.not_enough"),
+					loc.get("wool.transfer.errors.not_enough"),
 					balance=from_user.wool,
 					sender_id=from_user._id,
 					receiver_id=to_user._id,
@@ -203,7 +203,7 @@ class WoolCommands(Extension):
 				ctx,
 				await locale_format(
 					loc,
-					loc.get_string("wool.transfer.steal"),
+					loc.get("wool.transfer.steal"),
 					sender_id=from_user._id,
 					receiver_id=to_user._id,
 				),
@@ -213,7 +213,7 @@ class WoolCommands(Extension):
 			ctx,
 			await locale_format(
 				loc,
-				loc.get_string(f"wool.transfer.to.{'bot' if to.bot else 'user'}.{'none' if amount == 0 else 'some'}"),
+				loc.get(f"wool.transfer.to.{'bot' if to.bot else 'user'}.{'none' if amount == 0 else 'some'}"),
 				sender_id=from_user._id,
 				receiver_id=to_user._id,
 				amount=amount,
@@ -237,7 +237,7 @@ class WoolCommands(Extension):
 				ctx,
 				await locale_format(
 					loc,
-					loc.get_string("wool.pray.errors.timeout"),
+					loc.get("wool.pray.errors.timeout"),
 					unable_until=unable_until,
 				),
 				ephemeral=True,
@@ -259,11 +259,11 @@ class WoolCommands(Extension):
 		await ctx.send(
 			embed=Embed(
 				thumbnail=EmbedAttachment(make_emoji_cdn_url(emojis["treasures"]["die"])),
-				title=await locale_format(loc, loc.get_string("wool.pray.title")),
-				description=f"{await locale_format(loc, loc.get_string(f'wool.pray.finds.{finding[0]}'))}\n-# "
+				title=await locale_format(loc, loc.get("wool.pray.title")),
+				description=f"{await locale_format(loc, loc.get(f'wool.pray.finds.{finding[0]}'))}\n-# "
 				+ await locale_format(
 					loc,
-					loc.get_string(f"wool.pray.Change.{'gain' if amount > 0 else 'loss'}"),
+					loc.get(f"wool.pray.Change.{'gain' if amount > 0 else 'loss'}"),
 					amount=abs(amount),
 				),
 				color=Colors.GREEN if amount > 0 else Colors.BAD,

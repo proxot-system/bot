@@ -48,16 +48,16 @@ class RollCommand(Extension):
 		rolls = [0 if sides == 0 else random.randint(1, sides) for _ in range(amount)]
 
 		result = amperjoin([str(roll) for roll in rolls])
-		description = await locale_format(loc, loc.get_string("desc"), result=result)
+		description = await locale_format(loc, loc.get("desc"), result=result)
 
 		if len(rolls) > 1:
-			description += "\n\n" + await locale_format(loc, loc.get_string("multi"), total=sum(rolls))
+			description += "\n\n" + await locale_format(loc, loc.get("multi"), total=sum(rolls))
 
 		await ctx.send(
 			embeds=Embed(
 				color=Colors.DEFAULT,
 				thumbnail=EmbedAttachment(url=make_emoji_cdn_url(emojis["treasures"]["die"])),
-				title=await locale_format(loc, loc.get_string("title"), amount=amount if amount > 1 else "", sides=sides),
+				title=await locale_format(loc, loc.get("title"), amount=amount if amount > 1 else "", sides=sides),
 				description=description,
 			),
 			ephemeral=not public,
