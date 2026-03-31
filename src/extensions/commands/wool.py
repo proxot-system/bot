@@ -144,7 +144,7 @@ class WoolCommands(Extension):
 				message=await locale_format(loc, loc.get("transfer.to.bot.confirmation"))
 				+ await put_mini(
 					loc,
-					"transfer.to.bot.notefirmation",
+					"minis.notes.bot_transfer",
 					user_id=ctx.user.id,
 					show_up_amount=10,
 					pre="\n\n",
@@ -188,7 +188,7 @@ class WoolCommands(Extension):
 					sender_id=from_user._id,
 					receiver_id=to_user._id,
 				)
-				+ await put_mini(loc, "transfer.errors.note_nuf", pre="\n\n"),
+				+ await put_mini(loc, "minis.notes.not_enough_wool", pre="\n\n"),
 				edit=True,
 				ephemeral=True,
 				color=Colors.BAD,

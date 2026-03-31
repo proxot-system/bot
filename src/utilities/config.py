@@ -101,7 +101,7 @@ cl = get_config("config-check-level", typecheck=int, ignore_None=True)
 if cl is not None:
 	to_check: list[tuple[str, bool]] = [
 		("bot.token", True),
-		("database.uri", True),
+		("database.connection.password", True),
 		("localization.source-locale", True),
 		("bot.prod.token", False),
 		("bot.rolling.avatar", False),
