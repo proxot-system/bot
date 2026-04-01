@@ -266,7 +266,7 @@ class AboutCommand(Extension):
 				inline=True,
 			),
 		)
-		# embed.add_field(await locale_format(stats_loc, stats_loc.get_string("fields.user_installs.name")), len(ctx.client.app.users))  # NONEXISTENT  # noqa: ERA001
+		# embed.add_field(await locale_format(stats_loc, stats_loc.get("fields.user_installs.name")), len(ctx.client.app.users))  # NONEXISTENT  # noqa: ERA001
 		rows = []
 		for i in range(0, len(buttons), 5):
 			rows.append(ActionRow(*buttons[i : i + 5]))

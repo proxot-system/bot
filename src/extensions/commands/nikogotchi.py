@@ -596,7 +596,7 @@ class NikogotchiCommands(Extension):
 	async def make_food_select(self, loc, data: Nikogotchi, custom_id: str):
 		if all(getattr(data, attr) <= 0 for attr in ["glitched_pancakes", "golden_pancakes", "pancakes"]):
 			return await make_empty_select(
-				loc, placeholder=await locale_format(loc, loc.get_string("components.feed.no_food"))
+				loc, placeholder=await locale_format(loc, loc.get("components.feed.no_food"))
 			)
 
 		# name_map = {  # TODO: rm this when db fix
@@ -606,7 +606,7 @@ class NikogotchiCommands(Extension):
 		# }
 		select = StringSelectMenu(
 			custom_id=custom_id,
-			placeholder=await locale_format(loc, loc.get_string("components.feed.placeholder"), name=data.name),
+			placeholder=await locale_format(loc, loc.get("components.feed.placeholder"), name=data.name),
 		)
 		for pancake in ("glitched_pancakes", "golden_pancakes", "pancakes"):
 			updated_name: PancakeTypes = pancake_id_to_emoji_index_please_rename_them_in_db(pancake)
@@ -615,7 +615,7 @@ class NikogotchiCommands(Extension):
 				continue
 			select.options.append(
 				StringSelectOption(
-					label=await locale_format(loc, loc.get_string(f"components.feed.{pancake}"), amount=amount),
+					label=await locale_format(loc, loc.get(f"components.feed.{pancake}"), amount=amount),
 					emoji=emojis["pancakes"][updated_name],
 					value=updated_name,
 				)

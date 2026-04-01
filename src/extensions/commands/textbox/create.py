@@ -382,7 +382,7 @@ async def handle_update_text_modal(self, ctx: ModalContext, new_text: str):
 	# 	asyncio.create_task(
 	# 		fancy_message(
 	# 			ctx,
-	# 			await locale_format(loc, loc.get_string("modal.edit_text.response"), new_text=new_text, old_text=old_text),
+	# 			await locale_format(loc, loc.get("modal.edit_text.response"), new_text=new_text, old_text=old_text),
 	# 			ephemeral=True,
 	# 		)
 	# 	)
