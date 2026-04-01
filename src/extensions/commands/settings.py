@@ -361,24 +361,24 @@ class SettingsCommands(Extension):
 
 	@modal_callback("welcome_message_editor")
 	async def welcome_message_editor(self, ctx: ModalContext, text: str):
-		loc, server_data = await self.shortcut(ctx)
+		loc, server_data = await self.shortcut(ctx, prefix="commands.settings.server.welcome")
 		if not loc or not server_data:
 			return
 
 		config = server_data.welcome
 		old_text = config.message
 		new_text = text
-		if new_text == loc.get("welcome.editor.templates.default") or new_text == "":
+		if new_text == loc.get("editor.templates.default") or new_text == "":
 			new_text = None
 		if old_text is None or old_text == "":
-			old_text = loc.get("welcome.editor.templates.default")
+			old_text = loc.get("editor.templates.default")
 
 		await config.update(message=new_text)
 		Changed = "\n" + await locale_format(
 			loc,
-			loc.get("welcome.editor.Changed"),
+			loc.get("editor.changes"),
 			old_text=f"```\n{old_text.replace('```', '` ``')}```",
-			new_text=f"\n-# *{await locale_format(loc, loc.get('welcome.editor.new_none'))}*"
+			new_text=f"\n-# *{await locale_format(loc, loc.get('editor.new_none'))}*"
 			if new_text is None
 			else f"```\n{text.replace('```', '` ``')}```",
 		)

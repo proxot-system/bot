@@ -19,7 +19,7 @@ class MemberAddEvent(Extension):
 	@listen(MemberAdd, delay_until_ready=True)
 	async def handler(self, event: MemberAdd):
 		guild = event.guild
-		loc = Localization(guild)
+		loc = Localization(guild, prefix="")
 		server_data: ServerData = await ServerData(_id=guild.id).fetch()
 		config = server_data.welcome
 
@@ -32,7 +32,7 @@ class MemberAddEvent(Extension):
 
 		if not target_channel:
 			return
-		message = config.message or loc.get("settings.welcome.editor.templates.default", typecheck=str)
+		message = config.message or loc.get("commands.settings.server.welcome.editor.templates.default", typecheck=str)
 		message = await locale_format(
 			loc,
 			message,
