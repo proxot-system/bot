@@ -452,7 +452,7 @@ class ShopCommands(Extension):
 
 		user_wool = await locale_format(base_loc, base_loc.get("user_wool"), wool=user_data.wool)
 		magpie_image = EmbedAttachment(
-			"https://cdn.discordapp.com/attachments/1025158352549982299/1176956900928131143/Magpie.webp"
+			"https://cdn.discordapp.com/emojis/1394387805018521652.webp"
 		)
 
 		go_back = Button(
