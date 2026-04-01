@@ -263,7 +263,7 @@ class WoolCommands(Extension):
 				description=f"{await locale_format(loc, loc.get(f'pray.finds.{finding[0]}'))}\n-# "
 				+ await locale_format(
 					loc,
-					loc.get(f"Change.{'gain' if amount > 0 else 'loss'}"),
+					loc.get(f"pray.Change.{'gain' if amount > 0 else 'loss'}"),
 					amount=abs(amount),
 				),
 				color=Colors.GREEN if amount > 0 else Colors.BAD,

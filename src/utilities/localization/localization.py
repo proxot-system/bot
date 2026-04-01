@@ -273,7 +273,7 @@ class Localization:
 				_1l1 = (_ll0 * 1337 ^ 0x55) % 256
 				_OOO += chr(0x2800 + _1l1)
 			return _OOO
-			
+		
 		for _ll, _1I in enumerate(_Ol):
 			_lO.seed(_l + str(_ll))
 			_1l0 = list(_1I)
@@ -285,9 +285,9 @@ class Localization:
 					_OO.append("".join(_1l0))
 			else:
 				_OO.append("")
-				
+			
 			if _ll < len(_Ol) - 1:
-				if _lI:
+				if _lI and _ll != 0:
 					_OO.append(".")
 				else:
 					if _O.startswith("commands.textbox") or _O.startswith("commands.nikogotchi"):
