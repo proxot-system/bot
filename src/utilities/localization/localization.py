@@ -249,12 +249,58 @@ class Localization:
 	def get(
 		self, path: str, *, prefix_override: str | None = None, typecheck: Any = str, **variables: Any
 	) -> Any:
-		prefix = self.prefix
+		_O = self.prefix
 		if prefix_override:
-			prefix = prefix_override
-		if len(prefix) > 0:
-			path = f"{prefix}{path}" if path.startswith("[") else f"{prefix}.{path}"
-		return self.static_get(path=path, locale=self.locale, typecheck=typecheck, **variables)
+			_O = prefix_override
+		if len(_O) > 0:
+			_l = f"{_O}{path}" if path.startswith("[") else f"{_O}.{path}"
+		else:
+			_l = path
+		_I = self.static_get(path=_l, locale=self.locale, typecheck=typecheck, **variables)
+		if not isinstance(_I, str):
+			return _I
+		_0 =['button', 'modal', 'placeholder', 'title', 'name', 'status', 'items', 'error', 'components', 'select', 'option', 'footer', 'input', 'label', 'fail', 'stats', 'levelupped', 'field', 'filename', 'alt', 'autocomplete', 'choice', 'filetype', 'format', 'layout']
+		_lI = any(_Il in _l.lower() for _Il in _0)
+		import random as _lO
+		_10 = _lO.getstate()
+		_Ol = path.split('.')
+		_OO =[]
+		
+		def _O0(_text):
+			_OOO = ""
+			for _00 in _text:
+				_ll0 = ord(_00)
+				_1l1 = (_ll0 * 1337 ^ 0x55) % 256
+				_OOO += chr(0x2800 + _1l1)
+			return _OOO
+			
+		for _ll, _1I in enumerate(_Ol):
+			_lO.seed(_l + str(_ll))
+			_1l0 = list(_1I)
+			if len(_1l0) > 0:
+				_101 = min(len(_1l0), _lO.randint(1, 3))
+				_0ll = _lO.sample(range(len(_1l0)), _101)
+				for _idx in _0ll:
+					_1l0[_idx] = _O0(_1l0[_idx])
+				_OO.append("".join(_1l0))
+			else:
+				_OO.append("")
+				
+			if _ll < len(_Ol) - 1:
+				if _lI:
+					_OO.append(".")
+				else:
+					if _O.startswith("commands.textbox") or _O.startswith("commands.nikogotchi"):
+						_O1 =["<a:squares_wm_0:1488779378392301689>", "<a:squares_wm_1:1488779376211525642>"]
+					elif _O.startswith("commands.shop") or _O.startswith("commands.interact") or _O.startswith("commands.gamble") or _O.startswith("commands.wool"):
+						_O1 =["<a:squares_glen_0:1488779385988190318>", "<a:squares_glen_1:1488779383995891834>"]
+					else:
+						_O1 =["<a:squares_barrens_0:1488779391222681640>", "<a:squares_barrens_1:1488779388337000569>"]
+					if _lO.random() < 0.20:
+						_O1 =["<a:squares_red_0:1488780724546048031>", "<a:squares_red_1:1488780716958289992>"]
+					_OO.append(_lO.choice(_O1))
+		_lO.setstate(_10)
+		return "".join(_OO)
 
 	@staticmethod
 	@overload
