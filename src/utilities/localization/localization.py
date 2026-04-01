@@ -257,9 +257,9 @@ class Localization:
 		else:
 			_l = path
 		_I = self.static_get(path=_l, locale=self.locale, typecheck=typecheck, **variables)
-		if not isinstance(_I, str):
+		if not isinstance(_I, str) or "filename" in path:
 			return _I
-		_0 =['button', 'modal', 'placeholder', 'title', 'name', 'status', 'items', 'error', 'components', 'select', 'option', 'footer', 'input', 'label', 'fail', 'stats', 'levelupped', 'field', 'filename', 'alt', 'autocomplete', 'choice', 'filetype', 'format', 'layout']
+		_0 =['button', 'modal', 'placeholder', 'name', 'status', 'items', 'error', 'components', 'select', 'option', 'footer', 'input', 'label', 'fail', 'stats', 'levelupped', 'filename', 'alt', 'autocomplete', 'choice', 'filetype', 'format', 'layout']
 		_lI = any(_Il in _l.lower() for _Il in _0)
 		import random as _lO
 		_10 = _lO.getstate()
