@@ -233,18 +233,18 @@ class StateShortcutError(Exception):
 
 @overload
 async def state_shortcut(
-	ctx, state_id: str | int, frame_index: Literal[None], loc_prefix: str = "main"
+	ctx, state_id: str | int, frame_index: Literal[None], loc_prefix: str = "main", refresh_ctx: bool = False
 ) -> Tuple["Localization", "State"]: ...
 
 
 @overload
 async def state_shortcut(
-	ctx, state_id: str | int, frame_index: str | int, loc_prefix: str = "main"
+	ctx, state_id: str | int, frame_index: str | int, loc_prefix: str = "main", refresh_ctx: bool = False
 ) -> Tuple["Localization", "State", "Frame"]: ...
 
 
 async def state_shortcut(
-	ctx, state_id: str | int, frame_index: Optional[str | int], loc_prefix: str = "main"
+	ctx, state_id: str | int, frame_index: Optional[str | int], loc_prefix: str = "main", refresh_ctx: bool = False
 ) -> Union[Tuple["Localization", "State"], Tuple["Localization", "State", "Frame"]]:
 	"""
 	            Helper function for textbox to not have to get these variables all the time
@@ -291,7 +291,8 @@ async def state_shortcut(
 				ephemeral=True,
 			)
 			raise StateShortcutError(f"Frame with index '{idx}' not found in state '{state_id}'.")
-
+	if refresh_ctx:
+		state.memory_leak = ctx
 	return (loc, state, frame_data)
 
 

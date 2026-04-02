@@ -266,8 +266,8 @@ async def handle_facepic_selection(self, ctx: ComponentContext):
 		
 		frame_data.text = set_facepic_in_frame_text(frame_data.text, face_path)
 
-		await update_textbox(state.memory_leak, state_id, int(frame_index) or 0, type="loading", edit=True)
-		asyncio.create_task(update_textbox(state.memory_leak, state_id, frame_index, edit=True))
+		loading = asyncio.create_task(update_textbox(state.memory_leak, state_id, int(frame_index) or 0, type="loading", edit=True))
+		asyncio.create_task(update_textbox(state.memory_leak, state_id, frame_index, edit=True, awaitable=loading))
 
 	selected_item = f_storage.facepics
 	for part in path:

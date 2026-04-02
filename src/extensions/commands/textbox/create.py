@@ -3,7 +3,7 @@ import io
 import re
 from datetime import datetime
 from traceback import print_stack
-from typing import Any, Literal, get_args
+from typing import Any, Awaitable, Literal, get_args
 
 from interactions import (
 	ActionRow,
@@ -43,6 +43,7 @@ from utilities.misc import (
 	BadResults,
 	SortOption,
 	fetch,
+	filler_task,
 	optionSearch,
 	sanitize_filename,
 )
@@ -87,7 +88,7 @@ async def start(
 	filetype: SupportedFiletypes | None = None,
 	send_to: Literal[1, 2, 3] = 1,
 ):
-	await respond(ctx, type="loading")
+	loading = asyncio.create_task(respond(ctx, type="loading"))
 	state_id = str(ctx.id)  # state_id is the initial `/textbox create` interaction's id
 	frame_index = 0
 	if tbb_file:
@@ -137,11 +138,12 @@ async def start(
 				frames=Frame(text=text),
 			),
 		)
-	await respond(ctx, state_id, frame_index or 0, type="loading", edit=True)
+	await loading
+	loading = asyncio.create_task(respond(ctx, state_id, frame_index or 0, type="loading", edit=True))
 	if force_send or (send_to != 1 and (len(text) != 0 and face_path is not None)):
 		await send_output(ctx, state_id, 0)
 
-	return await respond(ctx, state_id, frame_index or 0)
+	return await respond(ctx, state_id, frame_index or 0, awaitable=loading)
 
 
 def convert_to_sortoptions(item: Any, path: list[str] | None = None, recursive: bool = False):
@@ -218,23 +220,23 @@ async def handle_components(self, ctx: ComponentContext):
 		return ctx.edit_origin()
 	method, state_id, frame_index = match.group("method", "state_id", "frame_index")
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index)
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, refresh_ctx=True)
 	except StateShortcutError:
 		return
-
+	loading = filler_task()
 	match method:
 		case "change_text":
 			return await init_change_text_flow(ctx, state_id, frame_index)
 		case "delete_frame":
-			await respond(ctx, state_id, int(frame_index) or 0, type="loading", edit=True)
+			loading = asyncio.create_task(respond(ctx, state_id, int(frame_index) or 0, type="loading", edit=True))
 			del state.frames[int(frame_index)]
 		case "edit":
 			return await init_edit_flow(ctx, state_id, frame_index)
 		case "render":
-			await respond(ctx, state_id, int(frame_index) or 0, type="loading", edit=True)
+			loading = asyncio.create_task(respond(ctx, state_id, int(frame_index) or 0, type="loading", edit=True))
 			await send_output(ctx, state_id, int(frame_index))
 
-	await respond(ctx, state_id, int(frame_index))
+	await respond(ctx, state_id, int(frame_index), awaitable=loading)
 
 
 async def send_output(
@@ -243,7 +245,7 @@ async def send_output(
 	frame_index: int,
 ):
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create", refresh_ctx=True)
 	except StateShortcutError:
 		return
 	pos = ""
@@ -339,7 +341,7 @@ async def render_to_file(
 
 async def init_change_text_flow(ctx: ComponentContext | SlashContext, state_id: str, frame_index: str):
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create", refresh_ctx=True)
 	except StateShortcutError:
 		return
 	modal = Modal(
@@ -386,13 +388,13 @@ async def handle_update_text_modal(self, ctx: ModalContext, new_text: str):
 	# 			ephemeral=True,
 	# 		)
 	# 	)
-	await respond(ctx, state_id, int(frame_index) or 0, type="loading")
-	await respond(ctx, state_id, int(frame_index), edit=True)
+	loading = asyncio.create_task(respond(ctx, state_id, int(frame_index) or 0, type="loading"))
+	await respond(ctx, state_id, int(frame_index), edit=True, awaitable=loading)
 
 
 async def init_edit_flow(ctx: ComponentContext | SlashContext, state_id: str, frame_index: str):
 	try:
-		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create")
+		loc, state, frame_data = await state_shortcut(ctx, state_id, frame_index, loc_prefix="commands.textbox.create", refresh_ctx=True)
 	except StateShortcutError:
 		return
 	frames = ""
@@ -439,8 +441,8 @@ async def handle_edit_modal(self, ctx: ModalContext, updated_frames: str):
 		return await ctx.send(f"Woopsie! {e}", ephemeral=True)
 	state.frames = new_frames
 
-	await respond(ctx, state_id, int(frame_index) or 0, type="loading")
-	await respond(ctx, state_id, int(frame_index), edit=True)
+	loading = asyncio.create_task(respond(ctx, state_id, int(frame_index) or 0, type="loading"))
+	await respond(ctx, state_id, int(frame_index), edit=True, awaitable=loading)
 
 
 async def respond(
@@ -451,9 +453,12 @@ async def respond(
 	edit: bool = True,
 	warnings: list = [],
 	error: Any | None = None,
+	awaitable: Awaitable | None = None
 ):
 	if ctx is None:
 		raise ValueError("uhhh")
+	if awaitable is None:
+		awaitable = filler_task()
 	components = []
 	files = []
 	content: str | None = None
@@ -582,9 +587,10 @@ async def respond(
 				accent_color=accent_color,
 			)
 		)
+	await awaitable
 	if not edit:
 		return await ctx.send(components=components, files=files, ephemeral=True)
-	elif isinstance(ctx, ComponentContext):
+	elif isinstance(ctx, ComponentContext) and not ctx.responded:
 		return await ctx.edit_origin(components=components, files=files)
 	else:
 		return await ctx.edit(
