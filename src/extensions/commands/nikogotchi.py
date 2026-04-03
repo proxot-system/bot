@@ -924,24 +924,40 @@ class NikogotchiCommands(Extension):
 		custom_id = button_ctx.custom_id
 
 		if custom_id == f"accept {ctx.author.id} {uid}":
+			
+			pancakes_backup_one = (
+				nikogotchi_one.pancakes,
+				nikogotchi_one.golden_pancakes,
+				nikogotchi_one.glitched_pancakes,
+			)
+			
+			pancakes_backup_two = (
+				nikogotchi_two.pancakes,
+				nikogotchi_two.golden_pancakes,
+				nikogotchi_two.glitched_pancakes,
+			)
+
+			(
+				nikogotchi_two.pancakes,
+				nikogotchi_two.golden_pancakes,
+				nikogotchi_two.glitched_pancakes
+			) = pancakes_backup_one
+
+			(
+				nikogotchi_one.pancakes,
+				nikogotchi_one.golden_pancakes,
+				nikogotchi_one.glitched_pancakes
+			) = pancakes_backup_two
+
 			del nikogotchi_two._id
 			del nikogotchi_one._id
-			backup = {
-				"a": {},
-				"b": {}
-			}
-			pancakeys = ("pancakes", "glitched_pancakes", "golden_pancakes")
-			for key in pancakeys:
-				backup['a'][key] = nikogotchi_one.__getattribute__(key)
-				backup['b'][key] = nikogotchi_two.__getattribute__(key)
+			
 			await self.save_nikogotchi(nikogotchi_two, str(ctx.author.id))
 			await self.save_nikogotchi(nikogotchi_one, str(uid))
-			for key in pancakeys:
-				nikogotchi_one.__setattr__(key, backup['a'][key])
-				nikogotchi_two.__setattr__(key, backup['b'][key])
+			
 			nikogotchi_two._id = str(ctx.author.id)
 			nikogotchi_one._id = str(uid)
-			del backup
+						
 			embed_two = Embed(
 				description=await locale_format(
 					loc,
