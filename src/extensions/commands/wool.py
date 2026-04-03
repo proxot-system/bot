@@ -103,6 +103,7 @@ class WoolCommands(Extension):
 		required=True,
 		opt_type=OptionType.INTEGER,
 		min_value=-1,
+		max_value=150000,
 	)
 	async def give(self, ctx: SlashContext, to: User, amount: int):
 		loc = Localization(ctx, prefix="commands.wool")
