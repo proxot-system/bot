@@ -142,7 +142,8 @@ class GambleCommands(Extension):
 		async def wait_for_skip():
 			try:
 				res: Component = await ctx.client.wait_for_component(components=skip_btn, timeout=25.0)
-				skip_event.set()
+				if res.ctx.author_id == ctx.author_id:
+					skip_event.set()
 				await res.ctx.defer(edit_origin=True)
 			except asyncio.TimeoutError:
 				pass
