@@ -41,7 +41,7 @@ from utilities.localization.formatting import fnum, ftime
 from utilities.localization.localization import Localization, locale_format
 from utilities.localization.minis import put_mini
 from utilities.message_decorations import Colors, fancy_message, make_progress_bar
-from utilities.misc import make_empty_select
+from utilities.misc import filler_task, make_empty_select
 from utilities.nikogotchi_metadata import (
 	NikogotchiMetadata,
 	fetch_nikogotchi_metadata,
@@ -265,7 +265,7 @@ class NikogotchiCommands(Extension):
 		pass
 
 	@nikogotchi.subcommand(sub_cmd_description="Check out your Nikogotchi!")
-	async def check(self, ctx: SlashContext | ComponentContext):
+	async def check(self, ctx: SlashContext | ComponentContext, edit: bool = False):
 		uid = ctx.author.id
 		loc = Localization(ctx, prefix="commands.nikogotchi")
 
@@ -273,7 +273,7 @@ class NikogotchiCommands(Extension):
 		metadata = await fetch_nikogotchi_metadata(nikogotchi.nid)
 		if nikogotchi.status > -1 and metadata:
 			loading = asyncio.create_task(fancy_message(
-				ctx, await locale_format(loc, loc.get("loading")), edit=True
+				ctx, await locale_format(loc, loc.get("loading")), edit=edit
 			))
 		else:
 			if not metadata and nikogotchi.nid != "?":
@@ -426,7 +426,7 @@ class NikogotchiCommands(Extension):
 	async def nikogotchi_interaction(self, ctx: ComponentContext, _awaitable: Awaitable | None = None ):
 		try:
 			if not _awaitable:
-				_awaitable = asyncio.create_task(ctx.defer(edit_origin=True))
+				_awaitable = filler_task()
 
 			match = self.r_nikogotchi_interaction.match(ctx.custom_id)
 
@@ -596,8 +596,12 @@ class NikogotchiCommands(Extension):
 			await _awaitable
 		try:
 			await ctx.edit_origin(embeds=embeds, components=[ActionRow(select), ActionRow(*buttons)])
-		except:
-			await ctx.edit(embeds=embeds, components=[ActionRow(select), ActionRow(*buttons)])
+		except Exception as e:
+			try:
+				await ctx.edit(embeds=embeds, components=[ActionRow(select), ActionRow(*buttons)])
+			except Exception:
+				await ctx.send(embeds=embeds, components=[ActionRow(select), ActionRow(*buttons)])
+
 		await self.save_nikogotchi(nikogotchi, str(ctx.author.id))
 
 	async def make_food_select(self, loc, data: Nikogotchi, custom_id: str):
@@ -720,7 +724,7 @@ class NikogotchiCommands(Extension):
 		loc = Localization(ctx, prefix="commands.nikogotchi")
 
 		loading = asyncio.create_task(fancy_message(
-			ctx, await locale_format(loc, loc.get("loading")), edit=True
+			ctx, await locale_format(loc, loc.get("loading"))
 		))
 
 		nikogotchi = await self.get_nikogotchi(str(ctx.author.id))
