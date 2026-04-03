@@ -444,7 +444,7 @@ class InteractCommands(Extension):
 			except:
 				msg = await ctx.respond(content=message, ephemeral=False, allowed_mentions=allowed_mentions)
 		except Exception as e:
-			return await ctx.send(
+			await ctx.send(
 				embeds=Embed(
 					description=f"[ {await locale_format(loc, loc.get('errors.fail'))} ]",
 					color=Colors.BAD,
