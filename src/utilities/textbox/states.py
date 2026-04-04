@@ -21,7 +21,7 @@ class StateOptions:
 		filetype: SupportedFiletypes | None = "WEBP",
 		send_to: Literal[1, 2, 3] | str | None = 1,
 		quality: int | str | None = 100,
-		loops: int | None = 1,
+		loops: int | None = 0,
 	):
 		if filetype is None:
 			filetype = "WEBP"

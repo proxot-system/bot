@@ -38,6 +38,8 @@ SupportedLocations = Literal[
 	"bcenter",
 	"bright",
 ]
+
+
 def sanitize(text: str) -> str:
 	return text.replace("\\", "\\\\").replace("\n", "\\n")
 
@@ -54,7 +56,10 @@ class SerializableData:
 		parts = []
 		for _field in fields(self):  # type: ignore
 			value = getattr(self, _field.name)
-			parts.append(str(value))
+			if value is None:
+				parts.append("")
+			else:
+				parts.append(str(value))
 		return self._separator.join(parts)
 
 	@classmethod
@@ -67,9 +72,7 @@ class SerializableData:
 		parts = data_string.split(cls._separator, num_expected - 1)
 
 		if len(parts) != num_expected:
-			raise ValueError(
-				f"Invalid format for {cls.__name__}. Expected {num_expected} parts separated by '{cls._separator}', but got {len(parts)} in '{data_string}'"
-			)
+			parts += [""] * (num_expected - len(parts))
 
 		kwargs = {}
 		for _field, value_str in zip(class_fields, parts):
@@ -83,29 +86,29 @@ class SerializableData:
 		origin = get_origin(field.type)
 		args = get_args(field.type)
 
+		if value_str == "" or value_str.lower() == "none":
+			return None
+
 		if origin is Literal:
 			if value_str not in args:
 				raise ValueError(f"Value '{value_str}' is not a valid choice from {args}")
 			return value_str
 		if origin in (list, tuple):
-			if not value_str:
-				return origin()
 			item_type = args[0] if args else str
 			return origin(SerializableData._parse_value(item.strip(), item_type) for item in value_str.split(","))
-		if origin is not None and any(
-			isinstance(arg, type) and issubclass(arg, type(None)) for arg in args
-		):  # Handles X | None
-			if value_str == "None":
-				return None
+		if origin is not None and any(isinstance(arg, type) and issubclass(arg, type(None)) for arg in args):
 			actual_type = next(arg for arg in args if not issubclass(arg, type(None)))
-			return SerializableData._parse_value(value_str, actual_type)
 
-		if value_str == "" and field.type is not str:
-			return None
+			class DummyField:
+				def __init__(self, t):
+					self.type = t
+
+			return SerializableData._parse_value(value_str, DummyField(actual_type))
+
 		if field.type is bool:
-			if value_str in ("True", "true", "+", "yes"):
+			if value_str.lower() in ("true", "+", "yes", "1"):
 				return True
-			if value_str == ("False", "false", "-", "no"):
+			if value_str.lower() in ("false", "-", "no", "0"):
 				return False
 			raise ValueError(f"couldn't parse '{value_str}' as bool.")
 		if field.type is int:
@@ -125,6 +128,7 @@ class FrameOptions(SerializableData):
 	end_delay: int = 150
 	end_arrow_bounces: int = 4
 	end_arrow_delay: int = 150
+	force_padding: bool | None = None
 
 	_separator: str = ";"
 
@@ -134,6 +138,7 @@ class FrameOptions(SerializableData):
 		end_delay: int | None = None,
 		end_arrow_bounces: int | None = None,
 		end_arrow_delay: int | None = None,
+		force_padding: bool | None = None,
 		_separator: str | None = ";",
 	):
 		self.separator = ";"
@@ -151,10 +156,12 @@ class FrameOptions(SerializableData):
 			raise ValueError("end_arrow_delay must be above 0")
 		self.end_arrow_delay = 150 if end_arrow_delay is None else end_arrow_delay
 
+		self.force_padding = force_padding
+
 	def __repr__(self):
 		attrs = {k: getattr(self, k) for k in self.__annotations__}
 		attrs_str = ", ".join(f"{k}={repr(v)}" for k, v in attrs.items())
-		return f"StateOptions({attrs_str})"
+		return f"FrameOptions({attrs_str})"
 
 
 @dataclass
@@ -236,16 +243,22 @@ async def render_frame(
 		facepic = await get_facepic(command.facepic)
 		if facepic:
 			facepic_present = True
-			facepic = await facepic.get_image(size=96)
-			facepic = facepic.resize((96, 96), resample=0)
-			burned_borders.paste(facepic, (496, 16), mask=facepic.convert("RGBA"))
+			facepic_img = await facepic.get_image(size=96)
+			facepic_img = facepic_img.resize((96, 96), resample=0)
+			burned_borders.paste(facepic_img, (496, 16), mask=facepic_img.convert("RGBA"))
 		else:
 			facepic_present = False
-			facepic = None
-		if facepic_present and facepic:
-			max_text_width = background.width - (20 * 2) - facepic.width + 10
+
+		# Determine padding logic
+		should_pad = facepic_present
+		if frame.options.force_padding is not None:
+			should_pad = frame.options.force_padding
+
+		if should_pad:
+			max_text_width = background.width - (20 * 2) - facepic_img.width + 10
 		else:
 			max_text_width = background.width - (20 * 2)
+
 		if delay and animated:
 			put_frame(0)
 
@@ -261,9 +274,13 @@ async def render_frame(
 	parsed = parse_textbox_text(frame.text) if frame.text else []
 	print(parsed)
 	text_offset = [0.0, 0.0]
+
 	first_facepic_command = next((cmd for cmd in parsed if isinstance(cmd, FacepicChangeCommand)), None)
-	if first_facepic_command and first_facepic_command.facepic != "":
+	if frame.options.force_padding is True or (
+		first_facepic_command and first_facepic_command.facepic != "" and frame.options.force_padding is not False
+	):
 		await update_facepic(not_empty_empty_face)
+
 	i = 0
 	while i < len(parsed):
 		command = parsed[i]
@@ -329,9 +346,7 @@ async def render_frame(
 							font=font,
 							fill=current_color,
 						)
-						text_offset[0] += d.textlength(
-							cluster, font=font
-						)  # TODO: there is a better way https://pillow.readthedocs.io/en/stable/reference/ImageText.html#example
+						text_offset[0] += d.textlength(cluster, font=font)
 					except:
 						pass
 					if animated:
@@ -459,9 +474,7 @@ async def render_textbox_frames(
 				png_obj = apng.PNG.from_bytes(temp_buffer.getvalue())
 				png_images.append(png_obj)
 
-			animation = apng.APNG(
-				num_plays=loops,
-			)
+			animation = apng.APNG(num_plays=loops)
 
 			for i, png_obj in enumerate(png_images):
 				animation.append(png_obj, delay=int(all_durations[i]), delay_den=1000)

@@ -2,107 +2,128 @@
 
 ## Commands
 
-You can use special commmands mid-sentence to do various stuff (like changing the facepic or coloring text), using `\c[arguments]` syntax (you can omit [] if there's no arguments). This is an almost direct copy of how [OneShot Textbox Maker](https://github.com/Leo40Git/OneShot-Textbox-Maker/) does this, check that project out if you want (even though it's archived), it's a java program that lets you make dialogues like the command in this bot too.<br/>
+You can use special commands mid-sentence to do various stuff (like changing the facepic or coloring text), using `\c[arguments]` syntax (you can omit `[]` if there's no arguments). This is very heavily inspired by [OneShot Textbox Maker](https://github.com/Leo40Git/OneShot-Textbox-Maker/) does this
 
 > `name` - Description - `example`
 
 > ### `@` - Change facepic - `\@[OneShot/Niko/af]`
 >
-> This accepts three arguments separated by a colon (`:`)
+> This command changes the character portrait displayed on the right side of the textbox
 >
-> 1. the path for the facepic. you can find all of these [in this file](https://github.com/proxot-system/bot/blob/main/src/data/facepics.yml) (they are listed in '`name`: `discord emoji id` # `credits`' layout), or by using the facepic selector in the textbox dialogue builder using the bot. When writing the paths manually, make sure to not put "characters" or "faces" in the paths.
+> Accepts the path for the facepic as an argument. You can find these in the facepic selector or in [the source configuration here](../../../src/data/facepics.yml)
 >
-> - optional string
+> **Padding Behavior:**
+> - By default, if any `\@` command is present in the frame text, the entire frame's text will be padded to the left to make room for a facepic
+> - `\@[]` or `\@[clear]`: These are aliases. They display an invisible facepic but **keep the text padded**. This is useful if you want a character to "disappear" but don't want the text to jump and change width
+> - This behavior can be overridden using the `force_padding` [frame option](#options)
+
+> ### `c` - Color text - `\c[#c386ff]` or `\c[red]`
 >
-> 2. the transformation to apply to the image **(not implemented yet)**
+> Changes the color of the text following the command. It uses a [CSS color parser](https://github.com/mazznoer/csscolorparser-rs?tab=readme-ov-file#relative-color), supporting hex codes (with alpha/transparency), RGB, and standard CSS color names
+> - You can chain these to draw rainbows or multi-colored words (there are plans about making this more automatable)
+> - Use `\c[]` to reset to the default white color
+
+> ### `s` - Text speed - `\s[2.0]`
 >
-> - optional string
+> Applies a modifier on the GIF frame delay. Default is `1.0` (no change), maximum is `50.0` (values higher than 25 already dont matter btw)
+
+> ### `d` - Delay - `\d[500]`
 >
-> 3. the position for the face in the textbox **(not implemented yet)**
+> Inserts a pause frame that delays for that amount of milliseconds. This frame does not get affected by text speed
+
+> ### `u` - Unicode character - `\u[#1F408]` or `\u[128008]`
 >
-> - optional string
->
-> If you start the frame text with an empty facepic: `\@[]` - it will force-disable the check which does the initial pad of the whole text on the side, if there is ANY facepic present in the frame. (useful if you want to overlay the facepic after the text was written? this only applies to the people who use multiple facepics in one frame, or move it around in the text)
+> Injects a specific unicode character into the text using its hex (prefixed with `#`) or decimal code
 
 > ### `n` - Line break - `\n`
 >
-> Self explanatory (probably shouldn't be included, but it's a command nonetheless)
+> Forces the text to move to the next line
+
+> ### `l` - Locale string - `\l[commands.info.about.mes[0]]`
+>
+> Injects a localization string from the bot's translation files based on the provided path (virtually useless)
+
 
 ## Raw file editing (.tbb)
 
-This is a generic text file that has the entire State (all the dialogue frames and everything) saved inside it. It's usually outputted right above the preview for a frame, you can use this to export/import a dialogue you've made, or edit it in a text editor of your preference instead of using Discord.
+This is a generic text file that has the entire State (all the dialogue frames and configuration) saved inside it. You can use this to export/import dialogues or edit them in an external text editor. It is always provided alongside the image preview of the textbox editor in the bot
 
 ### Parsing
 
-The file is parsed line by line. The parser first looks for the `#> StateOptions <#` marker to know that the following lines are for [`StateOptions`](#stateoptions). It then looks for the `#> Frames <#` marker, after which it parses the lines for [`Frames`](#frames). Any lines starting with `#` or that are empty are ignored.
+The file is parsed line by line. The parser looks for the `#> StateOptions <#` marker for global settings and the `#> Frames <#` marker for dialogue content. Lines starting with `#` (outside of markers) or empty lines are ignored
 
 ### `StateOptions`:
 
-A newline separated list of key=value pairs. All of them can be omitted, the default value will be used instead
+A list of `key=value` pairs. Default values are used if a key is omitted
 
-> `filetype` # Output filetype
->
-> - text, one of WEBP, GIF, APNG, PNG, JPEG (default: "WEBP")
->   APNG: this sends it as a file without a filename, because Discord breaks them upon upload for some reason
+> `filetype` (default: WEBP)
+> - \# Output filetype
+> - Options: WEBP, GIF, APNG, PNG, JPEG
+> - **note:** APNG files are sent without an extension to prevent Discord from stripping the animation
 
-> `send_to` # Whether to send the output to the channel or dms
->
-> - number, one of: 1, 2, 3 (default: 1)
->   1. Doesn't send anywhere, replies to the textbox in an ephemeral message
->   2. Sends in Direct Messages of runner
->   3. Sends to the current channel. If the bot isn't in the server - the bot tries to followup with a normal message (runner needs External Apps in order for this to actually send the message)
+> `send_to` (default: 1)
+> - \# Output destination (same as command argument)
+> - 1: Ephemeral reply
+> - 2: Direct Messages
+> - 3: Current Channel
 
-> `force_send` # Whether to ignore checks before sending (e.g. no facepic being set or no text being set)
->
-> - boolean true/false (default: false)
+> `quality` (default: 100)
+> - \# Rendering quality
+> - Range: 1..100
 
-> `quality` # Quality
->
-> - number, range: 1..=100 (default: 100)
+> `loops` (default: 0)
+> - \# Animation loops
+> - 0: Normal infinitely looping animation
+> - 1+: Specific number of plays
+
+> `force_send` (default: False)
+> - \# Bypass checks for the completeness of the frame before sending
+> - boolean: True/False
+
+> `frame_index` (default: 0)
+> - # Initial frame focus
+> - number: The frame number to show in the editor preview upon loading
 
 ### `Frames`:
 
-A newline separated list of frames. Each frame has an options and text field, separated by a semicolon, options are wrapped in braces for ease of editing ({options};text).
+A list of newline separated frames in the format `{options};text`. If you're editing this manually, remember to use [\n](#n---line-break---n) to separate text with newlines visually in the frame
 
 #### `options`
+This is a semicolon separated list of values, if you wish to fall back to the default of any value just don't include it (e.g. `{;;;;true};Meow` would overwrite only force_padding)
+> 1. `animated` (default: True)
+> - \# Toggle frame animation
+> - boolean: True/False
 
-> 1. `animated` # Whether the text should be animated
->
-> - boolean, true/false (default: true)
+> 2. `end_delay` (default: 150)
+> - \# Wait time before the end arrow appears
+> - number: milliseconds
 
-> 2. `end_delay` # How many milliseconds to wait before showing the end arrow
->
-> - number, range: 1.. (default: 150)
+> 3. `end_arrow_bounces` (default: 4)
+> - \# Number of arrow animations
+> - number: count
 
-> 3. `end_arrow_bounces` # How many bounces should the end arrow make
->
-> - number, range: 1.. (default: 4)
+> 4. `end_arrow_delay` (default: 150)
+> - \# Delay between arrow bounces
+> - number: milliseconds
 
-> 4. `end_arrow_delay` # How many milliseconds to wait between arrow bounces
->
-> - number, range: 1.. (default: 150)
+> 5. `force_padding` (default: None)
+> - \# Explicitly control facepic padding
+> - boolean: True (always pad), False (never pad), None (automatic based on `\@` command)
 
 #### `text`
 
-Text content for the frame (this supports [commands](#commands)). Whenever this overflows to the bottom of the textbox, it will move the text up with an animation, if you happen to be generating a static image file - it will cut off the beginning of the text.
+The actual dialogue content. This supports all [commands](#commands) listed above. When text overflows the bottom of the box, it will automatically scroll up 4 lines.
 
 ### Example
 
 ```
 #> StateOptions <#
-force_send=True
-send_to=3
+filetype=WEBP
+send_to=1
+quality=100
+loops=0
+
 #> Frames <#
-{True;150;4;150;;};\\@[OneShot (fan)/Nikonlanger/Smug]Meow :3
-```
-
-# Variables
-
-[Locations](#L88) (`SupportedLocations`): "aleft", "acenter", "aright", "left", "center", "right", "bleft", "bcenter", "bright"
-
-> a - above
-> b - below
-
-```
-
+{True;150;4;150;};\\@[OneShot/Niko/83c]Hello! \c[yellow]miaow meeeow meowmeow meow?\c[]
+{True;150;4;150;False};\\@[OneShot/The World Machine/Speak]This text will overlap the facepic because force_padding is False.
 ```
