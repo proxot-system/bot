@@ -33,7 +33,7 @@ from utilities.shop.fetch_items import fetch_background, fetch_item, fetch_treas
 from utilities.shop.fetch_shop_data import (
 	Item,
 	TreasureTypes,
-	fetch_shop_data,
+	get_shop_data,
 )
 
 
@@ -57,7 +57,7 @@ class ShopCommands(Extension):
 		await self.get_shop()
 
 	async def get_shop(self):
-		return await fetch_shop_data()
+		return await get_shop_data()
 
 	@component_callback("select_treasure_sell")
 	async def select_treasure_sell_callback(self, ctx: ComponentContext):
