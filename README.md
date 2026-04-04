@@ -29,7 +29,7 @@ Localization is done on [the translation website](https://translate.theworldmach
 > - If you are found sending spam/incorrect translations - you will be removed from the project without a possibility of returning
 
 > [!NOTE]
-> `/transmission`, `/sun give` - **do not** have localizations yet
+> `/transmission` - **does not** have localizations yet
 
 ### Pull Requests
 
@@ -43,7 +43,7 @@ Contributing in any way to the discord bot will have your name be put in the web
 
 ### Prerequisites
 
-Make sure you have python 3.13.11 (u can easily install this one via `pyenv`, running next step will ask if u want to install this version if u dont have it) and the `pipenv` module installed.
+Make sure you have python 3.13.11 (u can easily install this one via `pyenv`, if you have `pyenv` already installed - step 1 will ask you to download the right version) and the `pipenv` module installed.
 
 ```commandline
 python -m pip install pipenv
@@ -52,12 +52,14 @@ python -m pip install pipenv
 Clone the repo to get the codebase downloaded on your device
 
 ```commandline
-git clone https://github.com/proxot-system/bot proxot-system --recursive
+git clone https://github.com/proxot-system/bot twm-bot && cd twm-bot && git clone https://github.com/proxot-system/i18n src/data/locales
 ```
-
 > [!NOTE]
-> Without `--recursive` it won't download the required strings for the UI and it'll look all messed up
-
+> If you want to pull both locales and the bot at the same time you can use this command:
+> (you should be in the root directory of the bot, aka the twm-bot folder u just cloned)
+> ```commandline
+> git pull && cd src/data/locales && git pull origin main && cd ../../../
+> ```
 ### Step 1: Install Dependencies
 
 ```commandline
@@ -66,7 +68,7 @@ pipenv install
 
 ### Step 2: Fill in configs
 
-There is file called `bot-config.example.yml` which has stuff to configure the bot, including the bot token, database endpoints and api keys. Rename or duplicate this file to `bot-config.yml` in the same folder and fill it in. <br>
+There is file called `bot-config.example.yml` which has example configurations, including the bot token, database endpoints and api keys. Rename or duplicate this file to `bot-config.yml` in the same folder and fill it in. <br>
 A similar file is also located in the lavalink directory.
 
 ### Step 3: Running the bot
