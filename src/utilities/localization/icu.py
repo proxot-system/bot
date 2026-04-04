@@ -220,6 +220,7 @@ async def util_user(
 	except:
 		return f"'{user_id}' is not a valid user id"
 	prop = arguments[2]
+	user = None
 	if user_id != str(bot_id):
 		if not isinstance(client, Client):
 			return ValueError("function unsupported")
