@@ -1,3 +1,0 @@
-[submodule "src/data/locales"]
-	path = src/data/locales
-	url = https://github.com/proxot-system/i18n
