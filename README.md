@@ -45,24 +45,24 @@ Contributing in any way to the discord bot will have your name be put in the web
 
 Make sure you have python 3.13.11 (u can easily install this one via `pyenv`, if you have `pyenv` already installed - step 1 will ask you to download the right version) and the `pipenv` module installed.
 
-```commandline
+```sh
 python -m pip install pipenv
 ```
 
 Clone the repo to get the codebase downloaded on your device
 
-```commandline
+```sh
 git clone https://github.com/proxot-system/bot twm-bot && cd twm-bot && git clone https://github.com/proxot-system/i18n src/data/locales
 ```
 > [!NOTE]
 > If you want to pull both locales and the bot at the same time you can use this command:
 > (you should be in the root directory of the bot, aka the twm-bot folder u just cloned)
-> ```commandline
+> ```sh
 > git pull && cd src/data/locales && git pull origin main && cd ../../../
 > ```
 ### Step 1: Install Dependencies
 
-```commandline
+```sh
 pipenv install
 ```
 
@@ -73,6 +73,6 @@ A similar file is also located in the lavalink directory.
 
 ### Step 3: Running the bot
 
-```commandline
+```sh
 pipenv run bot
 ```
