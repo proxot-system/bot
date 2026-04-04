@@ -5,7 +5,6 @@ from interactions import Embed, Member, OptionType, SlashContext, User, slash_op
 
 import utilities.profile.badge_manager as bm
 from utilities.database.schemas import UserData
-from utilities.emojis import emojis
 from utilities.localization.formatting import fnum
 from utilities.localization.localization import Localization, locale_format
 from utilities.message_decorations import Colors, fancy_message
@@ -88,35 +87,32 @@ async def explode(self, ctx: SlashContext, public=True):
 	required=True,
 )
 async def sun_give(self, ctx: SlashContext, who: User):
+	loc = Localization(ctx, prefix="commands.inventory.suns")
 	user_data: UserData = await UserData(_id=who.id).fetch()
 
-	if who.bot:
-		return await fancy_message(ctx, "[ Bot's can't receive suns! ]", color=Colors.BAD, ephemeral=True)
-
 	if who.id == ctx.author.id:
-		return await fancy_message(ctx, "[ Nuh uh! ]", color=Colors.BAD, ephemeral=True)
+		return await ctx.send(await locale_format(loc, loc.get("give.self"), doer=ctx.author.id))
 
 	now = datetime.now()
+	unable_until = user_data.daily_sun_timestamp
 
-	last_reset_time = user_data.daily_sun_timestamp
-
-	if now < last_reset_time:
-		time_unix = last_reset_time.timestamp()
+	if now < unable_until:
 		return await fancy_message(
 			ctx,
-			f"[ You've already given a sun to someone! You can give one again <t:{int(time_unix)}:R>. ]",
+			await locale_format(loc, loc.get("give.errors.cooldown"), unable_until=unable_until.timestamp()),
 			ephemeral=True,
 			color=Colors.BAD,
 		)
 
-	# reset the limit if it is a new day
-	if now >= last_reset_time:
-		reset_time = now + timedelta(days=1)
+	if now >= unable_until:
+		reset_time = now + timedelta(hours=18)
 		await user_data.update(daily_sun_timestamp=reset_time)
+
 	_ = ctx.author
 	if isinstance(_, Member):
 		_ = _.user
+
 	await bm.increment_value(ctx, "suns", target=_)
 	await bm.increment_value(ctx, "suns", target=who)
 
-	await ctx.send(f"[ {ctx.author.mention} gave {who.mention} a sun! {emojis['icons']['sun']} ]")
+	await ctx.send(await locale_format(loc, loc.get("give.self"), doer=ctx.author.id))
