@@ -28,7 +28,7 @@ last_called: dict[int, datetime] = {}
 	opt_type=OptionType.BOOLEAN,
 )
 async def explode(self, ctx: SlashContext, public=True):
-	loc = Localization(ctx, prefix="commands.inventory.sun.explode")
+	loc = Localization(ctx, prefix="commands.inventory.suns.explode")
 	uid = ctx.user.id
 	explosion_amount = (await UserData(_id=uid).fetch()).times_shattered
 	if uid in last_called:
