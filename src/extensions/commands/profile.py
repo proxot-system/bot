@@ -11,7 +11,6 @@ from interactions import (
 	OptionType,
 	SlashCommandChoice,
 	SlashContext,
-	Snowflake,
 	User,
 	contexts,
 	integration_types,
@@ -47,16 +46,14 @@ class ProfileCommands(Extension):
 		loc = Localization(ctx, prefix="commands.profile")
 		if user is None:
 			user = ctx.user
-		if user.bot and (
-			user.id
-			not in (
-				ctx.user.id,
-				Snowflake(int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0)),
-			)
+		if user.bot and not (
+			user.id == int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0) or user.id == ctx.user.id
 		):
 			return await ctx.send(await locale_format(loc, loc.get("view.bots")), ephemeral=True)
 
-		loading = asyncio.create_task(fancy_message(ctx, await locale_format(loc, loc.get("view.loading"), target_id=user.id)))
+		loading = asyncio.create_task(
+			fancy_message(ctx, await locale_format(loc, loc.get("view.loading"), target_id=user.id))
+		)
 
 		start_time = time.perf_counter()
 		image = await draw_profile(
