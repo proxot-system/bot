@@ -88,14 +88,14 @@ async def explode(self, ctx: SlashContext, public=True):
 	required=True,
 )
 async def sun_give(self, ctx: SlashContext, who: User):
-	loc = Localization(ctx, prefix="commands.inventory.suns")
+	loc = Localization(ctx, prefix="commands.inventory.suns.give")
 	user_data: UserData = await UserData(_id=who.id).fetch()
 
 	if who.id == ctx.author.id and who.id not in (
 		ctx.user.id,
 		Snowflake(int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0)),
 	):
-		return await ctx.send(await locale_format(loc, loc.get("give.self"), doer=ctx.author.id))
+		return await ctx.send(await locale_format(loc, loc.get("self"), doer=ctx.author.id))
 
 	now = datetime.now()
 	unable_until = user_data.daily_sun_timestamp
@@ -103,7 +103,7 @@ async def sun_give(self, ctx: SlashContext, who: User):
 	if now < unable_until:
 		return await fancy_message(
 			ctx,
-			await locale_format(loc, loc.get("give.errors.cooldown"), unable_until=unable_until.timestamp()),
+			await locale_format(loc, loc.get("cooldown"), unable_until=unable_until.timestamp()),
 			ephemeral=True,
 			color=Colors.BAD,
 		)
@@ -119,4 +119,4 @@ async def sun_give(self, ctx: SlashContext, who: User):
 	await bm.increment_value(ctx, "suns", target=_)
 	await bm.increment_value(ctx, "suns", target=who)
 
-	await ctx.send(await locale_format(loc, loc.get("give.self"), doer=ctx.author.id))
+	await ctx.send(await locale_format(loc, loc.get("message"), doer=ctx.author.id))
