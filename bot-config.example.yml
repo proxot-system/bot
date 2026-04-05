@@ -38,6 +38,7 @@ bot:
       contributor-id: "1054832328729427988"
       translator-id: "1337522400367218758"
       supporter-id: "1044343502353481788"
+    nikobot-id: "873994883487125564"
 
 paths:
   # to avoid bugs - do not end any of these with a /

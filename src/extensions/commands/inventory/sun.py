@@ -1,9 +1,10 @@
 import random
 from datetime import datetime, timedelta
 
-from interactions import Embed, Member, OptionType, SlashContext, User, slash_option
+from interactions import Embed, Member, OptionType, SlashContext, Snowflake, User, slash_option
 
 import utilities.profile.badge_manager as bm
+from utilities.config import get_config
 from utilities.database.schemas import UserData
 from utilities.localization.formatting import fnum
 from utilities.localization.localization import Localization, locale_format
@@ -90,7 +91,10 @@ async def sun_give(self, ctx: SlashContext, who: User):
 	loc = Localization(ctx, prefix="commands.inventory.suns")
 	user_data: UserData = await UserData(_id=who.id).fetch()
 
-	if who.id == ctx.author.id:
+	if who.id == ctx.author.id and who.id not in (
+		ctx.user.id,
+		Snowflake(int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0)),
+	):
 		return await ctx.send(await locale_format(loc, loc.get("give.self"), doer=ctx.author.id))
 
 	now = datetime.now()

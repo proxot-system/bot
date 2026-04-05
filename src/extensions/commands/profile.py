@@ -47,7 +47,10 @@ class ProfileCommands(Extension):
 		loc = Localization(ctx, prefix="commands.profile")
 		if user is None:
 			user = ctx.user
-		if user.bot and user.id not in (ctx.user.id, Snowflake(873994883487125564)):
+		if user.bot and user.id not in (
+			ctx.user.id,
+			Snowflake(int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0)),
+		):
 			return await ctx.send(await locale_format(loc, loc.get("view.bots")), ephemeral=True)
 
 		loading = asyncio.create_task(fancy_message(ctx, await locale_format(loc, loc.get("view.loading"), target_id=user.id)))
