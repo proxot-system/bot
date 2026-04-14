@@ -269,7 +269,7 @@ class TransmissionCommands(Extension):
 			return
 
 		server_data: ServerData = await ServerData(_id=server_id).fetch()
-		await server_data.transmissions.known_servers.append(str(other_server.id))
+		asyncio.create_task(server_data.transmissions.known_servers.append(str(other_server.id)))
 
 		# guilds = [
 		# 	await ctx.client.fetch_guild(id) or id
@@ -308,7 +308,7 @@ class TransmissionCommands(Extension):
 
 			if not done:
 				if disconnect_timer % 10 == 0:
-					time = ftime(disconnect_timer)
+					time = ftime(disconnect_timer, bold=False)
 
 					embed.set_footer(text=f"Transmission will end in {time}.")
 

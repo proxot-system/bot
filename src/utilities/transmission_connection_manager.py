@@ -39,7 +39,9 @@ def remove_connection(server_id: Snowflake | Transmission):
 	if trans is None:
 		return
 	trans.connection_b = None
-	transmissions.remove(trans)
+
+	if trans in transmissions:
+		transmissions.remove(trans)
 
 
 def connect_to_transmission(server_id, channel_id):
@@ -62,7 +64,7 @@ def connection_alive(transmission: Snowflake | Transmission) -> bool:
 	trans = get_transmission(transmission)
 	if trans is None:
 		return False
-	if trans.connection_b == None:
+	if trans.connection_b is None:
 		return False
 	return True
 
