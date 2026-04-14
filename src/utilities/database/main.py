@@ -88,12 +88,42 @@ class DBDict(MutableMapping):
 	_parent: Collection | None
 	_parent_field: str | None
 
-	def __init__(self, *args, _parent: Collection | None = None, _parent_field: str | None = None, **kwargs):
+	def __init__(self, *args, _parent: "Collection | None" = None, _parent_field: str | None = None, **kwargs):
 		self._parent = _parent
 		self._parent_field = _parent_field
 
+		from dataclasses import MISSING, Field
+		from typing import get_origin, get_type_hints
+
+		try:
+			type_hints = get_type_hints(self.__class__)
+		except Exception:
+			type_hints = {}
+
 		initial_data = dict(*args, **kwargs)
+
+		for key, expected_type in type_hints.items():
+			if key.startswith("_"):
+				continue
+			if key not in initial_data and hasattr(self.__class__, key):
+				default_val = getattr(self.__class__, key)
+				if isinstance(default_val, Field):
+					if default_val.default_factory is not MISSING:
+						initial_data[key] = default_val.default_factory()
+					elif default_val.default is not MISSING:
+						initial_data[key] = default_val.default
+				else:
+					initial_data[key] = default_val
+
 		for key, value in initial_data.items():
+			expected_type = type_hints.get(key)
+			if expected_type is not None:
+				origin = get_origin(expected_type) or expected_type
+				if isinstance(value, list) and isinstance(origin, type) and issubclass(origin, list):
+					value = origin(default=value, _parent=self, _parent_field=key)  # type:ignore
+				elif isinstance(value, dict) and isinstance(origin, type) and issubclass(origin, DBDict):
+					value = origin(_parent=self, _parent_field=key, **value)  # type:ignore
+
 			setattr(self, key, value)
 
 	def __setitem__(self, key, value):
