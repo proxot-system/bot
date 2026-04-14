@@ -23,29 +23,29 @@ from utilities.shop.fetch_items import fetch_treasure
 	description="Whether you want the command to send messages visible for others in the channel",
 	opt_type=OptionType.BOOLEAN,
 )
-async def command(self, ctx: SlashContext, user: User | None = None, public: bool = False):
+async def command(self, ctx: SlashContext, target: User | None = None, public: bool = False):
 	loc = Localization(ctx, prefix="commands.inventory.base")
 	treasure_loc = Localization(ctx, prefix="commands.inventory.treasures")
 
-	if user is None:
-		user = ctx.user
-	if user.bot:
-		return await ctx.send(await locale_format(loc, treasure_loc.get("empty"), user_id=user.id), ephemeral=True)
+	if target is None:
+		target = ctx.user
+	if target.bot:
+		return await ctx.send(await locale_format(loc, treasure_loc.get("empty"), user_id=target.id), ephemeral=True)
 
 	message = asyncio.create_task(
 		fancy_message(
 			ctx,
-			await locale_format(loc, treasure_loc.get("loading"), target_type="current" if user == ctx.user else "other"),
+			await locale_format(loc, treasure_loc.get("loading"), target_type="current" if target == ctx.user else "other"),
 			ephemeral=not public,
 		)
 	)
 
 	all_treasures = await fetch_treasure()
-	user_data: UserData = await UserData(_id=user.id).fetch()
+	user_data: UserData = await UserData(_id=target.id).fetch()
 	owned_treasures = user_data.owned_treasures
 	if len(list(user_data.owned_treasures.items())) == 0:
 		await message
-		return await fancy_message(ctx, await locale_format(loc, treasure_loc.get("empty"), user_id=user.id), edit=True)
+		return await fancy_message(ctx, await locale_format(loc, treasure_loc.get("empty"), user_id=target.id), edit=True)
 
 	max_amount_length = len(fnum(max(owned_treasures.values(), default=0), locale=loc.locale))
 	treasure_string = ""
@@ -66,9 +66,7 @@ async def command(self, ctx: SlashContext, user: User | None = None, public: boo
 
 	await ctx.edit(
 		embed=Embed(
-			description=await locale_format(
-				loc, treasure_loc.get("message"), user=user.mention, treasures=treasure_string
-			)
+			description=await locale_format(loc, treasure_loc.get("message"), user=target.mention, treasures=treasure_string)
 			+ (
 				await put_mini(
 					treasure_loc,

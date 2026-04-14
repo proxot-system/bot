@@ -82,15 +82,15 @@ async def explode(self, ctx: SlashContext, public=True):
 
 @slash_option(
 	description="Person to give the sun to",
-	name="who",
+	name="target",
 	opt_type=OptionType.USER,
 	required=True,
 )
-async def sun_give(self, ctx: SlashContext, who: User):
+async def sun_give(self, ctx: SlashContext, target: User):
 	loc = Localization(ctx, prefix="commands.inventory.suns.give")
-	user_data: UserData = await UserData(_id=who.id).fetch()
+	user_data: UserData = await UserData(_id=target.id).fetch()
 
-	if who.id == ctx.author.id:
+	if target.id == ctx.author.id:
 		return await ctx.send(await locale_format(loc, loc.get("self"), doer=ctx.author.id))
 
 	now = datetime.now()
@@ -113,6 +113,6 @@ async def sun_give(self, ctx: SlashContext, who: User):
 		_ = _.user
 
 	await bm.increment_value(ctx, "suns", target=_)
-	await bm.increment_value(ctx, "suns", target=who)
+	await bm.increment_value(ctx, "suns", target=target)
 
-	await ctx.send(await locale_format(loc, loc.get("message"), giver=ctx.author.id, receiver=who.id))
+	await ctx.send(await locale_format(loc, loc.get("message"), giver=ctx.author.id, receiver=target.id))
