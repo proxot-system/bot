@@ -55,7 +55,7 @@ async def command(self, ctx: SlashContext, target: User | None = None, public: b
 		treasure_string += (
 			await locale_format(
 				loc,
-				loc.get("items.entry_template"),
+				loc.get("item_entry_template"),
 				spacer=rjust.replace(num, ""),
 				amount=num,
 				icon=emojis["treasures"][treasure_nid],
