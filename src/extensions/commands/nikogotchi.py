@@ -102,7 +102,7 @@ class NikogotchiCommands(Extension):
 				emoji=emojis["icons"]["refresh"],
 				custom_id=f"{prefix}refresh{suffix}",
 			),
-			Button(style=ButtonStyle.DANGER, label="X", custom_id=f"{prefix}exit{suffix}"),
+			# Button(style=ButtonStyle.DANGER, label="X", custom_id=f"{prefix}exit{suffix}"),
 		]
 
 	async def get_nikogotchi_age(self, uid: str):
@@ -379,16 +379,22 @@ class NikogotchiCommands(Extension):
 					custom_id=f"continue {ctx.id}",
 				),
 			]
-			await ctx.send(
-				embed=hatched_embed,
-				components=buttons,
-				ephemeral=True,
+			loading = asyncio.create_task(
+				ctx.send(
+					embed=hatched_embed,
+					components=buttons,
+					ephemeral=True,
+				)
 			)
 			try:
 				button: Component = await ctx.client.wait_for_component(components=buttons, timeout=15.0)
 				if button.ctx.custom_id == f"rename {ctx.id}":
-					await self.init_rename_flow(button.ctx, nikogotchi.name, True)
+					await loading
+					modal = await self.init_rename_flow(button.ctx, nikogotchi.name)
+					await ctx.client.wait_for_modal(modal=modal, author=ctx.author, timeout=30.0)
+
 			except TimeoutError:
+				await loading
 				return await self.check(ctx, edit=True)
 		await self.nikogotchi_interaction(ctx, loading)
 
@@ -596,7 +602,7 @@ class NikogotchiCommands(Extension):
 			await _awaitable
 		try:
 			await ctx.edit_origin(embeds=embeds, components=[ActionRow(select), ActionRow(*buttons)])
-		except Exception as e:
+		except Exception:
 			try:
 				await ctx.edit(embeds=embeds, components=[ActionRow(select), ActionRow(*buttons)])
 			except Exception:
@@ -723,9 +729,7 @@ class NikogotchiCommands(Extension):
 	async def send_away(self, ctx: SlashContext):
 		loc = Localization(ctx, prefix="commands.nikogotchi")
 
-		loading = asyncio.create_task(fancy_message(
-			ctx, await locale_format(loc, loc.get("loading"))
-		))
+		loading = asyncio.create_task(fancy_message(ctx, await locale_format(loc, loc.get("loading")), ephemeral=True))
 
 		nikogotchi = await self.get_nikogotchi(str(ctx.author.id))
 
@@ -779,7 +783,7 @@ class NikogotchiCommands(Extension):
 		else:
 			await ctx.delete()
 
-	async def init_rename_flow(self, ctx: ComponentContext | SlashContext, old_name: str, cont: bool = False):
+	async def init_rename_flow(self, ctx: ComponentContext | SlashContext, old_name: str):
 		loc = Localization(ctx, prefix="commands.nikogotchi")
 		modal = Modal(
 			ShortText(
@@ -792,9 +796,8 @@ class NikogotchiCommands(Extension):
 			custom_id="rename_nikogotchi",
 			title=await locale_format(loc, loc.get("other.renaming.title")),
 		)
-		if cont:
-			modal.custom_id = "rename_nikogotchi continue"
 		await ctx.send_modal(modal)
+		return modal
 
 	@modal_callback(re.compile(r"rename_nikogotchi?.+"))
 	async def on_rename_answer(self, ctx: ModalContext, name: str):
