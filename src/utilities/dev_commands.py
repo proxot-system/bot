@@ -20,6 +20,7 @@ from utilities.emojis import emojis
 from utilities.localization.formatting import fnum
 from utilities.message_decorations import Colors
 from utilities.misc import shell
+from utilities.shop.fetch_items import fetch_treasure
 from utilities.shop.fetch_shop_data import get_shop_data
 
 ansi_escape_pattern = re.compile(r"\033\[[0-9;]*[A-Za-z]")
@@ -30,7 +31,7 @@ def get_collection(collection: str, _id: str):
 		found = getattr(schemas, collection)
 	except:
 		found = None
-	if found == None or is_dataclass(found) or (hasattr(found, "__name__") and found.__name__ == "StatUpdate"):
+	if found is None or is_dataclass(found) or (hasattr(found, "__name__") and found.__name__ == "StatUpdate"):
 		raise ValueError(
 			"Invalid collection name, valid one's: "
 			+ ", ".join(
@@ -145,7 +146,7 @@ async def _execute_dev_command(message: Message):
 				case "refresh":
 					try:
 						extension = args[2]
-					except IndexError as e:
+					except IndexError:
 						return await message.reply('[ This command expects an extension to refresh, or "all" ]')
 					if extension == "all":
 						message.content = "{eval ```py\nload_commands(client, unload=True, print=print)\n```}"
@@ -160,13 +161,13 @@ async def _execute_dev_command(message: Message):
 				case "sync_commands":
 					msg = await message.reply(f"[ Synchronizing commands... {emojis['icons']['loading']} ]")
 					await client.synchronise_interactions(delete_commands=True)
-					return await msg.edit(content=f"[ Synchronized ]")
+					return await msg.edit(content="[ Synchronized ]")
 				case "shell":
 					msg = await message.reply(f"[ Running... {emojis['icons']['loading']} ]")
 					parse = " ".join(args).split(args[1])
 					if len(parse) < 1:
 						return await msg.edit(
-							content=f"[ No command passed. This command expects a command to execute in the terminal, e.g. `[bot shell echo meow]` ]"
+							content="[ No command passed. This command expects a command to execute in the terminal, e.g. `[bot shell echo meow]` ]"
 						)
 					output = shell(parse[1])
 					return await msg.edit(content=f"[ Done ]\n```bash\n{output}```")
@@ -181,8 +182,67 @@ async def _execute_dev_command(message: Message):
 					return await message.reply(f"[ logged {out.jump_url} ]")
 				case _:
 					return await message.reply("Available subcommands: `refresh` / `sync_commands` / `shell` / `log`")
+		case "inventory":
+			subcase = args[1]
+			match subcase:
+				case "sell":
+					try:
+						userid = args[2]
+						target_items_raw = args[3]
+					except IndexError:
+						return await message.reply(
+							"`[ Usage: [inventory sell {userid} all] or [inventory sell {userid} comma,separated,items] ]`"
+						)
+
+					user_data: schemas.UserData = await schemas.UserData(_id=userid).fetch()
+					daily_shop = await get_shop_data()
+					all_treasures = await fetch_treasure()
+					stock_price = daily_shop.stock.price
+
+					before_wool = user_data.wool
+					before_treasures = dict(user_data.owned_treasures)
+
+					if target_items_raw.lower() == "all":
+						treasures_to_sell = list(user_data.owned_treasures.keys())
+					else:
+						treasures_to_sell = [x.strip() for x in target_items_raw.split(",")]
+
+					wool_gained = 0
+					sold_details = []
+
+					for tid in treasures_to_sell:
+						if tid not in before_treasures or before_treasures[tid] <= 0:
+							continue
+						if tid not in all_treasures:
+							continue
+
+						amount = before_treasures[tid]
+						price_per_item = int(all_treasures[tid]["price"] * stock_price)
+						total_price = price_per_item * amount
+
+						wool_gained += total_price
+						del user_data.owned_treasures[tid]
+
+						sold_details.append(f"**{tid}**: {amount} -> 0 (+{total_price} {emojis['icons']['wool']})")
+
+					if wool_gained > 0:
+						await user_data.update(owned_treasures=user_data.owned_treasures)
+						await user_data.manage_wool(wool_gained)
+
+					after_wool = user_data.wool
+
+					desc = [f"**Wool:** {before_wool} -> {after_wool} (+{wool_gained})\n", "**Treasures Sold:**"]
+					if not sold_details:
+						desc.append("None")
+					else:
+						desc.extend(f"- {detail}" for detail in sold_details)
+
+					embed = Embed(title=f"Inventory update for {userid}", color=Colors.GREEN, description="\n".join(desc))
+					return await message.reply(embeds=embed)
+				case _:
+					return await message.reply("`[ Available subcommands: sell ]`")
 		case "eval":
-			code = command_content.split(f"eval ")
+			code = command_content.split("eval ")
 			referenced_message = message.get_referenced_message()
 			reply_content = referenced_message.content if referenced_message and referenced_message.content else None
 
@@ -221,7 +281,7 @@ async def _execute_dev_command(message: Message):
 							raise BaseException("no code provided")
 						result = eval(code, globals(), locals())
 				end_time = time.perf_counter()
-			except Exception as e:
+			except Exception:
 				end_time = time.perf_counter()
 				state["raisure"] = True
 				exc_type, exc_value, exc_tb = sys.exc_info()
@@ -259,10 +319,11 @@ async def _execute_dev_command(message: Message):
 				desc = f"-# Runtime: {fnum(runtime)} ms{note}"
 				if state["asnyc_warn"]:
 					desc += "\n-# All line numbers are offset by +1 cuz of await"
-				if result == None and method in ("aexec", "exec"):
+				if result is None and method in ("aexec", "exec"):
 					desc += "\n-# Nothing was printed"
 				else:
 					desc += f"\n```py\n{str(result).replace('```', '` ``')}```"
+
 				color = Colors.DEFAULT
 				if state["raisure"]:
 					color = Colors.BAD
@@ -305,8 +366,39 @@ async def _execute_dev_command(message: Message):
 						return await message.reply("`[ Successfully reset shop ]`")
 					except Exception as e:
 						return await message.reply(f"`[ {e} ]`")
+				case "update":
+					try:
+						target = args[2]
+						val_raw = args[3]
+					except IndexError:
+						return await message.reply("`[ Usage: [shop update stock 0.5] or [shop update stock 0.5,1] ]`")
+
+					if target == "stock":
+						daily_shop = await get_shop_data()
+						try:
+							if "," in val_raw:
+								p, v = map(float, val_raw.split(","))
+								daily_shop.stock.price = p
+								daily_shop.stock.value = v
+							else:
+								daily_shop.stock.price += float(val_raw)
+						except ValueError:
+							return await message.reply("`[ Invalid number format ]`")
+
+						await main.update_shop(
+							{
+								"last_updated": daily_shop.last_updated,
+								"backgrounds": daily_shop.background_stock,
+								"treasures": daily_shop.treasure_stock,
+								"motd": daily_shop.motd,
+								"stock": {"price": daily_shop.stock.price, "value": daily_shop.stock.value},
+							}
+						)
+						return await message.add_reaction("✅")
+					else:
+						return await message.reply("`[ Only 'stock' update is currently supported ]`")
 				case _:
-					return await message.reply("Available subcommands: `view` / `reset`")
+					return await message.reply("Available subcommands: `view` / `reset` / `update`")
 		case "db":
 			try:
 				match args[1]:
@@ -365,13 +457,9 @@ async def _execute_dev_command(message: Message):
 
 						await collection.manage_wool(amount)
 
-						return await message.reply(
-							f"`[ Successfully modified wool, updated value is now {collection.wool} ]`"
-						)
+						return await message.reply(f"`[ Successfully modified wool, updated value is now {collection.wool} ]`")
 					case _:
-						return await message.reply(
-							"Available subcommands: `set` / `view` / `view_all` / `wool`\nCollections:"
-						)
+						return await message.reply("Available subcommands: `set` / `view` / `view_all` / `wool`")
 			except Exception as e:
 				tb.print_exc()
 				await message.reply(f"``[ Error with command ({e}) ]``")
@@ -385,9 +473,7 @@ async def _execute_dev_command(message: Message):
 					guild_id = args[3] if len(args) == 4 else None
 					if guild_id is None:
 						if not message.guild:
-							raise ValueError(
-								"[ [util fakejoin] expects all arguments in dms: `user_id` and `guild_id` ]"
-							)
+							raise ValueError("[ [util fakejoin] expects all arguments in dms: `user_id` and `guild_id` ]")
 						guild_id = message.guild.id
 
 					guild = await client.fetch_guild(guild_id)
