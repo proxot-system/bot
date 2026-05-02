@@ -352,7 +352,7 @@ async def init_change_text_flow(ctx: ComponentContext | SlashContext, state_id: 
 			label=await locale_format(loc, loc.get("modal.edit_text.input.label"), index=int(frame_index) + 1),
 			placeholder=await locale_format(loc, loc.get("modal.edit_text.input.placeholder")),
 			min_length=0,
-			max_length=get_config("textbox.limits.frame-text-length", typecheck=int),
+			max_length=get_config("textbox.limits.frameTextLength", typecheck=int),
 		),
 		custom_id=f"textbox update_text_finish {state_id} {frame_index}",
 		title=await locale_format(

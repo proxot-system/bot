@@ -27,7 +27,7 @@ class FileWatcher(FileSystemEventHandler):
 			return
 
 		path = str(event.src_path)
-		if path.endswith("4913") and get_config("watcher.ignore-4913", typecheck=bool):
+		if path.endswith("4913") and get_config("watcher.ignore4913", typecheck=bool):
 			return
 
 		path = path.replace("\\", "/")

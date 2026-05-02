@@ -88,7 +88,7 @@ class TextboxCommands(Extension):
 		description="What you want the character to say?",
 		opt_type=OptionType.STRING,
 		required=False,
-		max_length=get_config("textbox.limits.frame-text-length", typecheck=int),
+		max_length=get_config("textbox.limits.frameTextLength", typecheck=int),
 	)
 	@slash_option(
 		name="facepic",

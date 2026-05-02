@@ -1,0 +1,128 @@
+configCheckLevel = 4
+debug = false
+
+dev {
+  guildId = "1017479547664482444"
+  channels {
+    logs = "1307137916379725824"
+    more = "1381622140125577276"
+  }
+  sendStartupMessage = true
+  commandMarker = "[.]"
+  whitelist = new Listing {
+    "744276454946242723"
+    "831530536781873163"
+  }
+}
+
+bot {
+  token = "MTAyODA1ODA5NzM4MzY0MTExOA.4R9ncw.LWxLZQXHygROBuEr5xeuXocO-Kb"
+  loggingLevel = "DEBUG"
+
+  rolling {
+    avatar = true
+    status = true
+    interval = 3600
+    statuses = new Listing {
+      "[ ... ]"
+      "[ ... ]"
+      "[ ... ]"
+      "[ looking for fun in over {guild_count} servers ]"
+      "[ no thoughts right now ]"
+      "[ hello ]"
+      // "[ uhhh ]"
+      // "[ merry machinsmas]"
+    }
+  }
+
+  links {
+    websiteRoot = "https://theworldmachine.xyz"
+    textboxWebsiteRoot = "https://tb.theworldmachine.xyz"
+    discordInvite = "https://discord.com/invite/UuyuubugZ9"
+    addTwmBot = "https://theworldmachine.xyz/add-twm"
+  }
+
+  main {
+    guildId = "1017531963000754247"
+    roles {
+      contributorId = "1054832328729427988"
+      translatorId = "1337522400367218758"
+      supporterId = "1044343502353481788"
+    }
+    nikobotId = "873994883487125564"
+  }
+}
+
+paths {
+  emojis = "src/data/emojis.yml"
+  facepics = "src/data/facepics.yml"
+  localization {
+    root = "src/data/locales/bot"
+  }
+  textbox {
+    fonts = "src/data/fonts"
+    colorParserBinary = "src/utilities/textbox/csscolors/target/release/csscolors"
+  }
+}
+
+modules {
+  welcome = true
+  music = false
+  devcommands = true
+}
+
+watcher {
+  ignore4913 = true
+}
+
+database {
+  connection {
+    username = "meqativ"
+    password = "password"
+    host = "localhost"
+    port = 27017
+  }
+  dnsFix = false
+}
+
+localization {
+  weblateToken = "wlu_XnaUbp8Hq62163Xau5i6AT37K9kYzn3423wz"
+  sourceLocale = "en-GB"
+  debug = false
+  whitelist {
+    ["en"] = new Listing {
+    // strings with ids
+    }
+  }
+}
+
+textbox {
+  web {
+    port = 4230
+  }
+  limits {
+    filesize = 50.gb
+    frames = 250
+    frameTextLength = 2423
+  }
+  font = "src/data/fonts/TerminusTTF-Bold.ttf"
+  unproxiedHosts = new Listing {
+    "discordapp.com"
+    "discordapp.net"
+    "discord.com"
+    "github.com"
+    "githubusercontent.com"
+  }
+}
+
+music {
+  spotify {
+    secret = null
+    id = null
+  }
+  lavalink {
+    ip = "localhost"
+    port = 4231
+    password = "password_here"
+  }
+}

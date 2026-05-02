@@ -5,7 +5,7 @@ from logging import INFO
 
 from termcolor import colored
 
-from utilities.config import debugging, get_config, get_token
+from utilities.config import get_config, get_token
 from utilities.logging import createLogger
 
 logger = createLogger(__name__)
@@ -87,7 +87,7 @@ client = TWMClient(
 	message_cache=smart_cache.create_cache(150, 5),
 	member_cache=smart_cache.create_cache(150, 5000),
 	user_cache=smart_cache.create_cache(150, 5000),
-	fetch_members=not debugging()
+	# fetch_members=not debugging()
 )
 client.started_at: datetime = datetime.now()  # type: ignore
 if do_rolling := get_config("bot.rolling.avatar", typecheck=bool) or get_config("bot.rolling.status"):

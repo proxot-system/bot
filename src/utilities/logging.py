@@ -2,7 +2,7 @@ import logging
 import os
 import time
 
-from utilities.config import debugging, get_config
+from utilities.config import get_config
 
 
 class IgnoreFilter(logging.Filter):
@@ -22,7 +22,7 @@ ignored = [
 	'Sending data to websocket: {"op": 1, "d": 18}',
 ]
 
-loggingLevel = logging.getLevelName(get_config(f"bot{'' if debugging() else '.prod'}.logging-level").upper())
+loggingLevel = logging.getLevelName(get_config("bot.loggingLevel").upper())
 
 
 def createLogger(name: str):

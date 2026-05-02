@@ -69,7 +69,7 @@ http_status_names = {
 
 
 def get_browser_locale(request: web.Request) -> str:
-	accept_lang = request.headers.get("Accept-Language", get_config("localization.source-locale"))
+	accept_lang = request.headers.get("Accept-Language", get_config("localization.sourceLocale"))
 
 	raw_locale = accept_lang.split(",")[0].split(";")[0].strip()
 

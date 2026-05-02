@@ -173,6 +173,7 @@ def rabbit(
 	_error_message: Optional[str] = None,
 	simple_error: bool = False,
 	deepcopy: bool = False,
+	use_attr_access: bool = False,
 ) -> Any:
 	"""
 	Goes down the `value`'s tree based on a dot-separated, or [0] indexed `path` string.
@@ -211,7 +212,7 @@ def rabbit(
 		try:
 			if current_fallback is not None:
 				try:
-					current_fallback = current_fallback[part]  # type: ignore
+					current_fallback = current_fallback.__getattribute__(str(part)) if use_attr_access else current_fallback[part]  # type: ignore
 				except TypeError:
 					if isinstance(current_fallback, str):
 						raise KeyError(f"Tried to access property ('{part}') of string in fallback")
@@ -221,7 +222,7 @@ def rabbit(
 					current_fallback = None
 
 			try:
-				current_value = current_value[part]  # type: ignore
+				current_value = current_value.__getattribute__(str(part)) if use_attr_access else current_value[part]  # type: ignore
 			except TypeError:
 				if isinstance(current_value, str):
 					raise KeyError(f"Tried to access property ('{part}') of string")
@@ -232,7 +233,9 @@ def rabbit(
 
 			if current_value is None and current_fallback is not None:
 				current_value = current_fallback
-			if isinstance(current_fallback, (dict, list, tuple)) and part not in current_fallback:
+			if isinstance(current_fallback, (dict, list, tuple)) and (
+				hasattr(current_fallback, str(part)) if use_attr_access else part not in current_fallback
+			):
 				if current_value is None and current_fallback is None:
 					raise KeyError(f"Couldn't find '{part}'")
 			if current_value is None and i < len(parsed_path) - 1:

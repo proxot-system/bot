@@ -15,7 +15,7 @@ from termcolor import colored
 
 import utilities.database.main as main
 import utilities.database.schemas as schemas
-from utilities.config import get_config, on_prod
+from utilities.config import get_config
 from utilities.emojis import emojis
 from utilities.localization.formatting import fnum
 from utilities.message_decorations import Colors
@@ -83,11 +83,7 @@ async def redir_prints(method, code, locals=None, globals=None):
 		return cp.output_buffer.getvalue()
 
 
-command_marker = get_config("dev.command-marker")
-if on_prod:
-	_pm = get_config("bot.prod.command-marker", ignore_None=True)
-	command_marker = _pm if _pm is not None else command_marker
-
+command_marker = get_config("dev.commandMarker")
 
 async def execute_dev_command(message: Message):
 	try:

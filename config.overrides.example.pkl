@@ -1,0 +1,36 @@
+amends "config.base.pkl"
+
+dev {
+  commandMarker = "<.>"
+}
+
+bot {
+  token = "NzQ0Mjc2NDU0OTQ2MjQyNzIz.rtq4tx.b0xH31zQCKKog1HaT1rNtZQ_j3F"
+  loggingLevel = "DEBUG"
+
+  rolling {
+    avatar = false
+  }
+  debug = false
+}
+
+database {
+  connection {
+    username = "."
+    password = "."
+    host = "localhost"
+    port = 27017
+  }
+  dnsFix = false
+}
+
+localization {
+  weblateToken = "."
+  debug = true
+}
+
+textbox {
+  limits {
+    filesize = 69420.tib
+  }
+}

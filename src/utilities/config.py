@@ -1,21 +1,22 @@
 from pathlib import Path
-from typing import Literal, Type, TypeVar, overload
+from traceback import print_exc
+from typing import Any, Literal, Type, TypeVar, overload
 
+from pkl import PklError
+from pkl import load as load_piquel
 from termcolor import colored
-from yaml import safe_load as load_yml_file
 
 from utilities.misc import rabbit
-from utilities.stats import get_current_branch
 
-bcpath = Path("bot-config.yml")
+bcpath = Path("config.overrides.pkl")
 try:
-	with open(bcpath, "r") as f:
-		config = load_yml_file(f)
-		print("Loaded configuration")
-except FileNotFoundError as e:
+	config: Any = load_piquel(bcpath)
+	print("Loaded configuration")
+except PklError:  #
+	print_exc()
 	print(
 		colored(
-			f"─ config file at '{bcpath.resolve()}' is missing.\nAre you sure you set it up correctly?",
+			f"─ config file at '{bcpath.resolve()}' is missing or failed to load.\nAre you sure you set it up correctly?",
 			"yellow",
 		)
 	)
@@ -81,6 +82,7 @@ def get_config(
 		raise_on_not_found=should_raise,
 		return_None_on_not_found=return_none,
 		_error_message="Configuration does not have [path]",
+		use_attr_access=True,
 	)
 
 	if res is None:
@@ -90,20 +92,17 @@ def get_config(
 		return str(res)
 
 	if not isinstance(res, typecheck):
-		raise TypeError(
-			f"Configuration value for '{path}' has type {type(res).__name__}, but expected {typecheck.__name__}"
-		)
+		raise TypeError(f"Configuration value for '{path}' has type {type(res)}, but expected {typecheck.__name__}")
 
 	return res
 
 
-cl = get_config("config-check-level", typecheck=int, ignore_None=True)
+cl = get_config("configCheckLevel", typecheck=int, ignore_None=True)
 if cl is not None:
 	to_check: list[tuple[str, bool]] = [
 		("bot.token", True),
 		("database.connection.password", True),
-		("localization.source-locale", True),
-		("bot.prod.token", False),
+		("localization.sourceLocale", True),
 		("bot.rolling.avatar", False),
 		("bot.rolling.status", False),
 		("bot.rolling.interval", False),
@@ -124,17 +123,12 @@ if cl is not None:
 			if cl <= 2:
 				exit(1)
 
-on_prod = get_current_branch() == get_config("bot.prod.branch", ignore_None=True)
-if get_config("bot.prod.override", typecheck=bool, ignore_None=True):
-	on_prod = True
-if get_config("bot.prod.token", ignore_None=True) is None:
-	on_prod = False
 
-debug = not on_prod  # 🔥✍️
-debug_override = get_config("bot.debug", typecheck=bool, ignore_None=True)
-
+debug = get_config("debug", typecheck=bool, ignore_None=True)
+debug_override = None
 
 def debugging():
+	global debug_override
 	return debug_override if debug_override is not None else debug
 
 
@@ -144,10 +138,4 @@ def setd(value: bool):
 
 
 def get_token() -> str:
-	out: str | None
-	if not on_prod:
-		return get_config("bot.token")
-	out = get_config("bot.prod.token", ignore_None=True)
-	if out is None:
-		out = get_config("bot.token")
-	return out
+	return get_config("bot.token")

@@ -47,7 +47,7 @@ class ProfileCommands(Extension):
 		if user is None:
 			user = ctx.user
 		if user.bot and not (
-			user.id == int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0) or user.id == ctx.user.id
+			user.id == int(get_config("bot.main.nikobotId", raise_on_not_found=False) or 0) or user.id == ctx.user.id
 		):
 			return await ctx.send(await locale_format(loc, loc.get("view.bots")), ephemeral=True)
 
@@ -88,7 +88,7 @@ class ProfileCommands(Extension):
 			Button(
 				style=ButtonStyle.URL,
 				label=await locale_format(loc, loc.get("generic.buttons.open_site", prefix_override="main")),
-				url=get_config("bot.links.website-root") + "/profile",
+				url=get_config("bot.links.websiteRoot") + "/profile",
 			)
 		]
 		asyncio.create_task(
@@ -106,7 +106,7 @@ class ProfileCommands(Extension):
 				Button(
 					style=ButtonStyle.URL,
 					label=await locale_format(loc, loc.get('buttons["community server"]', prefix_override="commands.info.about")),
-					url=get_config("bot.links.discord-invite"),
+					url=get_config("bot.links.discordInvite"),
 				)
 			)
 			buffer = await render_textbox_frames(

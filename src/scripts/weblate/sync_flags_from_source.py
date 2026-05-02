@@ -8,13 +8,13 @@ import aiohttp
 
 from utilities.config import get_config
 
-WEBLATE_API_TOKEN = os.environ.get("WEBLATE_TOKEN", get_config("localization.weblate-token"))
+WEBLATE_API_TOKEN = os.environ.get("WEBLATE_TOKEN", get_config("localization.weblateToken"))
 WEBLATE_URL = os.environ.get("WEBLATE_URL", "https://translate.theworldmachine.xyz")
 PROJECT_SLUG = os.environ.get("PROJECT_SLUG", "discord-bot")
 LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "en_GB")
 
 LOCALES_ROOT = Path(get_config("paths.localization.root"))
-SOURCE_LOCALE = get_config("localization.source-locale")
+SOURCE_LOCALE = get_config("localization.sourceLocale")
 SOURCE_PATH = LOCALES_ROOT / SOURCE_LOCALE
 
 SEMAPHORE = asyncio.Semaphore(15)

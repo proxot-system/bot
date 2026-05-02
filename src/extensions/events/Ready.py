@@ -57,15 +57,17 @@ class ReadyEvent(Extension):
 		channel = get_config("dev.channels.logs", ignore_None=True, typecheck=str)
 		if channel:
 			channel = await client.fetch_channel(channel)
-
 		extended = get_config("dev.channels.logs", ignore_None=True, typecheck=str)
 		if extended:
 			extended = await client.fetch_channel(extended)
-			assert isinstance(extended, TYPE_MESSAGEABLE_CHANNEL), "extended logs channel must be messageabe"
+			if not isinstance(extended, TYPE_MESSAGEABLE_CHANNEL) and extended is not None:
+				print(f"extended logs channel must be messageable! ignoring, found type {extended.type}")
+		if channel is None:
+			return
 		assert channel and isinstance(channel, TYPE_MESSAGEABLE_CHANNEL), "logs channel must be messageable"
 		ready_delta: timedelta = client.ready_at - client.started_at  # type: ignore
 		message: Message | None  # type:ignore
-		if get_config("dev.send-startup-message", typecheck=bool):
+		if get_config("dev.sendStartupMessage", typecheck=bool):
 			version = git_log()
 			message = await channel.send(
 				embed=Embed(
@@ -96,7 +98,7 @@ class ReadyEvent(Extension):
 			assert message is not None
 			client.followup_at = timestamp  # type: ignore
 			loadup_delta: timedelta = client.followup_at - client.started_at  # type: ignore
-			if get_config("dev.send-startup-message", typecheck=bool):
+			if get_config("dev.sendStartupMessage", typecheck=bool):
 				embed = message.embeds[0]
 				assert embed.description is not None
 				embed.description = embed.description.replace(

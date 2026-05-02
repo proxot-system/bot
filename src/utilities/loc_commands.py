@@ -5,7 +5,7 @@ import yaml
 from interactions import Message
 from termcolor import colored
 
-from utilities.config import get_config
+from utilities.config import config, get_config
 from utilities.localization.localization import local_override
 
 
@@ -16,10 +16,10 @@ async def execute_loc_command(message: Message):
 	if not message.content:
 		return
 
-	if str(message.author.id) not in list(chain(*get_config("localization.whitelist", typecheck=dict).values())):
+	if str(message.author.id) not in list(chain(*config.localization.whitelist.values())):
 		return
 
-	prefix = get_config("dev.command-marker").split(".")
+	prefix = get_config("dev.commandMarker").split(".")
 
 	if not (message.content[0] == prefix[0] and message.content[-1] == prefix[1]):
 		return

@@ -28,6 +28,7 @@ pyicumessageformat = "*"
 pyvips = {ref = "master", git = "https://github.com/libvips/pyvips.git"}
 pytz = "*"
 interactions-py = "*"
+pkl-python = "*"
 
 [dev-packages]
 ruff = "*"

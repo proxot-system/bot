@@ -9,12 +9,11 @@ from pymongo.server_api import ServerApi
 
 from utilities.config import get_config
 
-if get_config("database.dns-fix", typecheck=bool, ignore_None=True):
+if get_config("database.dnsFix", typecheck=bool, ignore_None=True):
 	import dns.resolver
 
 	dns.resolver.default_resolver = dns.resolver.Resolver(configure=False)
 	dns.resolver.default_resolver.nameservers = ["8.8.8.8"]
-connection_uri = get_config("database.uri")
 
 
 def init_things(self):

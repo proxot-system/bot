@@ -4,7 +4,7 @@ from pathlib import Path
 from utilities.config import get_config
 
 LOCALES_ROOT = Path(get_config("paths.localization.root"))
-SOURCE_LOCALE = get_config("localization.source-locale")
+SOURCE_LOCALE = get_config("localization.sourceLocale")
 SOURCE_PATH = LOCALES_ROOT / SOURCE_LOCALE
 
 
