@@ -9,6 +9,7 @@ blob/
 
 src/data/emojis.yml
 bot-config.yml
+config.overrides*.pkl
 
 lavalink/application.yml
 lavalink/plugins/
