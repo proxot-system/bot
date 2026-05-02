@@ -66,10 +66,9 @@ git clone https://github.com/proxot-system/bot twm-bot && cd twm-bot && git clon
 pipenv install
 ```
 
-### Step 2: Fill in configs
+### Step 2: Create configuration
 
-There is file called `bot-config.example.yml` which has example configurations, including the bot token, database endpoints and api keys. Rename or duplicate this file to `bot-config.yml` in the same folder and fill it in. <br>
-A similar file is also located in the lavalink directory.
+You can use `config.overrides.example.pkl` to create `config.overrides.pkl`, make sure to replace your credentials.
 
 ### Step 3: Running the bot
 
