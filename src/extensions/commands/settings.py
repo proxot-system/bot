@@ -346,7 +346,7 @@ class SettingsCommands(Extension):
 					custom_id="text",
 					placeholder=await locale_format(loc, loc.get("placeholder")),
 					max_length=get_config(
-						"textbox.limits.frameTextLength",
+						"textbox.limits.frame-text-length",
 						typecheck=int,
 						ignore_None=True,
 					)

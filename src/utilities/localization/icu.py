@@ -3,7 +3,7 @@ from traceback import print_exc
 from typing import Any
 
 from babel import Locale
-from babel.numbers import format_compact_decimal, format_currency, format_decimal, format_percent
+from babel.numbers import format_currency, format_decimal, format_percent
 from interactions import GLOBAL_SCOPE, BaseContext, Client, Snowflake, User
 from pyicumessageformat import Parser
 
@@ -147,8 +147,6 @@ async def icu_number(
 		return format_percent(value, locale=babel_locale)
 	elif style == "integer":
 		return format_decimal(value, format="#,##0", locale=babel_locale)
-	elif style == "compact":
-		return format_compact_decimal(value, format_type="short", locale=babel_locale)
 	elif style == "currency":
 		return format_decimal(value, locale=babel_locale)
 	elif style and isinstance(style, str) and style.startswith("::currency/"):

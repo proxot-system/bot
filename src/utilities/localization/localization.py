@@ -9,7 +9,7 @@ from interactions import BaseInteractionContext, Client, Guild, Message
 from termcolor import colored
 
 from extensions.events.Ready import ReadyEvent
-from utilities.config import debugging, get_config
+from utilities.config import debugging, get_config, on_prod
 from utilities.localization.icu import render_icu
 from utilities.misc import FrozenDict, format_type_hint, rabbit
 from utilities.source_watcher import FileModifiedEvent, all_of, filter_file_suffix, filter_path, subscribe
@@ -18,6 +18,9 @@ __all__ = ["Localization", "source_loc", "local_override"]
 
 _locales: dict[str, dict] = {}
 debug: bool = bool(get_config("localization.debug", ignore_None=True))
+if on_prod:
+	debug = False if debug is not True else True
+debug = debug if debug is not None else False
 
 fallback_locale: dict[str, dict]
 
@@ -67,7 +70,7 @@ def register_locale(locale: str, is_reload: bool = False) -> bool:
 
 		_locales[locale] = FrozenDict(data)
 
-		if locale == get_config("localization.sourceLocale"):
+		if locale == get_config("localization.source-locale"):
 			fallback_locale = _locales[locale]
 
 		if is_reload:
@@ -77,7 +80,7 @@ def register_locale(locale: str, is_reload: bool = False) -> bool:
 		if is_reload:
 			print(colored(" FAILED TO RELOAD", "red"))
 		else:
-			if get_config("localization.sourceLocale") == locale:
+			if get_config("localization.source-locale") == locale:
 				raise e
 			if debugging():
 				print(colored("| FAILED TO REGISTER MAIN LOCALE " + locale, "red"))
@@ -159,8 +162,8 @@ else:
 
 subscribe(all_of(filter_file_suffix(".yml"), filter_path(get_config("paths.localization.root"))), on_file_update)
 
-if get_config("localization.sourceLocale") in _locales:
-	_uhh_loc = get_config("localization.sourceLocale")
+if get_config("localization.source-locale") in _locales:
+	_uhh_loc = get_config("localization.source-locale")
 	fallback_locale = get_locale(_uhh_loc)
 	print(f"Loaded fallback locale ({_uhh_loc})")
 
@@ -204,12 +207,12 @@ class Localization:
 
 		final_locale: str
 		if raw_locale is None:
-			final_locale = get_config("localization.sourceLocale")
+			final_locale = get_config("localization.source-locale")
 		else:
 			try:
 				final_locale = parse_locale(str(raw_locale))
 			except UnknownLanguageError:
-				final_locale = get_config("localization.sourceLocale")
+				final_locale = get_config("localization.source-locale")
 
 		self.locale = final_locale
 		if not hasattr(self, prefix) or not self.prefix:

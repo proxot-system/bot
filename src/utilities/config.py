@@ -1,52 +1,21 @@
 from pathlib import Path
-from traceback import print_exc
-from typing import Any, Literal, Type, TypeVar, overload
+from typing import Literal, Type, TypeVar, overload
 
-from pkl import PklError
-from pkl import load as load_piquel
 from termcolor import colored
+from yaml import safe_load as load_yml_file
 
 from utilities.misc import rabbit
+from utilities.stats import get_current_branch
 
-
-def pkl_to_python(obj):
-	if isinstance(obj, (str, int, float, bool, type(None))):
-		return obj
-	if isinstance(obj, list):
-		return [pkl_to_python(e) for e in obj]
-	if isinstance(obj, dict):
-		return {k: pkl_to_python(v) for k, v in obj.items()}
-
-	if hasattr(obj, "elements") and obj.elements is not None:
-		return [pkl_to_python(e) for e in obj.elements]
-
-	res = {}
-	if hasattr(obj, "entries") and obj.entries is not None:
-		for k, v in obj.entries.items():
-			res[k] = pkl_to_python(v)
-
-	if hasattr(obj, "properties") and obj.properties is not None:
-		for k, v in obj.properties.items():
-			res[k] = pkl_to_python(v)
-
-	if hasattr(obj, "__dict__"):
-		for k, v in obj.__dict__.items():
-			if not k.startswith("_") and k not in ("entries", "properties", "elements"):
-				res[k] = pkl_to_python(v)
-
-	return res
-
-
-bcpath = Path("config.overrides.pkl")
+bcpath = Path("bot-config.yml")
 try:
-	raw_config: Any = load_piquel(bcpath)
-	config: Any = pkl_to_python(raw_config)
-	print("Loaded configuration")
-except PklError:  #
-	print_exc()
+	with open(bcpath, "r") as f:
+		config = load_yml_file(f)
+		print("Loaded configuration")
+except FileNotFoundError as e:
 	print(
 		colored(
-			f"─ config file at '{bcpath.resolve()}' is missing or failed to load.\nAre you sure you set it up correctly?",
+			f"─ config file at '{bcpath.resolve()}' is missing.\nAre you sure you set it up correctly?",
 			"yellow",
 		)
 	)
@@ -112,7 +81,6 @@ def get_config(
 		raise_on_not_found=should_raise,
 		return_None_on_not_found=return_none,
 		_error_message="Configuration does not have [path]",
-		use_attr_access=False,
 	)
 
 	if res is None:
@@ -122,17 +90,20 @@ def get_config(
 		return str(res)
 
 	if not isinstance(res, typecheck):
-		raise TypeError(f"Configuration value for '{path}' has type {type(res)}, but expected {typecheck.__name__}")
+		raise TypeError(
+			f"Configuration value for '{path}' has type {type(res).__name__}, but expected {typecheck.__name__}"
+		)
 
 	return res
 
 
-cl = get_config("configCheckLevel", typecheck=int, ignore_None=True)
+cl = get_config("config-check-level", typecheck=int, ignore_None=True)
 if cl is not None:
 	to_check: list[tuple[str, bool]] = [
 		("bot.token", True),
 		("database.connection.password", True),
-		("localization.sourceLocale", True),
+		("localization.source-locale", True),
+		("bot.prod.token", False),
 		("bot.rolling.avatar", False),
 		("bot.rolling.status", False),
 		("bot.rolling.interval", False),
@@ -153,12 +124,17 @@ if cl is not None:
 			if cl <= 2:
 				exit(1)
 
+on_prod = get_current_branch() == get_config("bot.prod.branch", ignore_None=True)
+if get_config("bot.prod.override", typecheck=bool, ignore_None=True):
+	on_prod = True
+if get_config("bot.prod.token", ignore_None=True) is None:
+	on_prod = False
 
-debug = get_config("debug", typecheck=bool, ignore_None=True)
-debug_override = None
+debug = not on_prod  # 🔥✍️
+debug_override = get_config("bot.debug", typecheck=bool, ignore_None=True)
+
 
 def debugging():
-	global debug_override
 	return debug_override if debug_override is not None else debug
 
 
@@ -168,4 +144,10 @@ def setd(value: bool):
 
 
 def get_token() -> str:
-	return get_config("bot.token")
+	out: str | None
+	if not on_prod:
+		return get_config("bot.token")
+	out = get_config("bot.prod.token", ignore_None=True)
+	if out is None:
+		out = get_config("bot.token")
+	return out

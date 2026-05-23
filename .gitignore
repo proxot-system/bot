@@ -8,8 +8,7 @@ __pycache__/
 blob/
 
 src/data/emojis.yml
-config.overrides*.pkl
-!config.overrides.example.pkl
+bot-config.yml
 
 lavalink/application.yml
 lavalink/plugins/

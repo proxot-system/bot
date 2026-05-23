@@ -41,7 +41,7 @@ class RGBA(NamedTuple):
 def csscolor(color: str) -> RGBA:
 	try:
 		result = subprocess.run(
-			[get_config("paths.textbox.colorParser-Binary"), color],
+			[get_config("paths.textbox.color-parser-binary"), color],
 			stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT,
 			text=True,
