@@ -104,7 +104,7 @@ def get_config(
 		raise_on_not_found=should_raise,
 		return_None_on_not_found=return_none,
 		_error_message="Configuration does not have [path]",
-		use_attr_access=False,
+		use_attr_access=True,
 	)
 
 	if res is None:
