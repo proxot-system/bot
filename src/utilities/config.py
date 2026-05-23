@@ -8,9 +8,31 @@ from termcolor import colored
 
 from utilities.misc import rabbit
 
+
+def pkl_to_python(obj):
+	if hasattr(obj, "properties") or hasattr(obj, "entries"):
+		res = {}
+		if hasattr(obj, "properties") and obj.properties:
+			for k, v in obj.properties.items():
+				res[k] = pkl_to_python(v)
+		if hasattr(obj, "entries") and obj.entries:
+			for k, v in obj.entries.items():
+				res[k] = pkl_to_python(v)
+		return res
+	elif hasattr(obj, "elements"):
+		return [pkl_to_python(e) for e in obj.elements]
+	elif isinstance(obj, list):
+		return [pkl_to_python(e) for e in obj]
+	elif isinstance(obj, dict):
+		return {k: pkl_to_python(v) for k, v in obj.items()}
+	else:
+		return obj
+
+
 bcpath = Path("config.overrides.pkl")
 try:
-	config: Any = load_piquel(bcpath)
+	raw_config: Any = load_piquel(bcpath)
+	config: Any = pkl_to_python(raw_config)
 	print("Loaded configuration")
 except PklError:  #
 	print_exc()
@@ -82,7 +104,7 @@ def get_config(
 		raise_on_not_found=should_raise,
 		return_None_on_not_found=return_none,
 		_error_message="Configuration does not have [path]",
-		use_attr_access=True,
+		use_attr_access=False,
 	)
 
 	if res is None:
