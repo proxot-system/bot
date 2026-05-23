@@ -27,7 +27,7 @@ bot {
       "[ ... ]"
       "[ ... ]"
       "[ ... ]"
-      "[ looking for fun in over {guild_count} servers ]"
+      "[ looking for fun in over {guild_count, number, compact} servers ]"
       "[ no thoughts right now ]"
       "[ hello ]"
       // "[ uhhh ]"
