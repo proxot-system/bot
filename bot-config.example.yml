@@ -92,10 +92,6 @@ localization:
     #   go to Personal API key and copypaste it here
   source-locale: en-GB # string, make sure the locale is 100% complete
   debug: true # boolean, defaults to false on prod, shows detailed error messages for not found paths if true
-  whitelist:
-    en:
-      - ~
-      - ~ #  strings, user ids
 
 textbox:
   web:
