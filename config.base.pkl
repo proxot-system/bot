@@ -89,11 +89,6 @@ localization {
   weblateToken = "wlu_XnaUbp8Hq62163Xau5i6AT37K9kYzn3423wz"
   sourceLocale = "en-GB"
   debug = false
-  local whitelist: Mapping = new {
-    ["en"] = new Listing {
-    // strings with ids
-    }
-  }
 }
 
 textbox {
