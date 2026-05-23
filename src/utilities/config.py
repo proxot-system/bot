@@ -10,23 +10,31 @@ from utilities.misc import rabbit
 
 
 def pkl_to_python(obj):
-	if hasattr(obj, "properties") or hasattr(obj, "entries"):
-		res = {}
-		if hasattr(obj, "properties") and obj.properties:
-			for k, v in obj.properties.items():
-				res[k] = pkl_to_python(v)
-		if hasattr(obj, "entries") and obj.entries:
-			for k, v in obj.entries.items():
-				res[k] = pkl_to_python(v)
-		return res
-	elif hasattr(obj, "elements"):
-		return [pkl_to_python(e) for e in obj.elements]
-	elif isinstance(obj, list):
-		return [pkl_to_python(e) for e in obj]
-	elif isinstance(obj, dict):
-		return {k: pkl_to_python(v) for k, v in obj.items()}
-	else:
+	if isinstance(obj, (str, int, float, bool, type(None))):
 		return obj
+	if isinstance(obj, list):
+		return [pkl_to_python(e) for e in obj]
+	if isinstance(obj, dict):
+		return {k: pkl_to_python(v) for k, v in obj.items()}
+
+	if hasattr(obj, "elements") and obj.elements is not None:
+		return [pkl_to_python(e) for e in obj.elements]
+
+	res = {}
+	if hasattr(obj, "entries") and obj.entries is not None:
+		for k, v in obj.entries.items():
+			res[k] = pkl_to_python(v)
+
+	if hasattr(obj, "properties") and obj.properties is not None:
+		for k, v in obj.properties.items():
+			res[k] = pkl_to_python(v)
+
+	if hasattr(obj, "__dict__"):
+		for k, v in obj.__dict__.items():
+			if not k.startswith("_") and k not in ("entries", "properties", "elements"):
+				res[k] = pkl_to_python(v)
+
+	return res
 
 
 bcpath = Path("config.overrides.pkl")
@@ -104,7 +112,7 @@ def get_config(
 		raise_on_not_found=should_raise,
 		return_None_on_not_found=return_none,
 		_error_message="Configuration does not have [path]",
-		use_attr_access=True,
+		use_attr_access=False,
 	)
 
 	if res is None:
