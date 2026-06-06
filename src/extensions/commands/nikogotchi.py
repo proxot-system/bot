@@ -271,10 +271,11 @@ class NikogotchiCommands(Extension):
 
 		nikogotchi: Nikogotchi = await Nikogotchi(uid).fetch()
 		metadata = await fetch_nikogotchi_metadata(nikogotchi.nid)
+		loading = filler_task("fake")
 		if nikogotchi.status > -1 and metadata:
-			loading = asyncio.create_task(fancy_message(
-				ctx, await locale_format(loc, loc.get("loading")), edit=edit
-			))
+			loading = asyncio.create_task(
+				fancy_message(ctx, await locale_format(loc, loc.get("loading")), edit=edit, components=[])
+			)
 		else:
 			if not metadata and nikogotchi.nid != "?":
 				buttons: list[BaseComponent | dict] = [
@@ -331,7 +332,7 @@ class NikogotchiCommands(Extension):
 					),
 					ephemeral=True,
 					color=Colors.BAD,
-					edit=True
+					edit=True if loading.result == "fake" else False,
 				)
 			selected_nikogotchi: NikogotchiMetadata = await pick_random_nikogotchi(nikogotchi.rarity)
 
@@ -395,7 +396,7 @@ class NikogotchiCommands(Extension):
 
 			except TimeoutError:
 				await loading
-				return await self.check(ctx, edit=True)
+				return await self.check.callback(ctx, True)  # pyright: ignore[reportAttributeAccessIssue] does the type checker know
 		await self.nikogotchi_interaction(ctx, loading)
 
 	async def calculate_treasure_seek(self, uid: str, time_taken: timedelta) -> TreasureSeekResults | None:
