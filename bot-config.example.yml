@@ -71,6 +71,7 @@ dev:
     - "831530536781873163"
 
 watcher:
+  ignore-git: true # ignores any path updates that have ".git" in it (beware that it also matches for folders/files called "meow.git.things" for example)
   ignore-4913:
     true
     # vim (the text editor) creates a file to check whether it can write files in the folder, causing random bullshi
