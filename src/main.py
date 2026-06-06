@@ -14,9 +14,12 @@ logger.log(INFO, colored("Starting The World Machine... 1/3\n\n", "light_cyan"))
 
 import asyncio
 import importlib
+import resource
 import sys
 
-# Handled commands
+gb = 1024 * 1024 * 1024
+resource.setrlimit(resource.RLIMIT_AS, (2 * gb, int(2.5 * gb)))
+
 VALID_COMMANDS = ("bot", "textboxweb", "script")
 
 run: str = "bot"
