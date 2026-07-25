@@ -14,7 +14,7 @@ from utilities.emojis import emojis, make_emoji_cdn_url
 from utilities.localization.formatting import fnum
 from utilities.localization.localization import Localization, locale_format, source_loc
 from utilities.message_decorations import Colors
-from utilities.misc import cached_get, pretty_user
+from utilities.misc import cached_get
 from utilities.shop.fetch_items import fetch_background, fetch_badge
 
 icons: list[Image.Image] = []
@@ -119,68 +119,6 @@ async def draw_profile(
 	base_profile = ImageDraw.Draw(image, "RGBA")
 
 	base_profile.text(
-		(42, 32),
-		title,
-		font=font,
-		fill=(252, 186, 86),
-		stroke_width=2,
-		stroke_fill=(0, 0, 0),
-	)
-	if len(user_data.profile_description) > 0:
-		# textwrap.fill makes it so the text doesn't overflow out of the image
-		base_profile.text(
-			(210, 140),
-			textwrap.fill(user_data.profile_description, 35),
-			font=font,
-			fill=(255, 255, 255),
-			stroke_width=2,
-			stroke_fill=Colors.BLACK.hex,
-			align="center",
-		)
-
-	init_x = 60  # Start with the first column (adjust as needed)
-	init_y = 310  # Start with the first row (adjust as needed)
-
-	x = init_x  # x position of Stamp
-	y = init_y  # y position of Stamp
-
-	x_increment = 45  # How much to move to the next column
-	y_increment = 50  # How much to move down to the next row
-
-	current_row = 0  # Keep track of the current row
-	current_column = 1  # Keep track of the current column
-
-	badge_keys = list(badges.keys())
-
-	for i, icon in enumerate(icons):
-		enhancer = ImageEnhance.Brightness(icon)
-
-		icon = enhancer.enhance(0)
-
-		if badge_keys[i] in user_data.owned_badges:
-			icon = enhancer.enhance(1)
-
-		image.paste(icon, (x, y), icon)
-
-		x += x_increment  # Move to the next column
-
-		# If we have reached the end of a row
-		if (i + 1) % 5 == 0:
-			x = init_x  # Reset to the first column
-			y += y_increment  # Move to the next row
-			current_row += 1
-
-		# If we have displayed all the rows, start the next one.
-		if current_row == 3:
-			init_x = (init_x + x_increment * 5) * current_column + 10
-
-			x = init_x
-			y = init_y
-
-			current_column += 1
-			current_row = 0
-
-	base_profile.text(
 		(648, 70),
 		f"{fnum(user_data.wool, locale=loc.locale)} x",
 		font=font,
@@ -205,13 +143,75 @@ async def draw_profile(
 	image.paste(sun_icon, (659, 25), sun_icon.convert("RGBA"))
 
 	base_profile.text(
-		(42, 251),
-		await locale_format(loc, loc.get("image.unlocked.stamps"), username=user.username),
+		(42, 32),
+		title,
 		font=font,
-		fill=(255, 255, 255),
+		fill=(252, 186, 86),
 		stroke_width=2,
-		stroke_fill=Colors.BLACK.hex,
+		stroke_fill=(0, 0, 0),
 	)
+	if len(user_data.profile_description) > 0:
+		# textwrap.fill makes it so the text doesn't overflow out of the image
+		base_profile.text(
+			(210, 140),
+			textwrap.fill(user_data.profile_description, 35),
+			font=font,
+			fill=(255, 255, 255),
+			stroke_width=2,
+			stroke_fill=Colors.BLACK.hex,
+			align="center",
+		)
+
+	if not user.bot:
+		base_profile.text(
+			(42, 251),
+			await locale_format(loc, loc.get("image.unlocked.stamps"), target_id=user.id),
+			font=font,
+			fill=(255, 255, 255),
+			stroke_width=2,
+			stroke_fill=Colors.BLACK.hex,
+		)
+
+		init_x = 60
+		init_y = 310
+
+		x = init_x
+		y = init_y
+
+		x_increment = 45
+		y_increment = 50
+
+		current_row = 0
+		current_column = 1
+
+		badge_keys = list(badges.keys())
+		for i, icon in enumerate(icons):
+			enhancer = ImageEnhance.Brightness(icon)
+
+			icon = enhancer.enhance(0)
+
+			if badge_keys[i] in user_data.owned_badges:
+				icon = enhancer.enhance(1)
+
+			image.paste(icon, (x, y), icon)
+
+			x += x_increment  # Move to the next column
+
+			# If we have reached the end of a row
+			if (i + 1) % 5 == 0:
+				x = init_x  # Reset to the first column
+				y += y_increment  # Move to the next row
+				current_row += 1
+
+			# If we have displayed all the rows, start the next one.
+			if current_row == 3:
+				init_x = (init_x + x_increment * 5) * current_column + 10
+
+				x = init_x
+				y = init_y
+
+				current_column += 1
+				current_row = 0
 
 	pfp = Image.open(await cached_get(user_pfp_url))
 	frames = []
@@ -240,16 +240,13 @@ async def draw_profile(
 		image.save(img_buffer, format="PNG")
 	img_buffer.seek(0)
 
-	# TODO: move this out of here sometime # noqa: ERA001
-	username = pretty_user(user)
-
 	alt = (
 		alt
 		if alt is not None
 		else await locale_format(
 			loc,
 			loc.get("image.alt"),
-			username=username,
+			target_id=user.id,
 			suns=user_data.suns,
 			wool=user_data.wool,
 			description=user_data.profile_description,

@@ -26,7 +26,12 @@ from utilities.misc import fetch
 from utilities.profile.main import draw_profile
 from utilities.textbox.mediagen import Frame, render_textbox_frames
 
-
+allowed_bots = [
+	int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0),
+	1015629604536463421,
+	1028058097383641118,
+	772163491385442334,
+]
 class ProfileCommands(Extension):
 	@slash_command(description="All things to do with profiles")
 	@integration_types(guild=True, user=True)
@@ -46,9 +51,7 @@ class ProfileCommands(Extension):
 		loc = Localization(ctx, prefix="commands.profile")
 		if user is None:
 			user = ctx.user
-		if user.bot and not (
-			user.id == int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0) or user.id == ctx.user.id
-		):
+		if user.bot and not (user.id in allowed_bots or user.id == ctx.client.user.id):
 			return await ctx.send(await locale_format(loc, loc.get("view.bots")), ephemeral=True)
 
 		loading = asyncio.create_task(
