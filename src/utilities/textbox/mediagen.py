@@ -215,7 +215,13 @@ async def render_frame(
 	burned_borders = borders.copy()
 	background.resize((background.height, background.width + 500))
 	font = ImageFont.truetype(await cached_get(Path(get_config("textbox.font")), force=True), 20)
-	text = Image.new("RGBA", (background.width, 999999), color=(255, 255, 255, 0))
+	text = None
+	if frame.text:
+		text = Image.new(
+			"RGBA",
+			(background.width, int(((len(frame.text) if len(frame.text) > 0 else 25) / 56) + 1) * 25),
+			color=(255, 255, 255, 0),
+		)
 	text_x, text_y = 23, 16
 	max_text_width = background.width - (20 * 2)
 	# text_height = background.height - (17 * 2)
@@ -226,7 +232,8 @@ async def render_frame(
 
 	def put_frame(duration: int, speed_adjust: bool = True):
 		new = background.copy()
-		new.paste(text, (text_x, int(text_y)), mask=text)
+		if text:
+			new.paste(text, (text_x, int(text_y)), mask=text)
 		new.paste(burned_borders, (0, 0), mask=burned_borders)
 		images.append(new)
 		if speed_adjust:
@@ -314,13 +321,15 @@ async def render_frame(
 
 			if not isinstance(message, str):
 				message = f"[ ermm? unexpected type from command, got {type(message)} ]"
-			d = ImageDraw.Draw(text)
+			d = None
+			if text:
+				d = ImageDraw.Draw(text)
 			cumulative_text = ""
 			for word in re.findall(r"\S+\s*|\s+", message):  # TODO: regex alert
 				if (
 					text_offset[0] != 0
 					and word_wrap
-					and (d.textlength(word, font=font) + text_x + text_offset[0] + 1 > max_text_width)
+					and (d.textlength(word, font=font) if d else 0 + text_x + text_offset[0] + 1 > max_text_width)
 				):
 					text_offset[1] += 25.0
 					text_offset[0] = 0.0
@@ -340,13 +349,14 @@ async def render_frame(
 					if text_y + text_offset[1] > background.height - (17 * 2):
 						carriage_return()
 					try:
-						d.text(
-							(text_offset[0], text_offset[1]),
-							cluster,
-							font=font,
-							fill=current_color,
-						)
-						text_offset[0] += d.textlength(cluster, font=font)
+						if d:
+							d.text(
+								(text_offset[0], text_offset[1]),
+								cluster,
+								font=font,
+								fill=current_color,
+							)
+							text_offset[0] += d.textlength(cluster, font=font)
 					except:
 						pass
 					if animated:
