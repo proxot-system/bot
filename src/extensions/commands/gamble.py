@@ -101,7 +101,7 @@ class GambleCommands(Extension):
 		# TAKE the wool
 		await user_data.manage_wool(-bet)
 
-		active_slots = slots
+		active_slots = list(slots)
 		if user_data.gamble_queue:
 			gamble_value = user_data.gamble_queue.pop()
 			await user_data.update(gamble_queue=user_data.gamble_queue)
@@ -111,6 +111,9 @@ class GambleCommands(Extension):
 			if gamble_value > 50:
 				penguin_count = ((gamble_value - 50) // 20) * 2
 				active_slots.extend([Slot(emojis["icons"]["penguin"], -0.2)] * penguin_count)
+
+		while len(active_slots) < 12:
+			active_slots.extend(active_slots)
 
 		rows = [random.sample(active_slots, len(active_slots)) for _ in range(3)]
 
