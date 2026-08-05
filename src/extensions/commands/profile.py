@@ -76,8 +76,12 @@ class ProfileCommands(Extension):
 			)
 		content = await locale_format(loc, loc.get("view.message"), target_id=user.id)
 		await loading
+		if debugging():
+			content = f"Took {fnum(runtime, locale=loc.locale)}ms. {content}"
+		if user.id == int(get_config("bot.main.nikobot-id", raise_on_not_found=False) or 0):
+			content += " <:twm_amaze:1023573458296246333>"
 		await ctx.edit(
-			content=f"-# Took {fnum(runtime, locale=loc.locale)}ms. {content}" if debugging() else f"-# {content}",
+			content=f"-# [ {content} ]",
 			files=image,
 			components=components,
 			allowed_mentions={"users": []},
