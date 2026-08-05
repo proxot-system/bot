@@ -48,7 +48,7 @@ class WelcomerEvents(Extension):
 		)
 		buffer = io.BytesIO()
 		basic_facepic_command = "\\@"
-		if not basic_facepic_command in message:
+		if basic_facepic_command not in message:
 			# default to this face unless they have some in their message already
 			message = f"\\@[OneShot/The World Machine/Pancakes]{message}"
 
@@ -63,11 +63,11 @@ class WelcomerEvents(Extension):
 			print(f"Trying to send welcome message (guild: {event.guild.id}, channel: {event.guild.system_channel})")
 			return await target_channel.send(
 				content=f"-# {event.member.mention}",
-				files=File(file=buffer, file_name=f"welcome textbox.png"),
+				files=File(file=buffer, file_name="welcome textbox.png"),
 				allowed_mentions=AllowedMentions.all() if server_data.welcome.ping else AllowedMentions.none(),
 			)
-			
-		except Exception as e:
+
+		except Exception:
 			print(f"Failed to send welcome message. {guild.id}/{target_channel.id}")
 			print(tb.format_exc(chain=True))
-			await config.update(diabled=True, errored=True)
+			await config.update(disabled=True, errored=True)

@@ -156,7 +156,7 @@ class WoolCommands(Extension):
 				ephemeral=True,
 			)
 			try:
-				response = await ctx.client.wait_for_component(messages=confirmation_m, timeout=60.0 * 1000)
+				response = await ctx.client.wait_for_component(messages=confirmation_m, timeout=60.0)
 				await ctx.delete(confirmation_m)
 				if response.ctx.custom_id == "cancel":
 					return

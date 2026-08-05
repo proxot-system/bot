@@ -30,13 +30,15 @@ def init_things(self):
 			if name in ["_id", "_parent", "_parent_field"]:
 				continue
 
+			origin = get_origin(field_type) or field_type
+
 			if isinstance(value, dict):
-				if get_origin(field_type) == DBDynamicDict:
-					setattr(self, name, field_type(_parent=self, _parent_field=name, **value))
+				if origin == DBDynamicDict:
+					setattr(self, name, origin(_parent=self, _parent_field=name, **value))
 				else:
-					setattr(self, name, init_things(field_type(_parent=self, _parent_field=name, **value)))
+					setattr(self, name, init_things(origin(_parent=self, _parent_field=name, **value)))
 			elif isinstance(value, list):
-				setattr(self, name, field_type(default=value, _parent=self, _parent_field=name))
+				setattr(self, name, origin(default=value, _parent=self, _parent_field=name))
 	return self
 
 
@@ -50,10 +52,12 @@ class Collection:
 	async def update(self, **kwargs):
 		"""Update the current collection with the given kwargs."""
 		updated_data = await update_in_database(self, **kwargs)
-		# The new overloads for to_dict will correctly infer a dict type here
-		for k, v in to_dict(updated_data).items():
+
+		data_to_apply = updated_data if isinstance(updated_data, dict) else getattr(updated_data, "__dict__", {})
+		for k, v in data_to_apply.items():
 			setattr(self, k, v)
-		return init_things(updated_data)
+
+		return init_things(self)
 
 	async def fetch(self: TCollection) -> TCollection:
 		"""Fetch the current collection using id."""

@@ -17,7 +17,7 @@ async def put_mini(
 	database_key = loc.prefix + "." + message
 	if user_id:
 		user_data: UserData = await UserData(str(user_id)).fetch()
-		reacher = user_data.minis_shown.get(message, 0)
+		reacher = user_data.minis_shown.get(database_key, 0)
 		if show_up_amount != -1 and show_up_amount <= reacher:
 			return ""
 		asyncio.create_task(user_data.minis_shown.increment_key(database_key))

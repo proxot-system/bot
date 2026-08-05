@@ -61,7 +61,7 @@ async def increment_value(
 
 	await user_data.increment_key(value_to_increment, amount)
 
-	get_value = user_data.__getattribute__(value_to_increment) + amount
+	get_value = getattr(user_data, value_to_increment)
 
 	for badge, data in badges.items():
 		if data["type"] == value_to_increment:
