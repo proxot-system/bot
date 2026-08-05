@@ -173,12 +173,12 @@ async def _execute_dev_command(message: Message):
 					return await msg.edit(content=f"[ Done ]\n```bash\n{output}```")
 				case "log":
 					text_to_log = command_content.split(args[0] + " log ", maxsplit=1)
-					from extensions.events.Ready import ReadyEvent
+					from extensions.events.readylogger import ReadyLogsEvents
 
 					if len(text_to_log) == 1:
-						out = await ReadyEvent.log(lambda channel: channel.send(content=f"<@{message._author_id}>"))
+						out = await ReadyLogsEvents.log(lambda channel: channel.send(content=f"<@{message._author_id}>"))
 						return await message.reply(f"[ logs u {out.jump_url} ]")
-					out = await ReadyEvent.log(lambda channel: channel.send(content=text_to_log[1]))
+					out = await ReadyLogsEvents.log(lambda channel: channel.send(content=text_to_log[1]))
 					return await message.reply(f"[ logged {out.jump_url} ]")
 				case _:
 					return await message.reply("Available subcommands: `refresh` / `sync_commands` / `shell` / `log`")
@@ -221,7 +221,7 @@ async def _execute_dev_command(message: Message):
 						total_price = price_per_item * amount
 
 						wool_gained += total_price
-						del user_data.owned_treasures[tid]
+						del user_data.owned_treasures[tid]  # type: ignore
 
 						sold_details.append(f"**{tid}**: {amount} -> 0 (+{total_price} {emojis['icons']['wool']})")
 

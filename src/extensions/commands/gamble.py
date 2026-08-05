@@ -139,6 +139,7 @@ class GambleCommands(Extension):
 			custom_id=f"gamble_skip_{ctx.id}",
 		)
 
+		edit_task = None
 		async def wait_for_skip():
 			try:
 				res: Component = await ctx.client.wait_for_component(components=skip_btn, timeout=25.0)
@@ -219,9 +220,8 @@ class GambleCommands(Extension):
 			)
 
 		await loading
-		await ctx.edit(embed=await generate_embed(0, -1, slot_images), components=skip_btn)
+		edit_task = asyncio.create_task(ctx.edit(embed=await generate_embed(0, -1, slot_images), components=skip_btn))
 
-		edit_task = None
 		sleep_first_rotata_s = 3
 		for column in range(0, 3):
 			max_rolls = random.randint(8, 9) if column == 2 else 8
@@ -234,10 +234,9 @@ class GambleCommands(Extension):
 						await asyncio.wait_for(skip_event.wait(), timeout=delay)
 					except asyncio.TimeoutError:
 						pass
-
-				if not skip_event.is_set():
 					edit_task = asyncio.create_task(ctx.edit(embed=result_embed, components=skip_btn))
 
+				await edit_task
 				slot_values[column] = rows[column][i].value
 
 		skip_task.cancel()

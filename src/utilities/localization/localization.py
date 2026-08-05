@@ -8,7 +8,7 @@ import yaml as yaml
 from interactions import BaseInteractionContext, Client, Guild, Message
 from termcolor import colored
 
-from extensions.events.Ready import ReadyEvent
+from extensions.events.readylogger import ReadyLogsEvents
 from utilities.config import debugging, get_config, on_prod
 from utilities.localization.icu import render_icu
 from utilities.misc import FrozenDict, format_type_hint, rabbit
@@ -85,7 +85,7 @@ def register_locale(locale: str, is_reload: bool = False) -> bool:
 			if debugging():
 				print(colored("| FAILED TO REGISTER MAIN LOCALE " + locale, "red"))
 		print_exc()
-		ReadyEvent.queue(e)
+		ReadyLogsEvents.queue(e)
 		return False
 
 

@@ -113,7 +113,7 @@ def make_emoji_cdn_url(
 
 	if not emoji_id:
 		raise ValueError("Idk what the emoji id is")
-	if filetype == None:
+	if filetype is None:
 		filetype = "gif" if animated else "png"
 	params = {"quality": quality, "animated": animated}
 	if size:
@@ -143,7 +143,7 @@ def on_emojis_update(callback):
 		if callback in emoji_subs:
 			emoji_subs.remove(callback)
 		else:
-			raise ValueError(f"Subscription was already removed before.")
+			raise ValueError("Subscription was already removed before.")
 
 	return unsubscribe
 
@@ -171,9 +171,10 @@ def on_file_update(path):
 	except BaseException as e:
 		print(colored(" FAILED", "red"))
 		print_exc()
-		from extensions.events.Ready import ReadyEvent
+		from extensions.events.readylogger import ReadyLogsEvents
 
-		ReadyEvent.queue(lambda channel: channel.send(content="## Failed to reload emojis\n" + str(e)))
+		err_msg = str(e)
+		ReadyLogsEvents.queue(lambda channel: channel.send(content=f"## Failed to reload emojis\n{err_msg}"))
 		return
 
 	old_flat = flatten_emojis(dict(old_emojis))

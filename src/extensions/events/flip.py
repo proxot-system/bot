@@ -2,10 +2,8 @@ from interactions import Extension, listen
 from interactions.api.events import MessageCreate
 from interactions.models.discord.components import MediaGalleryComponent, MediaGalleryItem
 
-from utilities.dev_commands import execute_dev_command
 
-
-class MessageCreateEvent(Extension):
+class FlipEvents(Extension):
 	@listen(MessageCreate)
 	async def handler(self, event: MessageCreate):
 		if "flip" in event.message.content and event.message.contains_mention(event.client.user):
@@ -20,4 +18,3 @@ class MessageCreateEvent(Extension):
 					)
 				]
 			)
-		await execute_dev_command(event.message)

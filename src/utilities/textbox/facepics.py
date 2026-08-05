@@ -10,7 +10,7 @@ from interactions import PartialEmoji
 from PIL import Image
 from termcolor import colored
 
-from extensions.events.Ready import ReadyEvent
+from extensions.events.readylogger import ReadyLogsEvents
 from utilities.config import debugging, get_config
 from utilities.emojis import make_emoji_cdn_url
 from utilities.misc import cached_get, is_domain_allowed
@@ -110,7 +110,8 @@ def on_file_update(filename):
 	except Exception as e:
 		print(colored(" FAILED", "red"))
 		print_exc()
-		ReadyEvent.queue(lambda channel: channel.send(content="## Failed to reload facepics\n" + str(e)))
+		err_msg = str(e)
+		ReadyLogsEvents.queue(lambda channel: channel.send(content=f"## Failed to reload facepics\n{err_msg}"))
 		return
 
 	print(" ─ ─ ─ ")
@@ -149,7 +150,7 @@ async def get_facepic(path: str) -> Face | None:
 				print(at)
 				print(f"Couldn't find face for path {path}")
 				return await get_facepic(invalid_path)
-		except (KeyError, TypeError) as e:
+		except (KeyError, TypeError):
 			print_exc()
 			return await get_facepic(invalid_path)
 	return await get_facepic(invalid_path)
@@ -163,7 +164,7 @@ else:
 f_storage.facepics = load_facepics()
 
 if not debugging():
-	print(f"\033[udone", flush=True)
+	print("\033[udone", flush=True)
 	print("\033[999B", end="", flush=True)
 else:
 	print(f"Done")

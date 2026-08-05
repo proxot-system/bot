@@ -120,9 +120,9 @@ async def on_startup(event: Startup):
 		roll.start()
 	logger.log(INFO, colored("The World Machine is ready! ─ 3/3\n\n", "light_magenta"))
 	startupped = datetime.now()
-	from extensions.events.Ready import ReadyEvent
+	from extensions.events.readylogger import ReadyLogsEvents
 
-	await ReadyEvent.followup(startupped)
+	await ReadyLogsEvents.followup(startupped)
 
 
 logger.log(INFO, colored("Finalizing... ─ ─ ─ ─ ─ ─ ─ ─ 2/3\n\n", "light_yellow"))

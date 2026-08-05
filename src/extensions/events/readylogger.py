@@ -17,7 +17,7 @@ stuff = {
 }
 
 
-class ReadyEvent(Extension):
+class ReadyLogsEvents(Extension):
 	# WHY DID I MAKE THIS
 	@staticmethod
 	async def log(
@@ -89,7 +89,7 @@ class ReadyEvent(Extension):
 			else:
 				print("logged", thing)
 
-		ReadyEvent.log = log
+		ReadyLogsEvents.log = log
 
 		async def followup(timestamp: datetime):  #
 			nonlocal message
@@ -109,13 +109,13 @@ class ReadyEvent(Extension):
 
 		if isinstance(stuff["followup_at"], datetime):
 			await followup(stuff["followup_at"])
-		ReadyEvent.followup = followup
+		ReadyLogsEvents.followup = followup
 
 		def new_queue(thing: Callable[[TYPE_MESSAGEABLE_CHANNEL], Any] | Exception):
-			asyncio.create_task(ReadyEvent.log(thing))
+			asyncio.create_task(ReadyLogsEvents.log(thing))
 
-		ReadyEvent.queue = new_queue
-		ReadyEvent.stuff = stuff
+		ReadyLogsEvents.queue = new_queue
+		ReadyLogsEvents.stuff = stuff
 		while len(stuff["queue"]) > 0:
 			for thing in stuff["queue"]:
 				await log(thing)

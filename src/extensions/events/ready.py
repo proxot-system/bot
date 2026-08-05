@@ -2,10 +2,10 @@ from interactions import Extension, listen
 from interactions.api.events import Ready
 
 
-class Logs(Extension):
+class ReadyEvents(Extension):
 	@listen(Ready, delay_until_ready=True)
 	async def send_logs(self, event: Ready):
 		if hasattr(event.client, "followup_message_edited_at"):  # type:ignore
-			from extensions.events.Ready import ReadyEvent
+			from extensions.events.readylogger import ReadyLogsEvents
 
-			await ReadyEvent.log(lambda channel: channel.send(content="Ready event triggered!"))
+			await ReadyLogsEvents.log(lambda channel: channel.send(content="Ready event triggered!"))
