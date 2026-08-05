@@ -1,4 +1,5 @@
 import asyncio
+import math
 import random
 from dataclasses import dataclass
 from typing import Literal
@@ -100,7 +101,18 @@ class GambleCommands(Extension):
 		# TAKE the wool
 		await user_data.manage_wool(-bet)
 
-		rows = [random.sample(slots, len(slots)) for _ in range(3)]
+		active_slots = slots
+		if user_data.gamble_queue:
+			gamble_value = user_data.gamble_queue.pop()
+			await user_data.update(gamble_queue=user_data.gamble_queue)
+
+			num_to_keep = math.ceil(len(slots) * (gamble_value / 100))
+			active_slots = sorted(slots, reverse=True)[:num_to_keep]
+			if gamble_value > 50:
+				penguin_count = ((gamble_value - 50) // 20) * 2
+				active_slots.extend([Slot(emojis["icons"]["penguin"], -0.2)] * penguin_count)
+
+		rows = [random.sample(active_slots, len(active_slots)) for _ in range(3)]
 
 		def img_all(*args):
 			return [slot.emoji for slot in args]

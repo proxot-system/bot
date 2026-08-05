@@ -45,6 +45,7 @@ class UserData(Collection):
 		default_factory=lambda: DBList(["Default", "Blue", "Red", "Yellow", "Green", "Pink"])
 	)
 	owned_badges: DBList[str] = field(default_factory=lambda: DBList())
+	gamble_queue: DBList[int] = field(default_factory=lambda: DBList())
 	ask_limit: int = 14
 	last_asked: datetime = field(default_factory=lambda: datetime(2000, 1, 1, 0, 0, 0))
 	daily_wool_timestamp: datetime = field(default_factory=lambda: datetime(2000, 1, 1, 0, 0, 0))

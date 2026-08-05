@@ -27,7 +27,7 @@ from utilities.textbox.facepics import get_facepic
 
 # fmt: off
 wool_finds = {
-  10: [ "devoted", "positive_major"   ],
+  11: [ "devoted", "positive_major"   ],
   30: [  "yippie", 'positive_normal'  ],
   60: [    "ogie", 'positive_minimum' ],
   70: [ "misdeed", 'negative_minimum' ],
@@ -251,11 +251,13 @@ class WoolCommands(Extension):
 			await user_data.update(daily_wool_timestamp=reset_time)
 		rolled = random.randint(0, 100)
 
-		finding = wool_finds[min(wool_finds.keys(), key=lambda k: abs(k - rolled))]
+		key = min(wool_finds.keys(), key=lambda k: abs(k - rolled))
+		finding = wool_finds[key]
 		amount = wool_values[finding[1]]
 		amount = int(random.uniform(amount[0], amount[1]))
 
 		await user_data.manage_wool(amount)
+		await user_data.gamble_queue.append(key)
 
 		await ctx.send(
 			embed=Embed(
