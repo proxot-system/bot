@@ -48,21 +48,16 @@ class Slot:
 
 et = emojis["treasures"]
 slots = [
-	Slot(et["bottle"], 0.1),
-	Slot(et["journal"], 0.15),
-	Slot(et["amber"], 0.2),
-	Slot(et["shirt"], 0.5),
-	Slot(et["bottle"], 0.1),
-	Slot(et["journal"], 0.15),
-	Slot(et["amber"], 0.2),
-	Slot(et["shirt"], 0.5),
-	Slot(et["card"], 0.8),
-	Slot(et["die"], 1.0),
-	Slot(et["sun"], 1.12),
-	Slot(et["clover"], 1.5),
-	Slot(emojis["icons"]["penguin"], -0.2),
-	Slot(emojis["icons"]["penguin"], -0.2),
-	Slot(emojis["icons"]["penguin"], -0.2),
+	Slot(emojis["icons"]["penguin"], -0.4),
+	Slot(et["bottle"], 0.2),
+	Slot(et["journal"], 0.25),
+	Slot(et["amber"], 0.3),
+	Slot(et["shirt"], 0.6),
+	Slot(et["bottle"], 0.2),
+	Slot(et["card"], 0.9),
+	Slot(et["die"], 1.1),
+	Slot(et["sun"], 2.5),
+	Slot(et["clover"], 3),
 ]
 
 
