@@ -49,7 +49,6 @@ class Slot:
 
 et = emojis["treasures"]
 slots = [
-	Slot(emojis["icons"]["penguin"], -0.4),
 	Slot(et["bottle"], 0.2),
 	Slot(et["journal"], 0.25),
 	Slot(et["amber"], 0.3),
@@ -107,15 +106,18 @@ class GambleCommands(Extension):
 			gamble_value = user_data.gamble_queue.pop()
 			await user_data.update(gamble_queue=user_data.gamble_queue)
 
-			num_to_keep = math.ceil(len(slots) * (gamble_value / 100))
+			percentage_keep = max(0.35, gamble_value / 100)
+			num_to_keep = math.ceil(len(slots) * percentage_keep)
 			active_slots = sorted(slots, reverse=True)[:num_to_keep]
+
 			if gamble_value > 50:
 				penguin_count = ((gamble_value - 50) // 20) * 2
-
-		active_slots.extend([Slot(emojis["icons"]["penguin"], -0.2)] * penguin_count)
+			elif gamble_value < 30:
+				penguin_count = 2
 
 		while len(active_slots) < 12:
 			active_slots.extend(active_slots)
+		active_slots.extend([Slot(emojis["icons"]["penguin"], -0.4)] * penguin_count)
 
 		rows = [random.sample(active_slots, len(active_slots)) for _ in range(3)]
 
