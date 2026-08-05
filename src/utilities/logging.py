@@ -20,6 +20,7 @@ ignored = [
 	"❤ Gateway is sending a Heartbeat",
 	"❤ Received heartbeat acknowledgement from gateway",
 	'Sending data to websocket: {"op": 1, "d": 18}',
+	"Component Called: ¢feed_food",
 ]
 
 loggingLevel = logging.getLevelName(get_config(f"bot{'' if debugging() else '.prod'}.logging-level").upper())
