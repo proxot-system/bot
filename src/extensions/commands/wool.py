@@ -43,7 +43,7 @@ wool_values = {
    'negative_major': [ -5_000, -30_000 ]
 }
 # fmt: on
-wool_give_blacklist = ["545986448231497728", "611543231192236051"]
+wool_give_blacklist = []
 
 
 class WoolCommands(Extension):
