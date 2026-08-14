@@ -1,9 +1,11 @@
+import logging
 import random
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 
 from utilities.database.main import Collection, DBDict, DBDynamicDict, DBList
 from utilities.emojis import TreasureTypes
+from utilities.logging import createLogger
 
 
 class TransmitConfig(DBDict):
@@ -31,7 +33,7 @@ class ServerData(Collection):
 	transmissions: TransmitConfig = field(default_factory=TransmitConfig)
 	welcome: WelcomeConfig = field(default_factory=WelcomeConfig)
 
-
+databaseLogger = createLogger("database")
 @dataclass
 class UserData(Collection):
 	minis_shown: DBDynamicDict[str, int] = field(default_factory=lambda: DBDynamicDict())
@@ -56,6 +58,7 @@ class UserData(Collection):
 	translation_language: str = "english"
 
 	async def manage_wool(self, amount: int):
+		databaseLogger.log(logging.DEBUG, f"{'took' if amount < 0 else 'gave'} user {self._id}, {amount} wool")
 		wool = self.wool + amount
 
 		if wool <= 0:

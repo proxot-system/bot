@@ -23,9 +23,17 @@ ignored = [
 	"Component Called: ¢feed_food",
 ]
 
-loggingLevel = logging.getLevelName(get_config(f"bot{'' if debugging() else '.prod'}.logging-level").upper())
+_loggingLevelConfName = get_config(f"bot{'' if debugging() else '.prod'}.logging-level").upper()
+loggingLevels = logging.getLevelNamesMapping()
+if _loggingLevelConfName not in loggingLevels:
+	_loggingLevelConfName = "INFO"
+loggingLevel = loggingLevels[_loggingLevelConfName]
+
+print(loggingLevels)
 
 
+def loggingLevelFromName(name: str):
+	return loggingLevels[name]
 def createLogger(name: str):
 	logger = logging.getLogger(name)
 	logger.setLevel(loggingLevel)
