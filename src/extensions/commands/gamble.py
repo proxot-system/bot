@@ -98,7 +98,7 @@ class GambleCommands(Extension):
 			return await ctx.delete(message=(await loading).id)
 
 		# TAKE the wool
-		await user_data.manage_wool(-bet, "commands:games:slots:end")
+		await user_data.manage_wool(-bet, "commands:games:slots:start")
 
 		active_slots = list(slots)
 		penguin_count = 4
