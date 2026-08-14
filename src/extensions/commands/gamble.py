@@ -98,7 +98,7 @@ class GambleCommands(Extension):
 			return await ctx.delete(message=(await loading).id)
 
 		# TAKE the wool
-		await user_data.manage_wool(-bet)
+		await user_data.manage_wool(-bet, "commands:games:slots:end")
 
 		active_slots = list(slots)
 		penguin_count = 4
@@ -156,7 +156,7 @@ class GambleCommands(Extension):
 		edit_task = None
 		async def wait_for_skip():
 			try:
-				res: Component = await ctx.client.wait_for_component(components=skip_btn, timeout=25.0)
+				res: Component = await ctx.client.wait_for_component(components=skip_btn)
 				if res.ctx.author_id == ctx.author_id:
 					skip_event.set()
 				await res.ctx.defer(edit_origin=True)
@@ -242,15 +242,17 @@ class GambleCommands(Extension):
 			for i in range(max_rolls):
 				result_embed = await generate_embed(i, column, slot_images)
 
-				if not skip_event.is_set():
-					delay = sleep_first_rotata_s * ((i + 1) / max_rolls) ** 1.5
-					try:
-						await asyncio.wait_for(skip_event.wait(), timeout=delay)
-					except asyncio.TimeoutError:
-						pass
-					edit_task = asyncio.create_task(ctx.edit(embed=result_embed, components=skip_btn))
-
-				await edit_task
+				try:
+					if not skip_event.is_set():
+						delay = sleep_first_rotata_s * ((i + 1) / max_rolls) ** 1.5
+						try:
+							await asyncio.wait_for(skip_event.wait(), timeout=delay)
+						except asyncio.TimeoutError:
+							pass
+						edit_task = asyncio.create_task(ctx.edit(embed=result_embed, components=skip_btn))
+					await edit_task
+				except Exception as _:
+					pass
 				slot_values[column] = rows[column][i].value
 
 		skip_task.cancel()
@@ -271,7 +273,7 @@ class GambleCommands(Extension):
 			win_amount = 0
 
 		# EVIL line of code that either takes or gives the wool
-		await user_data.manage_wool(win_amount)
+		await user_data.manage_wool(win_amount, "commands:games:slots:end")
 
 		if win_amount > 0:
 			if additional_scoring >= 100:

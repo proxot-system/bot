@@ -57,8 +57,8 @@ class UserData(Collection):
 	times_shattered: int = 0
 	translation_language: str = "english"
 
-	async def manage_wool(self, amount: int):
-		databaseLogger.log(logging.DEBUG, f"{'took' if amount < 0 else 'gave'} user {self._id}, {amount} wool")
+	async def manage_wool(self, amount: int, context: str | None = None):
+		databaseLogger.log(logging.INFO, f"{context} {'+' if amount > 0 else ''}{amount} wool @{self._id}")
 		wool = self.wool + amount
 
 		if wool <= 0:
