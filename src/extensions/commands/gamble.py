@@ -49,15 +49,15 @@ class Slot:
 
 et = emojis["treasures"]
 slots = [
-	Slot(et["bottle"], 0.2),
-	Slot(et["journal"], 0.25),
-	Slot(et["amber"], 0.3),
-	Slot(et["shirt"], 0.6),
-	Slot(et["bottle"], 0.2),
-	Slot(et["card"], 0.9),
-	Slot(et["die"], 1.1),
-	Slot(et["sun"], 2.5),
-	Slot(et["clover"], 3),
+	Slot(et["bottle"], 0.1),
+	Slot(et["journal"], 0.1),
+	Slot(et["amber"], 0.1),
+	Slot(et["shirt"], 0.2),
+	Slot(et["bottle"], 0.1),
+	Slot(et["card"], 0.3),
+	Slot(et["die"], 0.5),
+	Slot(et["sun"], 0.8),
+	Slot(et["clover"], 1.2),
 ]
 
 
@@ -117,7 +117,7 @@ class GambleCommands(Extension):
 
 		while len(active_slots) < 12:
 			active_slots.extend(active_slots)
-		active_slots.extend([Slot(emojis["icons"]["penguin"], -0.4)] * penguin_count)
+		active_slots.extend([Slot(emojis["icons"]["penguin"], -0.2)] * penguin_count)
 
 		rows = [random.sample(active_slots, len(active_slots)) for _ in range(3)]
 
