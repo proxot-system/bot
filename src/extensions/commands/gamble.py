@@ -49,7 +49,7 @@ class Slot:
 
 et = emojis["treasures"]
 slots = [
-	Slot(et["bottle"], 0.1),
+	Slot(emojis["icons"]["penguin"], -0.2),
 	Slot(et["bottle"], 0.12),
 	Slot(et["journal"], 0.15),
 	Slot(et["shirt"], 0.16),
