@@ -50,11 +50,11 @@ class Slot:
 et = emojis["treasures"]
 slots = [
 	Slot(et["bottle"], 0.1),
-	Slot(et["journal"], 0.12),
-	Slot(et["amber"], 0.18),
-	Slot(et["shirt"], 0.2),
-	Slot(et["bottle"], 0.15),
-	Slot(et["card"], 0.3),
+	Slot(et["bottle"], 0.12),
+	Slot(et["journal"], 0.15),
+	Slot(et["shirt"], 0.16),
+	Slot(et["card"], 0.18),
+	Slot(et["amber"], 0.3),
 	Slot(et["die"], 0.5),
 	Slot(et["sun"], 0.8),
 	Slot(et["clover"], 1.2),
